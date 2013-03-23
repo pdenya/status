@@ -11,4 +11,14 @@
 #ifdef __OBJC__
 	#import <UIKit/UIKit.h>
 	#import <Foundation/Foundation.h>
+
+	#import "UIColor+PD.h"
+	#import "UIView+PD.h"
+	#import "UILabel+PD.h"
+	#import "UIButton+PD.h"
+	#import "UITableViewCell+PD.h"
+
+	#import "User.h"
+	#import "Post.h"
+	#import "FBHelper.h"
 #endif

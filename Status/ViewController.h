@@ -7,7 +7,28 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "FBHelper.h"
+#import "TimelineView.h"
+#import "UserDetailsView.h"
+#import "PostDetailsView.h"
+#import "FilteredUsersView.h"
+#import "UserFilterView.h"
 
-@interface ViewController : UIViewController
+
+@interface ViewController : UIViewController <UITableViewDataSource,UITableViewDelegate> {
+	TimelineView *timelineview;
+	NSMutableArray *feed;
+	NSMutableDictionary *user_data;
+	NSMutableDictionary *filter;
+	NSMutableDictionary *favorites;
+	int total_failed;
+}
+
+@property (nonatomic, retain) TimelineView *timelineview;
+@property (nonatomic, retain) NSMutableArray *feed;
+@property (nonatomic, retain) NSMutableDictionary *user_data;
+@property (nonatomic, retain) NSMutableDictionary *filter;
+@property (nonatomic, retain) NSMutableDictionary *favorites;
+@property (readwrite) int total_failed;
 
 @end
