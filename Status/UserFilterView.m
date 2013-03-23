@@ -74,7 +74,7 @@
 	[self.avatarView setx:15];
 	
 	//hr
-	UIImageView *hr = [UIView horizontalRule];
+	UIView *hr = [UIView horizontalRule];
 	[hr setx:35];
 	[hr setw:[self w] - 70];
 	[hr seth:1];
