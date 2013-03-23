@@ -15,10 +15,14 @@ typedef void (^UFBlock)(NSDictionary *filter_update);
 #define FILTER_STATE_FILTERED @"filtered"
 #define FILTER_STATE_VISIBLE @"visible"
 
+#define FAVORITE_STATE_FAVORITED @"favorited"
+#define FAVORITE_STATE_NOT_FAVORITED @"not_favorited"
+
 @interface UserFilterView : UIView {
 	User *user;
 	UIImageView *avatarView;
 	UFBlock filterStateChanged;
+    
 }
 
 @property (nonatomic, retain) User *user;

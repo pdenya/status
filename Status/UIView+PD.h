@@ -10,6 +10,7 @@
 
 //maybe move this to a globals file at some point
 typedef void (^PDBlock)(void);
+typedef void (^PDObjectBlock)(id);
 
 @interface UIView (PD)
 

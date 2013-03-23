@@ -222,7 +222,14 @@
 }
 
 - (void)favoriteClicked:(id)sender {
-	
+	NSLog(@"favorite clicked");
+    
+    [self setFilterState:@{
+        @"state": FAVORITE_STATE_FAVORITED,
+        @"start": [NSDate date],
+        @"uid": self.user.uid
+     }];
+    
 }
 
 - (void)setInitialFilterState:(NSString *)filter_state {
