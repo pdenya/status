@@ -30,10 +30,6 @@ const int FAILED_THRESHOLD = 30;
     [super viewWillAppear:animated];
 
 	self.total_failed = 0;
-	self.feed = [[NSMutableArray alloc] init];
-	self.filter = [[NSMutableDictionary alloc] init];
-	self.favorites = [[NSMutableDictionary alloc] init];
-	self.user_data = [[NSMutableDictionary alloc] init];
 	
 	[self load];
 	//[self loadDemoData];
@@ -53,13 +49,8 @@ const int FAILED_THRESHOLD = 30;
 	}
 	
 	self.timelineview = [[TimelineView alloc] initWithFrame:self.view.bounds];
-	self.timelineview.feed = self.feed;
-	self.timelineview.user_data = self.user_data;
-	self.timelineview.filter = self.filter;
 	self.timelineview.filterButtonClicked = ^{
 		FilteredUsersView *filteredview = [[FilteredUsersView alloc] initWithFrame:self.view.bounds];
-		filteredview.user_data = self.user_data;
-		filteredview.filter = self.filter;
 		[self.view addSubview:filteredview];
 		[self.view bringSubviewToFront:filteredview];
 		[filteredview release];
@@ -136,48 +127,17 @@ const int FAILED_THRESHOLD = 30;
 }
 
 - (void)save {
-	NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-	
-	NSData *feedData = [NSKeyedArchiver archivedDataWithRootObject:self.feed];
-	[feedData writeToFile:[NSString stringWithFormat:@"%@/feed",docDir] atomically:YES];
-
-	NSData *userData = [NSKeyedArchiver archivedDataWithRootObject:self.user_data];
-	[userData writeToFile:[NSString stringWithFormat:@"%@/userdata",docDir] atomically:YES];
-	
-	NSData *filterData = [NSKeyedArchiver archivedDataWithRootObject:self.filter];
-	[filterData writeToFile:[NSString stringWithFormat:@"%@/filter",docDir] atomically:YES];
-	
-	NSData *favoritesData = [NSKeyedArchiver archivedDataWithRootObject:self.favorites];
-	[favoritesData writeToFile:[NSString stringWithFormat:@"%@/favorites",docDir] atomically:YES];
+    [[FeedHelper    instance] save];
+    [[FavoritesHelper instance] save];
+    [[UsersHelper   instance] save];
+    [[FilterHelper  instance] save];
 }
 
 - (void)load {
-	NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-	
-	//todo: check if these files exist
-	
-	NSData *feedData = [NSData dataWithContentsOfFile:[NSString stringWithFormat:@"%@/feed",docDir]];
-	self.feed = [NSMutableArray arrayWithArray:[NSKeyedUnarchiver unarchiveObjectWithData:feedData]];
-	self.timelineview.feed = self.feed;
-	NSLog(@"Loaded Feed Data: %@", [self.feed description]);
-	
-	NSData *userData = [NSData dataWithContentsOfFile:[NSString stringWithFormat:@"%@/userdata",docDir]];
-	NSDictionary *tmp = [NSKeyedUnarchiver unarchiveObjectWithData:userData];
-	self.user_data = [NSMutableDictionary dictionaryWithDictionary:tmp];
-	self.timelineview.user_data = self.user_data;
-	NSLog(@"Loaded User Data %@", [self.user_data description]);
-
-	
-	NSData *filterData = [NSData dataWithContentsOfFile:[NSString stringWithFormat:@"%@/filter",docDir]];
-	tmp = [NSKeyedUnarchiver unarchiveObjectWithData:filterData];
-	self.filter = [NSMutableDictionary dictionaryWithDictionary:tmp];
-	self.timelineview.filter = self.filter;
-	NSLog(@"Loaded Filter Data: %@", [self.filter description]);
-	
-	NSData *favoritesData = [NSData dataWithContentsOfFile:[NSString stringWithFormat:@"%@/favoites",docDir]];
-	tmp = [NSKeyedUnarchiver unarchiveObjectWithData:favoritesData];
-	self.favorites = [NSMutableDictionary dictionaryWithDictionary:tmp];
-	NSLog(@"Loaded Favorites Data: %@", [self.favorites description]);
+	[[FeedHelper    instance] load];
+    [[FavoritesHelper instance] load];
+    [[UsersHelper   instance] load];
+    [[FilterHelper  instance] load];
 }
 
 - (void)loadDemoData {

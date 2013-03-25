@@ -20,5 +20,10 @@
 
 	#import "User.h"
 	#import "Post.h"
+
 	#import "FBHelper.h"
+    #import "FeedHelper.h"
+    #import "FavoritesHelper.h"
+    #import "UsersHelper.h"
+    #import "FilterHelper.h"
 #endif
