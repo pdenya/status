@@ -47,6 +47,11 @@
 	
 	UIView *headerView = [UIView headerView:nameLabel leftButton:backButton rightButton:nil secondRightButton:nil thirdRightButton:nil];
 	[self addSubview:headerView];
+    
+    NSDictionary *favorite_state = [[FavoritesHelper instance].favorites objectForKey:new_user.uid];
+    if (favorite_state) {
+        [self viewWithTag:44].backgroundColor = [self highlightColor];
+    }
 }
 
 -(void)addFilterBtns {
@@ -175,7 +180,7 @@
 	UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
 	[btn seth:[self h] * 0.24f];
 	[btn setw:140];
-	[btn setBackgroundColor:[UIColor colorWithHex:0x242424]]; //selected color: 6d9e42
+	[btn setBackgroundColor:[self buttonColor]]; //selected color: 6d9e42
 	btn.layer.cornerRadius = 4.0f;
 	btn.adjustsImageWhenHighlighted = YES;
 	
@@ -224,26 +229,45 @@
 - (void)favoriteClicked:(id)sender {
 	NSLog(@"favorite clicked");
     
-    [self setFilterState:@{
-        @"state": FAVORITE_STATE_FAVORITED,
-        @"start": [NSDate date],
-        @"uid": self.user.uid
-     }];
+    NSDictionary *favorite_state = [[FavoritesHelper instance].favorites objectForKey:self.user.uid];
     
+    if (favorite_state) {
+        [[FavoritesHelper instance].favorites removeObjectForKey:self.user.uid];
+        [self viewWithTag:44].backgroundColor = [self buttonColor];
+    }
+    else {
+        [[FavoritesHelper instance].favorites setObject:@{
+             @"state": FAVORITE_STATE_FAVORITED,
+             @"start": [NSDate date],
+             @"uid": self.user.uid
+         } forKey:self.user.uid];
+        
+        [self viewWithTag:44].backgroundColor = [self highlightColor];
+    }
+    
+    [[FavoritesHelper instance] save];
+}
+
+- (UIColor *)highlightColor {
+    return [UIColor colorWithHex:0x6d9e42];
+}
+
+- (UIColor *)buttonColor {
+    return [UIColor colorWithHex:0x242424];
 }
 
 - (void)setInitialFilterState:(NSString *)filter_state {
 	if ([filter_state isEqualToString:FILTER_STATE_VISIBLE]) {
-		[self viewWithTag:43].backgroundColor = [UIColor colorWithHex:0x6d9e42];
+		[self viewWithTag:43].backgroundColor = [self highlightColor];
 	}
 	else if ([filter_state isEqualToString:FILTER_STATE_FILTERED]) {
-		[self viewWithTag:42].backgroundColor = [UIColor colorWithHex:0x6d9e42];
+		[self viewWithTag:42].backgroundColor = [self highlightColor];
 	}
 	else if ([filter_state isEqualToString:FILTER_STATE_FILTERED_DAY]) {
-		[self viewWithTag:40].backgroundColor = [UIColor colorWithHex:0x6d9e42];
+		[self viewWithTag:40].backgroundColor = [self highlightColor];
 	}
 	else if ([filter_state isEqualToString:FILTER_STATE_FILTERED_WEEK]) {
-		[self viewWithTag:41].backgroundColor = [UIColor colorWithHex:0x6d9e42];
+		[self viewWithTag:41].backgroundColor = [self highlightColor];
 	}
 }
 

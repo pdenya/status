@@ -33,6 +33,11 @@ const int FAILED_THRESHOLD = 30;
 	
 	[self load];
 	//[self loadDemoData];
+    
+    self.filter = [FilterHelper instance].filter;
+    self.user_data = [UsersHelper instance].users;
+    self.favorites = [FavoritesHelper instance].favorites;
+    self.feed = [FeedHelper instance].feed;
 	
 	[self filterFilter];
 	

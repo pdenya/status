@@ -15,7 +15,7 @@
 
 
 @implementation TimelineView
-@synthesize feed, user_data, tableview, expanded, filter, filterButtonClicked;
+@synthesize feed, user_data, tableview, expanded, filter, filterButtonClicked, favoriteButtonClicked;
 
 const int NUM_LINES_BEFORE_CLIP = 5;
 
@@ -32,10 +32,10 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		[self.tableview sety:50];
 		[self addSubview:self.tableview];
 		
-		self.feed = [[NSMutableArray alloc] init];
-		self.user_data = [[NSMutableDictionary alloc] init];
+		self.feed = [FeedHelper instance].feed;
+		self.user_data = [UsersHelper instance].users;
 		self.expanded = [[NSMutableArray alloc] init];
-		self.filter = [[NSMutableDictionary alloc] init];
+		self.filter = [FilterHelper instance].filter;
 		
 		UIButton *postButton = [UIButton buttonWithType:UIButtonTypeCustom];
 		[postButton setImage:[UIImage imageNamed:@"visible.png"] forState:UIControlStateNormal];

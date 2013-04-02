@@ -41,8 +41,8 @@
 
 - (void)setFilter:(NSMutableDictionary *)new_filter {
 	filter = new_filter;
-	self.keys = [NSMutableArray arrayWithArray:[new_filter allKeys]];
-	NSLog(@"keys %@", [self.keys description]);
+	[FavoritesHelper instance].favorites = [NSMutableArray arrayWithArray:[new_filter allKeys]];
+	NSLog(@"keys %@", [[FavoritesHelper instance].favorites description]);
 	
 	if (self.tableview) {
 		[self.tableview reloadData];
@@ -54,8 +54,8 @@
 }
 
 - (int)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	NSLog(@"rows in section: %i", [self.keys count]);
-	return [self.keys count];
+	NSLog(@"rows in section: %i", [[FavoritesHelper instance].favorites count]);
+	return [[FavoritesHelper instance].favorites count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -67,7 +67,8 @@
 		[cell configureForTimeline];
     }
 	
-	NSNumber *uid = [NSNumber numberWithInteger:[[self.keys objectAtIndex:[indexPath row]] integerValue]];
+    /*
+	NSNumber *uid = [NSNumber numberWithInteger:[[[FavoritesHelper instance].favorites objectAtIndex:[indexPath row]] integerValue]];
 	
 	User *user = [self.user_data objectForKey:uid];
 	
@@ -75,12 +76,13 @@
 		 @"name":			[NSString stringWithFormat:@"%@ %@", user.first_name, user.last_name],
 		 @"avatar":			user.image_square != nil ? user.image_square : [NSNumber numberWithInt:0] //stupid hack because nil can't exist in nsdictionary
 	 }];
-	
+	*/
 	return cell;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath	{
-	NSNumber *uid = [NSNumber numberWithInteger:[[self.keys objectAtIndex:[indexPath row]] integerValue]];
+    /*
+	NSNumber *uid = [NSNumber numberWithInteger:[[[FavoritesHelper instance].favorites objectAtIndex:[indexPath row]] integerValue]];
 	User *user = [self.user_data objectForKey:uid];
 	NSLog(@"View Filter State for User %@ %@", user.first_name, user.last_name);
 	
@@ -105,7 +107,7 @@
 		
 	}];
 	[self addSubview:filterview];
-	
+	*/
 }
 
 @end

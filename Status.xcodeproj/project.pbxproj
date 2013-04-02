@@ -83,6 +83,7 @@
 		78210F6D16FF7F3E005CAF53 /* FavoritesHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 78210F6C16FF7F3E005CAF53 /* FavoritesHelper.m */; };
 		78210F7016FF7F49005CAF53 /* UsersHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 78210F6F16FF7F49005CAF53 /* UsersHelper.m */; };
 		78210F7317000D14005CAF53 /* FilterHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 78210F7217000D14005CAF53 /* FilterHelper.m */; };
+		78210F771702C768005CAF53 /* FavoritesView.m in Sources */ = {isa = PBXBuildFile; fileRef = 78210F761702C768005CAF53 /* FavoritesView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -188,6 +189,8 @@
 		78210F6F16FF7F49005CAF53 /* UsersHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UsersHelper.m; sourceTree = "<group>"; };
 		78210F7117000D14005CAF53 /* FilterHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FilterHelper.h; sourceTree = "<group>"; };
 		78210F7217000D14005CAF53 /* FilterHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FilterHelper.m; sourceTree = "<group>"; };
+		78210F751702C768005CAF53 /* FavoritesView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FavoritesView.h; sourceTree = "<group>"; };
+		78210F761702C768005CAF53 /* FavoritesView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FavoritesView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -292,12 +295,8 @@
 		6177999D16CB3E5E0091F002 /* User */ = {
 			isa = PBXGroup;
 			children = (
-				61C29CA716F2419F00331B6D /* UserAvatarView */,
 				6177999716CB3E490091F002 /* User.h */,
 				6177999816CB3E490091F002 /* User.m */,
-				61C29C9A16F1599A00331B6D /* FilteredUsersView */,
-				6101FC3216E82F1B002F4F6D /* UserFilterView */,
-				6177999616CB3E1E0091F002 /* UserDetailsView */,
 			);
 			name = User;
 			sourceTree = "<group>";
@@ -307,8 +306,6 @@
 			children = (
 				6177999A16CB3E550091F002 /* Post.h */,
 				6177999B16CB3E550091F002 /* Post.m */,
-				6177999116CB3B5E0091F002 /* PostDetailsView */,
-				61E5AA4216CDDC8D0068C613 /* PostCreateView */,
 			);
 			name = Post;
 			sourceTree = "<group>";
@@ -316,7 +313,6 @@
 		617799A216CB3EF00091F002 /* TimelineView */ = {
 			isa = PBXGroup;
 			children = (
-				61E0BE3616E5DA45003C2DC6 /* MCSwipeTableViewCell */,
 				6177999F16CB3EEC0091F002 /* TimelineView.h */,
 				617799A016CB3EEC0091F002 /* TimelineView.m */,
 			);
@@ -402,14 +398,22 @@
 		61C8E59416B258C10039C109 /* Status */ = {
 			isa = PBXGroup;
 			children = (
+				78210F741702C5CC005CAF53 /* FavoritesView */,
 				61C29CA616F1A14100331B6D /* Images */,
 				61C8E59516B258C10039C109 /* Supporting Files */,
 				615E9C8A16B4509900E9DE76 /* Categories */,
 				615E9C8B16B451C000E9DE76 /* Helpers */,
 				6177999216CB3B680091F002 /* RootVC */,
+				61E0BE3616E5DA45003C2DC6 /* MCSwipeTableViewCell */,
 				617799A216CB3EF00091F002 /* TimelineView */,
 				6177999E16CB3E6E0091F002 /* Post */,
+				6177999116CB3B5E0091F002 /* PostDetailsView */,
+				61E5AA4216CDDC8D0068C613 /* PostCreateView */,
 				6177999D16CB3E5E0091F002 /* User */,
+				61C29C9A16F1599A00331B6D /* FilteredUsersView */,
+				6101FC3216E82F1B002F4F6D /* UserFilterView */,
+				6177999616CB3E1E0091F002 /* UserDetailsView */,
+				61C29CA716F2419F00331B6D /* UserAvatarView */,
 			);
 			path = Status;
 			sourceTree = "<group>";
@@ -458,6 +462,15 @@
 				61E5AA4016CDDC880068C613 /* PostCreateView.m */,
 			);
 			name = PostCreateView;
+			sourceTree = "<group>";
+		};
+		78210F741702C5CC005CAF53 /* FavoritesView */ = {
+			isa = PBXGroup;
+			children = (
+				78210F751702C768005CAF53 /* FavoritesView.h */,
+				78210F761702C768005CAF53 /* FavoritesView.m */,
+			);
+			name = FavoritesView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -590,6 +603,7 @@
 				78210F6D16FF7F3E005CAF53 /* FavoritesHelper.m in Sources */,
 				78210F7016FF7F49005CAF53 /* UsersHelper.m in Sources */,
 				78210F7317000D14005CAF53 /* FilterHelper.m in Sources */,
+				78210F771702C768005CAF53 /* FavoritesView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
