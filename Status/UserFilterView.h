@@ -10,14 +10,6 @@
 
 typedef void (^UFBlock)(NSDictionary *filter_update);
 
-#define FILTER_STATE_FILTERED_WEEK @"filtered_week"
-#define FILTER_STATE_FILTERED_DAY @"filtered_day"
-#define FILTER_STATE_FILTERED @"filtered"
-#define FILTER_STATE_VISIBLE @"visible"
-
-#define FAVORITE_STATE_FAVORITED @"favorited"
-#define FAVORITE_STATE_NOT_FAVORITED @"not_favorited"
-
 @interface UserFilterView : UIView {
 	User *user;
 	UIImageView *avatarView;

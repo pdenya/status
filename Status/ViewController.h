@@ -12,6 +12,7 @@
 #import "UserDetailsView.h"
 #import "PostDetailsView.h"
 #import "FilteredUsersView.h"
+#import "FavoritesView.h"
 #import "UserFilterView.h"
 
 

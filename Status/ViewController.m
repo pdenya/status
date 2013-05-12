@@ -61,6 +61,13 @@ const int FAILED_THRESHOLD = 30;
 		[filteredview release];
 	};
 	
+	self.timelineview.favoriteButtonClicked = ^{
+		FavoritesView *favview = [[FavoritesView alloc] initWithFrame:self.view.bounds];
+		[self.view addSubview:favview];
+		[self.view bringSubviewToFront:favview];
+		[favview release];
+	};
+	
 	[self.view addSubview:self.timelineview];
 	
 	NSLog(@"viewWillAppear");

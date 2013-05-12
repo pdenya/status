@@ -9,7 +9,7 @@
 #import "Post.h"
 
 @implementation Post
-@synthesize  message, status_id, time, uid, has_comments;
+@synthesize  message, status_id, time, uid, has_comments, images;
 
 +(Post *)postFromDictionary:(NSDictionary *)post_data {
 	Post *post = [[[Post alloc] init] autorelease];
@@ -20,7 +20,40 @@
 	post.uid = [post_data objectForKey:@"uid"];
 	post.has_comments = NO;
 	
+	if ([post_data valueForKey:@"images"]) {
+		post.images = [NSMutableArray arrayWithArray:[post_data valueForKey:@"images"]];
+	} else {
+		post.images = [[NSMutableArray alloc] init];
+	}
+	
 	return post;
+}
+
+
+- (BOOL)hasImages {
+	if (self.images) {
+		return ([self.images count] > 0);
+	}
+	
+	return NO;
+}
+
+- (CGFloat)rowHeight {
+	CGFloat w = [self messageLabelWidth];
+	
+	CGFloat height = [self.message sizeWithFont:[UIFont systemFontOfSize:15.0f]
+							  constrainedToSize:CGSizeMake(w, FLT_MAX)
+								  lineBreakMode:UILineBreakModeWordWrap].height;
+	
+	CGFloat min_height = [self hasImages] ? 53 : 43;
+	
+	height = MAX(min_height, height) + 40;
+	
+	return height;
+}
+
+- (CGFloat)messageLabelWidth {
+	return round([UIScreen mainScreen].bounds.size.width * ([self hasImages] ? 0.58 : .75));
 }
 
 //NSCoding
@@ -33,6 +66,7 @@
 			self.time = [coder decodeObjectForKey:@"time"];
 			self.uid = [coder decodeObjectForKey:@"uid"];
 			self.has_comments = [coder decodeBoolForKey:@"has_comments"];
+			self.images = [NSMutableArray arrayWithArray:[coder decodeObjectForKey:@"images"]];
 		}
 		
 		return self;
@@ -44,6 +78,7 @@
 		[coder encodeObject:self.time forKey:@"time"];
 		[coder encodeObject:self.uid forKey:@"uid"];
 		[coder encodeBool:self.has_comments forKey:@"has_comments"];
+		[coder encodeObject:self.images forKey:@"images"];
 	}
 
 //Logging helper

@@ -9,14 +9,32 @@
 #import "FavoritesView.h"
 
 @implementation FavoritesView
-@synthesize tableview;
+@synthesize tableview, favorites, keys;
 
 
 - (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code
-        self.tableview = [[UITableView alloc] initWithFrame:self.bounds];
+		self.favorites = [FavoritesHelper instance].favorites;
+		self.keys = [NSMutableArray arrayWithArray:[self.favorites allKeys]];
+		
+		self.backgroundColor = [UIColor whiteColor];
+		
+		UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		[backButton setImage:[UIImage imageNamed:@"back.png"] forState:UIControlStateNormal];
+		[backButton addTarget:self action:@selector(removeFromSuperview) forControlEvents:UIControlEventTouchUpInside];
+		
+		UIView *headerView = [UIView headerView:nil leftButton:backButton rightButton:nil secondRightButton:nil thirdRightButton:nil];
+		[self addSubview:headerView];
+		
+		self.tableview = [[UITableView alloc] initWithFrame:self.bounds];
+		[self.tableview seth:[self.tableview h] - [headerView h]];
+		[self.tableview sety:[headerView bottomEdge]];
+		self.tableview.delegate = self;
+		self.tableview.dataSource = self;
+		self.tableview.rowHeight = 83;
+		[self addSubview:self.tableview];
     }
     return self;
 }
@@ -26,10 +44,10 @@
 }
 
 - (int)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	return [[FavoritesHelper instance].favorites count];
+	return [self.favorites count];
 }
 
-/*
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 	static NSString *CellIdentifier = @"Cell";
     
@@ -39,11 +57,24 @@
 		[cell configureForTimeline];
     }
 	
-	NSNumber *uid = [NSNumber numberWithInteger:[[self.keys objectAtIndex:[indexPath row]] integerValue]];
+	NSDictionary *fav_data = [self.favorites objectForKey:[self.keys objectAtIndex:[indexPath row]]];
+	User *user = [[UsersHelper instance].users objectForKey:[fav_data objectForKey:@"uid"]];
 	
-	User *user = [self.user_data objectForKey:uid];
+	NSString *message = @"test";
+	
+	for (Post *post in [FeedHelper instance].feed) {
+		NSString *post_uid = [NSString stringWithFormat:@"%@", post.uid];
+		NSString *user_uid = [NSString stringWithFormat:@"%@", user.uid];
+		if ([post_uid isEqualToString:user_uid]) {
+			message = post.message;
+			break;
+		} else {
+			NSLog(@"%@ %@", post.uid, user.uid);
+		}
+	}
 	
 	[cell setOptions:@{
+	 @"message":		message,
      @"name":			[NSString stringWithFormat:@"%@ %@", user.first_name, user.last_name],
      @"avatar":			user.image_square != nil ? user.image_square : [NSNumber numberWithInt:0] //stupid hack because nil can't exist in nsdictionary
 	 }];
@@ -52,33 +83,17 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath	{
-	NSNumber *uid = [NSNumber numberWithInteger:[[self.keys objectAtIndex:[indexPath row]] integerValue]];
-	User *user = [self.user_data objectForKey:uid];
+	NSDictionary *fav_data = [self.favorites objectForKey:[self.keys objectAtIndex:[indexPath row]]];
+	User *user = [[UsersHelper instance].users objectForKey:[fav_data objectForKey:@"uid"]];
+	
 	NSLog(@"View Filter State for User %@ %@", user.first_name, user.last_name);
 	
-	NSDictionary *filter_state = [self.filter objectForKey:[uid stringValue]];
+	EditFilterView *filterview = [[EditFilterView alloc] initWithFrame:self.bounds];
+	filterview.user = user;
 	
-	UserFilterView *filterview = [[UserFilterView alloc] initWithFrame:self.bounds];
-	filterview.user = [self.user_data objectForKey:uid];
-	
-	[filterview setInitialFilterState:[filter_state objectForKey:@"state"]];
-	[filterview setFilterStateChanged:^(NSDictionary *filter_update) {
-		NSString *state = [filter_update objectForKey:@"state"];
-		NSString *uid = [NSString stringWithFormat:@"%@", [filter_update objectForKey:@"uid"]];
-		
-		if ([state isEqualToString:@"visible"]) {
-			[self.filter removeObjectForKey:uid];
-		}
-		else { //filtered, filtered_day, filtered_week
-			[self.filter setObject:filter_update forKey:uid];
-		}
-		
-		[self.tableview reloadData];
-		
-	}];
 	[self addSubview:filterview];
 	
 }
-*/
+
 
 @end

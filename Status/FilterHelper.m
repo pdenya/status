@@ -33,7 +33,14 @@
     NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     NSData *filterData = [NSData dataWithContentsOfFile:[NSString stringWithFormat:@"%@/filter",docDir]];
 	NSDictionary *tmp = [NSKeyedUnarchiver unarchiveObjectWithData:filterData];
-	self.filter = [NSMutableDictionary dictionaryWithDictionary:tmp];
+	if ([tmp isKindOfClass:[NSDictionary class]]) {
+		self.filter = [NSMutableDictionary dictionaryWithDictionary:tmp];
+	}
+	else {
+		self.filter = [[NSMutableDictionary alloc] init];
+		[self save];
+	}
+
 	NSLog(@"Loaded Filter Data: %@", [self.filter description]);
 }
 
@@ -41,6 +48,21 @@
     NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
 	NSData *filterData = [NSKeyedArchiver archivedDataWithRootObject:self.filter];
 	[filterData writeToFile:[NSString stringWithFormat:@"%@/filter",docDir] atomically:YES];
+}
+
++ (NSString *) stringForState:(NSString *)state {
+	if ([state isEqualToString:FILTER_STATE_FILTERED]) {
+		return @"Filtered";
+	}
+	else if ([state isEqualToString:FILTER_STATE_FILTERED_DAY]) {
+		return @"Filtered for a day";
+	}
+	else if ([state isEqualToString:FILTER_STATE_FILTERED_WEEK]) {
+		return @"Filtered for a week";
+	}
+	else {
+		return @"Visible";
+	}
 }
 
 @end

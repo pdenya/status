@@ -24,7 +24,7 @@
 
 
 - (void)openSession:(FBVoidBlock)sessionOpened {
-	NSArray *permissions = @[ @"read_stream", @"publish_stream" ];
+	NSArray *permissions = @[ @"publish_stream" ];
 	
     [FBSession openActiveSessionWithPublishPermissions:permissions defaultAudience:FBSessionDefaultAudienceFriends allowLoginUI:YES completionHandler:
 	 ^(FBSession *session, FBSessionState state, NSError *error) {
@@ -57,10 +57,12 @@
 	}
 	
 	//select app_data, attachment, post_id from stream where post_id IN ('1315663027_10200756640981133') AND app_data.images != ''
+	//post_id is ${uid}_${status_id}
 	NSString *query = @"{"
-		@"'status_query': 'SELECT uid,status_id,message,time FROM status WHERE (uid IN (SELECT uid2 FROM friend WHERE uid1= me()) OR uid=me()) AND message != \"\" AND time > %@ %@ LIMIT 200', "
+		@"'status_query': 'SELECT uid,status_id,message,time,concat(uid,\"_\",status_id) FROM status WHERE (uid IN (SELECT uid2 FROM friend WHERE uid1= me()) OR uid=me()) AND message != \"\" AND time > %@ %@ LIMIT 200', "
 		@"'friend_info_query': 'SELECT uid,first_name, last_name, pic_square, pic_big FROM user WHERE uid IN (SELECT uid FROM #status_query)', "
-		@"'comment_count_query': 'SELECT object_id FROM comment WHERE object_id IN (SELECT status_id FROM #status_query)' "
+		@"'comment_count_query': 'SELECT object_id FROM comment WHERE object_id IN (SELECT status_id FROM #status_query)', "
+		@"'photo_query': 'SELECT app_data.images, post_id FROM stream WHERE post_id IN (SELECT anon FROM #status_query ) AND app_data.images != \"\"' "
     @"}";
 	
 	//apply filter if available
@@ -96,7 +98,8 @@
 			 NSMutableArray *statuses = [[NSMutableArray alloc] init];
 			 NSMutableDictionary *user_data = [[NSMutableDictionary alloc] init];
 			 NSMutableDictionary *comment_map = [[NSMutableDictionary alloc] init];
-			 			 
+			 NSMutableDictionary *images_map = [[NSMutableDictionary alloc] init];
+			 
 			 //handle all result sets
 			 for (int i = 0; i < [results count]; i++) {
 				 NSDictionary *query_result = [results objectAtIndex:i];
@@ -137,6 +140,31 @@
 						 [comment_map setValue:@"true" forKey:[[comment_results objectAtIndex:j] valueForKey:@"object_id"]];
 					 }
 				 }
+				 else if ([[query_result valueForKey:@"name"] isEqualToString:@"photo_query"]) {
+					 NSLog(@"handle post attachments");
+					 NSArray *fql_result_set = [query_result valueForKey:@"fql_result_set"];
+					 
+					 for (int j = 0; j < [fql_result_set count]; j++) {
+						 NSDictionary *appdata = [fql_result_set objectAtIndex:j];
+						 
+						 if ([appdata objectForKey:@"app_data"] && [[appdata objectForKey:@"app_data"] objectForKey:@"images"]) {
+							 NSLog(@"AppData images %@", [[appdata objectForKey:@"app_data"] objectForKey:@"images"]);
+							 
+							 NSData *img_json = [[[appdata objectForKey:@"app_data"] objectForKey:@"images"] dataUsingEncoding:NSUTF8StringEncoding];
+							 NSError *err = nil;
+							 NSArray *images = [NSJSONSerialization JSONObjectWithData:img_json options:NSJSONReadingMutableLeaves error:&err];
+							 
+							 if (!images) {
+								 NSLog(@"Error parsing JSON: %@", err);
+							 }
+							 
+							 NSString *post_id = [[[appdata objectForKey:@"post_id"] componentsSeparatedByString:@"_"] objectAtIndex:1];
+							 [images_map setValue:images forKey:post_id];
+						 }
+					 }
+					 
+					 NSLog(@"User images %@", [images_map description]);
+				 }
 			 }
 			 
 			 for (int i = 0; i < [statuses count]; i++) {
@@ -144,6 +172,10 @@
 				 
 				 if ([comment_map objectForKey:post.status_id]) {
 					 post.has_comments = YES;
+				 }
+				 
+				 if ([images_map objectForKey:post.status_id]) {
+					 post.images = [NSMutableArray arrayWithArray:[images_map objectForKey:post.status_id]];
 				 }
 			 }
 			 

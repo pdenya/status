@@ -9,8 +9,10 @@
 #import "PostCreateView.h"
 #import "PostDetailsView.h"
 #import "UserFilterView.h"
+#import "EditFilterView.h"
 #import "TimelineView.h"
 #import "UserAvatarView.h"
+#import "ThumbView.h"
 #import <QuartzCore/QuartzCore.h>
 
 
@@ -70,7 +72,10 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 }
 
 -(void)didClickFavoritesButton {
-	NSLog(@"Favorite Button Clicked");
+	if (self.favoriteButtonClicked) {
+		NSLog(@"fav btn clicked");
+		self.favoriteButtonClicked();
+	}
 }
 
 - (void)showPostCreateView {
@@ -88,7 +93,9 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 }
 
 - (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	return [self clipHeight] < [self heightForRow:[indexPath row]] ? indexPath : nil;
+	Post *post = [self.feed objectAtIndex:[indexPath row]];
+	CGFloat height = [post rowHeight];
+	return [self clipHeight] < height ? indexPath : nil;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -121,17 +128,9 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-	CGFloat height = [self heightForRow:[indexPath row]];
+	Post *post = [self.feed objectAtIndex:[indexPath row]];
+	CGFloat height = [post rowHeight];
 	return [self.expanded containsObject:[self stringFromIndexPath:indexPath]] ? height : MIN([self clipHeight] + 40, height);
-}
-
-- (CGFloat)heightForRow:(int)row {
-	Post *post = [self.feed objectAtIndex:row];
-	CGFloat height = [post.message sizeWithFont:[UIFont systemFontOfSize:15.0f] constrainedToSize:CGSizeMake(round([self w] * .75), FLT_MAX) lineBreakMode:UILineBreakModeWordWrap].height;
-	
-	height = MAX(43, height) + 40;
-	
-	return height;
 }
 
 - (CGFloat)clipHeight {
@@ -156,7 +155,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
         cell = [[[MCSwipeTableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier] autorelease];
 		[cell configureForTimeline];
 		
-		UIImageView *avatarView = [cell avatarView];
+		ThumbView *avatarView = [cell avatarView];
 		
 		avatarView.userInteractionEnabled = YES;
 		UITapGestureRecognizer *doubletapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(zoomAvatar:)];
@@ -171,13 +170,20 @@ const int NUM_LINES_BEFORE_CLIP = 5;
     Post *post = [self.feed objectAtIndex:[indexPath row]];
 	User *user = [self.user_data objectForKey:post.uid];
 	
+	if ([post hasImages]) {
+		NSLog(@"Post has images %@", [post.images description]);
+	}
+	
 	[cell setOptions:@{
 		@"message":			post.message,
 		@"is_expanded":		[NSNumber numberWithBool:[self.expanded containsObject:[self stringFromIndexPath:indexPath]]],
 		@"name":			[NSString stringWithFormat:@"%@ %@", user.first_name, user.last_name],
 		@"has_comments":	[NSNumber numberWithBool:post.has_comments],
 		@"time":			post.time,
-		@"avatar":			user.image_square != nil ? user.image_square : [NSNumber numberWithInt:0] //stupid hack because nil can't exist in nsdictionary
+		@"avatar":			user.image_square != nil ? user.image_square : [NSNumber numberWithInt:0], //stupid hack because nil can't exist in nsdictionary
+		@"images":			post.images,
+		@"post":			post,
+		@"user":			user
 	}];
 	
 	//set profile pic
@@ -247,7 +253,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 }
 
 - (void)viewFilterControls:(NSString *)uid {
-	UserFilterView *filterview = [[UserFilterView alloc] initWithFrame:self.bounds];
+	EditFilterView *filterview = [[EditFilterView alloc] initWithFrame:self.bounds];
 	filterview.user = [self.user_data objectForKey:uid];
 	[filterview setInitialFilterState:FILTER_STATE_VISIBLE];
 	[filterview setFilterStateChanged:^(NSDictionary *filter_update) {

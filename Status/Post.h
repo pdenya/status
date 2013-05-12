@@ -15,8 +15,11 @@
 @property (nonatomic, retain) NSString *status_id;
 @property (nonatomic, retain) NSString *time;
 @property (nonatomic, retain) NSString *uid;
+@property (nonatomic, retain) NSMutableArray *images;
 @property (readwrite) BOOL has_comments;
 
 +(Post *)postFromDictionary:(NSDictionary *)post_data;
-
+- (BOOL)hasImages;
+- (CGFloat)rowHeight;
+- (CGFloat)messageLabelWidth;
 @end

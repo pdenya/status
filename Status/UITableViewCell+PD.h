@@ -7,16 +7,16 @@
 //
 
 #import <UIKit/UIKit.h>
-
+@class ThumbView;
 @interface UITableViewCell (PD)
 
 - (void) configureForTimeline;
-- (void) configureWithOptions:(NSDictionary *)options;
 - (UILabel *) messageLabel;
 - (UILabel *) dateLabel;
 - (UILabel *) nameLabel;
-- (UIImageView *) avatarView;
+- (ThumbView *) avatarView;
 - (UIView *) commentsNotifierView;
+- (UIImageView *) imageView;
 - (void)setOptions:(NSDictionary *)options;
 - (void)setExpanded:(BOOL)should_be_expanded;
 - (int) linesBeforeClip;

@@ -8,6 +8,14 @@
 
 #import <Foundation/Foundation.h>
 
+#define FILTER_STATE_FILTERED_WEEK @"filtered_week"
+#define FILTER_STATE_FILTERED_DAY @"filtered_day"
+#define FILTER_STATE_FILTERED @"filtered"
+#define FILTER_STATE_VISIBLE @"visible"
+
+#define FAVORITE_STATE_FAVORITED @"favorited"
+#define FAVORITE_STATE_NOT_FAVORITED @"not_favorited"
+
 @interface FilterHelper : NSObject {
     
 }
@@ -18,5 +26,6 @@
 - (FilterHelper *)init;
 - (void)load;
 - (void)save;
++ (NSString *) stringForState:(NSString *)state;
 
 @end

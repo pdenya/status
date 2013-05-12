@@ -52,6 +52,11 @@
     if (favorite_state) {
         [self viewWithTag:44].backgroundColor = [self highlightColor];
     }
+	
+	NSDictionary *filter_state = [[FilterHelper instance].filter objectForKey:new_user.uid];
+	if (filter_state) {
+		[self setInitialFilterState:[filter_state objectForKey:@"state"]];
+	}
 }
 
 -(void)addFilterBtns {
@@ -274,6 +279,17 @@
 - (void)setFilterState:(NSDictionary *)filter_state {
 	if (self.filterStateChanged) {
 		self.filterStateChanged(filter_state);
+	}
+	else {
+		NSString *state = [filter_state objectForKey:@"state"];
+		NSString *uid = [NSString stringWithFormat:@"%@", self.user.uid];
+		
+		if ([state isEqualToString:@"visible"]) {
+			[[FilterHelper instance].filter removeObjectForKey:uid];
+		}
+		else { //filtered, filtered_day, filtered_week
+			[[FilterHelper instance].filter setObject:filter_state forKey:uid];
+		}
 	}
 }
 

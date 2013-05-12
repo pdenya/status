@@ -7,7 +7,7 @@
 //
 
 #import "FilteredUsersView.h"
-#import "UserFilterView.h"
+#import "EditFilterView.h"
 
 @implementation FilteredUsersView
 @synthesize filter, tableview, keys, user_data;
@@ -18,8 +18,9 @@
     if (self) {
         // Initialization code
 		self.backgroundColor = [UIColor whiteColor];
-		self.filter = [[NSMutableDictionary alloc] init];
-		self.user_data = [[NSMutableDictionary alloc] init];
+		self.filter = [FilterHelper instance].filter;
+		self.keys = [NSMutableArray arrayWithArray:[self.filter allKeys]];
+		self.user_data = [UsersHelper instance].users;
 		
 		UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
 		[backButton setImage:[UIImage imageNamed:@"back.png"] forState:UIControlStateNormal];
@@ -39,23 +40,13 @@
     return self;
 }
 
-- (void)setFilter:(NSMutableDictionary *)new_filter {
-	filter = new_filter;
-	[FavoritesHelper instance].favorites = [NSMutableArray arrayWithArray:[new_filter allKeys]];
-	NSLog(@"keys %@", [[FavoritesHelper instance].favorites description]);
-	
-	if (self.tableview) {
-		[self.tableview reloadData];
-	}
-}
-
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return 1;
 }
 
 - (int)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	NSLog(@"rows in section: %i", [[FavoritesHelper instance].favorites count]);
-	return [[FavoritesHelper instance].favorites count];
+	NSLog(@"rows in section: %i", [self.filter count]);
+	return [self.filter count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -66,32 +57,30 @@
         cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
 		[cell configureForTimeline];
     }
-	
-    /*
-	NSNumber *uid = [NSNumber numberWithInteger:[[[FavoritesHelper instance].favorites objectAtIndex:[indexPath row]] integerValue]];
-	
-	User *user = [self.user_data objectForKey:uid];
+		
+	NSDictionary *filter_data = [self.filter objectForKey:[self.keys objectAtIndex:[indexPath row]]];
+	User *user = [self.user_data objectForKey:[filter_data objectForKey:@"uid"]];
 	
 	[cell setOptions:@{
+		 @"message":		[FilterHelper stringForState:[filter_data objectForKey:@"state"]],
 		 @"name":			[NSString stringWithFormat:@"%@ %@", user.first_name, user.last_name],
 		 @"avatar":			user.image_square != nil ? user.image_square : [NSNumber numberWithInt:0] //stupid hack because nil can't exist in nsdictionary
 	 }];
-	*/
+	
 	return cell;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath	{
-    /*
-	NSNumber *uid = [NSNumber numberWithInteger:[[[FavoritesHelper instance].favorites objectAtIndex:[indexPath row]] integerValue]];
-	User *user = [self.user_data objectForKey:uid];
+    
+	NSDictionary *filter_data = [self.filter objectForKey:[self.keys objectAtIndex:[indexPath row]]];
+	User *user = [self.user_data objectForKey:[filter_data objectForKey:@"uid"]];
+	
 	NSLog(@"View Filter State for User %@ %@", user.first_name, user.last_name);
+		
+	EditFilterView *filterview = [[EditFilterView alloc] initWithFrame:self.bounds];
+	filterview.user = user;
 	
-	NSDictionary *filter_state = [self.filter objectForKey:[uid stringValue]];
-	
-	UserFilterView *filterview = [[UserFilterView alloc] initWithFrame:self.bounds];
-	filterview.user = [self.user_data objectForKey:uid];
-	
-	[filterview setInitialFilterState:[filter_state objectForKey:@"state"]];
+	[filterview setInitialFilterState:[filter_data objectForKey:@"state"]];
 	[filterview setFilterStateChanged:^(NSDictionary *filter_update) {
 		NSString *state = [filter_update objectForKey:@"state"];
 		NSString *uid = [NSString stringWithFormat:@"%@", [filter_update objectForKey:@"uid"]];
@@ -107,7 +96,6 @@
 		
 	}];
 	[self addSubview:filterview];
-	*/
 }
 
 @end

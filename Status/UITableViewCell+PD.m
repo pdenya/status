@@ -7,6 +7,7 @@
 //
 
 #import "UITableViewCell+PD.h"
+#import "ThumbView.h"
 #import <QuartzCore/QuartzCore.h>
 
 @implementation UITableViewCell (PD)
@@ -15,8 +16,9 @@
 	UILabel *messageLabel;
 	UILabel *dateLabel;
 	UILabel *nameLabel;
-	UIImageView *avatarView;
+	ThumbView *avatarView;
 	UIView *commentsNotifierView;
+	UIImageView *imageView;
 	
 	//hide defaults
 	self.textLabel.hidden = YES;
@@ -25,16 +27,22 @@
 	
 	self.selectedBackgroundView = [[UIView alloc] init];
 	
+	avatarView = [[ThumbView alloc] initWithFrame:CGRectMake(4, 10, 62, 62)];
+	avatarView.tag = 96;
+
+	[self.contentView addSubview:avatarView];
+	
 	messageLabel = [[[UILabel alloc] init] autorelease];
 	messageLabel.backgroundColor = [UIColor clearColor];
 	[self.contentView addSubview:messageLabel];
 	messageLabel.font = [UIFont systemFontOfSize:15.0f];
 	messageLabel.numberOfLines = 0;
 	messageLabel.textColor = [UIColor colorWithHex:0x3b444f];
-	[messageLabel setwp:.75f];
+	//messageLabel setw ignored here.  It's in setOptions
 	[messageLabel setx:71];
 	[messageLabel sety:29];
-	[messageLabel seth:60];
+	[messageLabel seth:60]; //sizeToFit called in setOptions, this is ignored
+	[messageLabel setwp:0.77f]; //sizeToFit called in setOptions, this is ignored
 	messageLabel.tag = 90;
 	[self bringSubviewToFront:messageLabel];
 	
@@ -65,15 +73,17 @@
 	[nameLabel sety:[dateLabel y] + 1];
 	[nameLabel seth:20];
 	nameLabel.tag = 92;
-	 
-	avatarView = [[UIImageView alloc] initWithFrame:CGRectMake(4, 10, 62, 62)];//CGRectMake(0, 0, 67, 67)];
-	avatarView.tag = 96;
-	avatarView.layer.cornerRadius = 3.0f;
-	avatarView.layer.borderColor = [UIColor colorWithHex:0xa2caf1].CGColor;
-	avatarView.layer.borderWidth = 1.0f;
-	avatarView.layer.masksToBounds = YES;
-	avatarView.backgroundColor = [UIColor colorWithHex:0xa2caf1];
-	[self.contentView addSubview:avatarView];
+	
+	CGFloat imgview_w = 57;
+	imageView = [[UIImageView alloc] initWithFrame:CGRectMake([self.contentView w] - (imgview_w + 4), [messageLabel y], imgview_w, imgview_w)];//CGRectMake(0, 0, 67, 67)];
+	imageView.tag = 98;
+	imageView.layer.cornerRadius = 3.0f;
+	imageView.layer.borderColor = [UIColor colorWithHex:0xa2caf1].CGColor;
+	imageView.layer.borderWidth = 1.0f;
+	imageView.layer.masksToBounds = YES;
+	imageView.backgroundColor = [UIColor colorWithHex:0xa2caf1];
+	imageView.hidden = YES;
+	[self.contentView addSubview:imageView];
 	
 	commentsNotifierView = [[UIView alloc] init];
 	[self.contentView addSubview:commentsNotifierView];
@@ -96,22 +106,6 @@
 	backgroundView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
 }
 
-- (void)configureWithOptions:(NSDictionary *)options {
-	UIImageView *avatarView = [self avatarView];
-	
-	//	avatar_selector can be set with: [NSValue valueWithPointer:@selector(whatever)]
-	if ([options objectForKey:@"avatar_target"] && [options objectForKey:@"avatar_selector"]) {
-		avatarView.userInteractionEnabled = YES;
-		
-		UITapGestureRecognizer *doubletapgr = [[UITapGestureRecognizer alloc] initWithTarget:[options objectForKey:@"avatar_target"] action:[[options objectForKey:@"avatar_selector"] pointerValue]];
-		doubletapgr.numberOfTapsRequired = 2;
-		[avatarView addGestureRecognizer:doubletapgr];
-		[doubletapgr release];
-		
-		NSLog(@"Added double tap gesture recognizer");
-	}
-}
-
 - (UILabel *) messageLabel {
 	return (UILabel *)[self.contentView viewWithTag:90];
 }
@@ -124,12 +118,16 @@
 	return (UILabel *)[self.contentView viewWithTag:92];	
 }
 
-- (UIImageView *) avatarView {
-	return (UIImageView *)[self viewWithTag:96];
+- (ThumbView *) avatarView {
+	return (ThumbView *)[self viewWithTag:96];
 }
 
 - (UIView *) commentsNotifierView {
 	return (UIView *)[self viewWithTag:97];
+}
+
+- (UIImageView *) imageView {
+	return (UIImageView *)[self viewWithTag:98];
 }
 
 - (int) linesBeforeClip {
@@ -150,12 +148,20 @@
 	UILabel *messageLabel = [self messageLabel];
 	UILabel *dateLabel = [self dateLabel];
 	UILabel *nameLabel = [self nameLabel];
-	UIImageView *avatarView = [self avatarView];
+	ThumbView *avatarView = [self avatarView];
+	UIImageView *imageView = [self imageView];
 	
 	messageLabel.text = [options objectForKey:@"message"];
 	messageLabel.numberOfLines = [[options objectForKey:@"is_expanded"] boolValue] ? 0 : [self linesBeforeClip];
 	[messageLabel sizeToFit];
-	[messageLabel setwp:.75f];
+	
+	if ([options objectForKey:@"post"]) {
+		NSLog(@"Setting Message Label WIdth");
+		Post *post = (Post *)[options objectForKey:@"post"];
+		[messageLabel setw:[post messageLabelWidth]];
+	} else {
+		[messageLabel setwp:.77f];
+	}
 	
 	nameLabel.text = [options objectForKey:@"name"];
 	[nameLabel sizeToFit];
@@ -170,8 +176,21 @@
 	
 	[self commentsNotifierView].hidden = ![[options objectForKey:@"has_comments"] boolValue];
 	
-	//stupid
-	avatarView.image = [[options objectForKey:@"avatar"] isKindOfClass:[UIImage class]] ? [options objectForKey:@"avatar"] : nil;
+	if ([[options objectForKey:@"images"] count] > 0) {
+		imageView.hidden = NO;
+	} else {
+		imageView.hidden = YES;
+	}
+	
+	if ([options objectForKey:@"user"]) {
+		User *user = (User *)[options objectForKey:@"user"];
+		avatarView.user = user;
+	} else {
+		//stupid
+		avatarView.image = [[options objectForKey:@"avatar"] isKindOfClass:[UIImage class]] ? [options objectForKey:@"avatar"] : nil;
+	}
+	
+	
 	
 	
 }

@@ -29,6 +29,14 @@
     return self;
 }
 
++ (BOOL)isFavorited:(User *)user {
+	if ([[self instance].favorites objectForKey:user.uid]) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 - (void) load {
     NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     NSData *favoritesData = [NSData dataWithContentsOfFile:[NSString stringWithFormat:@"%@/favoites",docDir]];
