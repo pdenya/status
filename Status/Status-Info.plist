@@ -28,12 +28,22 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.18</string>
+	<string>0.2.2</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.nextmarvel.nextmarvel_status</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>nmstatus</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.nextmarvel.nextmarvel_status_fb</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>fb397187667037635</string>
@@ -41,7 +51,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>18.0</string>
+	<string>22.0</string>
 	<key>FacebookAppID</key>
 	<string>397187667037635</string>
 	<key>LSRequiresIPhoneOS</key>

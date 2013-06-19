@@ -9,11 +9,9 @@
 #import <UIKit/UIKit.h>
 #import "FBHelper.h"
 #import "TimelineView.h"
-#import "UserDetailsView.h"
 #import "PostDetailsView.h"
 #import "FilteredUsersView.h"
 #import "FavoritesView.h"
-#import "UserFilterView.h"
 
 
 @interface ViewController : UIViewController <UITableViewDataSource,UITableViewDelegate> {

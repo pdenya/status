@@ -21,6 +21,12 @@
         // Initialization code
 		self.backgroundColor = [UIColor clearColor];
 		
+		UIView *overlay = [[UIView alloc] initWithFrame:self.bounds];
+		//overlay.backgroundColor = [UIColor blackColor];
+		overlay.backgroundColor = [UIColor colorWithHex:0x000000];
+		overlay.alpha = 0.6f;
+		[self addSubview:overlay];
+		
 		self.tableview = [[UITableView alloc] initWithFrame:self.bounds];
 		self.tableview.backgroundColor = [UIColor colorWithRed:0.1f green:0.1f blue:0.1f alpha:0.8f];
 		self.tableview.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
@@ -43,6 +49,9 @@
 		[self addSubview:close_btn];
 		[close_btn sety:[self.tableview y] - 2];
 		[close_btn setx:[self.tableview rightEdge] - [close_btn w] - 10];
+		
+		self.filter_state = FILTER_STATE_VISIBLE;
+		self.favorite_state = FAVORITE_STATE_NOT_FAVORITED;
     }
 	
     return self;
@@ -50,17 +59,19 @@
 
 -(void)setUser:(User *)new_user {
 	user = new_user;
+	[self refresh];
+}
+
+- (void)refresh {
+	NSDictionary *favorite_state = [[FavoritesHelper instance].favorites objectForKey:self.user.uid];
+	self.favorite_state = (favorite_state) ? FAVORITE_STATE_FAVORITED : FAVORITE_STATE_NOT_FAVORITED;
 	
+	NSString *uid = [NSString stringWithFormat:@"%@", self.user.uid];
+	NSDictionary *filter_state = [[FilterHelper instance].filter objectForKey:uid];
+	NSLog(@"REFRESH FILTER STATE: %@", [filter_state description] );
+	self.filter_state = filter_state ? [filter_state objectForKey:@"state"] : FILTER_STATE_VISIBLE;
 	
-    NSDictionary *favorite_state = [[FavoritesHelper instance].favorites objectForKey:new_user.uid];
-    if (favorite_state) {
-    //    [self viewWithTag:44].backgroundColor = [self highlightColor];
-    }
-	
-	NSDictionary *filter_state = [[FilterHelper instance].filter objectForKey:new_user.uid];
-	if (filter_state) {
-	//	[self setInitialFilterState:[filter_state objectForKey:@"state"]];
-	}
+	[self.tableview reloadData];
 }
 
 - (void)visibleClicked:(id)sender {
@@ -110,35 +121,19 @@
     return [UIColor colorWithHex:0x242424];
 }
 
-- (void)setInitialFilterState:(NSString *)filter_state {
-	if ([filter_state isEqualToString:FILTER_STATE_VISIBLE]) {
-		[self viewWithTag:43].backgroundColor = [self highlightColor];
-	}
-	else if ([filter_state isEqualToString:FILTER_STATE_FILTERED]) {
-		[self viewWithTag:42].backgroundColor = [self highlightColor];
-	}
-	else if ([filter_state isEqualToString:FILTER_STATE_FILTERED_DAY]) {
-		[self viewWithTag:40].backgroundColor = [self highlightColor];
-	}
-	else if ([filter_state isEqualToString:FILTER_STATE_FILTERED_WEEK]) {
-		[self viewWithTag:41].backgroundColor = [self highlightColor];
-	}
-}
-
 - (void)setFilterState:(NSDictionary *)filter_state {
+	NSString *state = [filter_state objectForKey:@"state"];
+	NSString *uid = [NSString stringWithFormat:@"%@", self.user.uid];
+	
+	if ([state isEqualToString:@"visible"]) {
+		[[FilterHelper instance].filter removeObjectForKey:uid];
+	}
+	else { //filtered, filtered_day, filtered_week
+		[[FilterHelper instance].filter setObject:filter_state forKey:uid];
+	}
+	
 	if (self.filterStateChanged) {
 		self.filterStateChanged(filter_state);
-	}
-	else {
-		NSString *state = [filter_state objectForKey:@"state"];
-		NSString *uid = [NSString stringWithFormat:@"%@", self.user.uid];
-		
-		if ([state isEqualToString:@"visible"]) {
-			[[FilterHelper instance].filter removeObjectForKey:uid];
-		}
-		else { //filtered, filtered_day, filtered_week
-			[[FilterHelper instance].filter setObject:filter_state forKey:uid];
-		}
 	}
 }
 
@@ -162,9 +157,8 @@
         cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
 		cell.textLabel.textColor = [UIColor whiteColor];
 		cell.textLabel.font = [UIFont boldSystemFontOfSize:20.0f];
-		UIView *select_bg = [[UIView alloc] init];
-		select_bg.alpha = 0.0f;
-		cell.selectedBackgroundView = select_bg;
+
+		[cell setSelectionStyle:UITableViewCellSelectionStyleNone];
 		
 		colorMarker = [[UIView alloc] init];
 		[colorMarker seth:self.tableview.rowHeight];
@@ -194,6 +188,12 @@
 	cell.textLabel.text = @"";
 	colorMarker.backgroundColor = [UIColor clearColor];
 	
+	//UIColor *color = [UIColor colorWithHex:0xEEEEEE];
+	//UIColor *selected_color = [UIColor colorWithHex:0xA3CB52];
+	
+	UIColor *color = [UIColor colorWithHex:0x666666];
+	UIColor *selected_color = [UIColor colorWithHex:0xFFFFFF];
+	
 	switch([indexPath row]) {
 		case 0:
 			cell.textLabel.text = self.user ? [NSString stringWithFormat:@"%@ %@", self.user.first_name, self.user.last_name] : @"Username";
@@ -201,10 +201,12 @@
 			break;
 		case 1:
 			statusLabel.text = @"Favorite";
-			colorMarker.backgroundColor = [UIColor colorWithHex:0x60c306];
+			statusLabel.textColor = [self.favorite_state isEqualToString:FAVORITE_STATE_FAVORITED] ? selected_color : color;
+			colorMarker.backgroundColor = [UIColor colorWithHex:0xFDFF00];
 			break;
 		case 2:
 			statusLabel.text = @"Not Favorite";
+			statusLabel.textColor = [self.favorite_state isEqualToString:FAVORITE_STATE_NOT_FAVORITED] ? selected_color : color;
 			colorMarker.backgroundColor = [UIColor colorWithHex:0xFFFFFF];
 			break;
 		case 3:
@@ -214,19 +216,23 @@
 			break;
 		case 4:
 			statusLabel.text = @"Visible";
-			colorMarker.backgroundColor = [UIColor colorWithHex:0x60c306];
+			statusLabel.textColor = [self.filter_state isEqualToString:FILTER_STATE_VISIBLE] ? selected_color : color;
+			colorMarker.backgroundColor = [UIColor colorWithHex:0xA3CB52];
 			break;
 		case 5:
-			statusLabel.text = @"Filter ..for a day";
-			colorMarker.backgroundColor = [UIColor colorWithHex:0xeec315];
+			statusLabel.text = @"Filter until tomorrow";
+			statusLabel.textColor = [self.filter_state isEqualToString:FILTER_STATE_FILTERED_DAY] ? selected_color : color;
+			colorMarker.backgroundColor = [UIColor colorWithHex:0xFFB900];
 			break;
 		case 6:
-			statusLabel.text = @"Filter ..for a week";
-			colorMarker.backgroundColor = [UIColor colorWithHex:0xe46100];
+			statusLabel.text = @"Filter until next week";
+			statusLabel.textColor = [self.filter_state isEqualToString:FILTER_STATE_FILTERED_WEEK] ? selected_color : color;
+			colorMarker.backgroundColor = [UIColor colorWithHex:0xFF5A00];
 			break;
 		case 7:
 			statusLabel.text = @"Filter";
-			colorMarker.backgroundColor = [UIColor colorWithHex:0xe40000];
+			statusLabel.textColor = [self.filter_state isEqualToString:FILTER_STATE_FILTERED] ? selected_color : color;
+			colorMarker.backgroundColor = [UIColor colorWithHex:0xFF0000];
 			break;
 		default:
 			break;
@@ -282,28 +288,20 @@
 			break;
 	}
 	
+	[self refresh];
+	
 	if (should_close) {
+		[[FilterHelper instance] save];
 		[self close];
 	}
 }
 
-- (void)close:(CGFloat)delay {
-	[UIView animateWithDuration:0.2
-						  delay:0.2f
-						options:UIViewAnimationOptionCurveEaseInOut
-					 animations:^{
-						 self.transform = CGAffineTransformMakeScale(0.4, 0.4);
-						 self.alpha = 0.0f;
-					 }
-					 completion:^(BOOL finished){ [self removeFromSuperview]; }];
-}
-
 -(void)closeButtonClicked:(id)sender {
-	[self close:0.0f];
+	[self shrinkAndRemove];
 }
 
 -(void)close {
-	[self close:0.2f];
+	[self shrinkAndRemove:0.2f];
 }
 
 @end

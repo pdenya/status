@@ -60,6 +60,10 @@
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
+	if ([url.scheme isEqualToString:@"nmstatus"]) {
+		return YES;
+	}
+	
     return [FBSession.activeSession handleOpenURL:url];
 }
 

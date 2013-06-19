@@ -39,7 +39,7 @@
 
 - (void) load {
     NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    NSData *favoritesData = [NSData dataWithContentsOfFile:[NSString stringWithFormat:@"%@/favoites",docDir]];
+    NSData *favoritesData = [NSData dataWithContentsOfFile:[NSString stringWithFormat:@"%@/favorites",docDir]];
 	NSDictionary *tmp = [NSKeyedUnarchiver unarchiveObjectWithData:favoritesData];
 	self.favorites = [NSMutableDictionary dictionaryWithDictionary:tmp];
 	NSLog(@"Loaded Favorites Data: %@", [self.favorites description]);

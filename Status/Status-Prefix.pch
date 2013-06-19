@@ -26,4 +26,5 @@
     #import "FavoritesHelper.h"
     #import "UsersHelper.h"
     #import "FilterHelper.h"
+    #import "AppHelper.h"
 #endif

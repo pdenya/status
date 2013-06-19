@@ -61,10 +61,11 @@
 - (void)postToFacebookClicked:(id)sender {
 	NSLog(@"post to facebook clicked");
 	[self postClicked]();
+	[self shrinkAndRemove:0.2f];
 }
 
 - (void)cancelClicked:(id)sender {
-	[self removeFromSuperview];
+	[self shrinkAndRemove];
 }
 
 /*

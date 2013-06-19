@@ -8,6 +8,8 @@
 
 #import "FilteredUsersView.h"
 #import "EditFilterView.h"
+#import "ThumbView.h"
+#import "UserAvatarView.h"
 
 @implementation FilteredUsersView
 @synthesize filter, tableview, keys, user_data;
@@ -19,6 +21,7 @@
         // Initialization code
 		self.backgroundColor = [UIColor whiteColor];
 		self.filter = [FilterHelper instance].filter;
+		NSLog(@"Got Filter\n %@", [self.filter description]);
 		self.keys = [NSMutableArray arrayWithArray:[self.filter allKeys]];
 		self.user_data = [UsersHelper instance].users;
 		
@@ -26,7 +29,10 @@
 		[backButton setImage:[UIImage imageNamed:@"back.png"] forState:UIControlStateNormal];
 		[backButton addTarget:self action:@selector(removeFromSuperview) forControlEvents:UIControlEventTouchUpInside];
 
-		UIView *headerView = [UIView headerView:nil leftButton:backButton rightButton:nil secondRightButton:nil thirdRightButton:nil];
+		UILabel *headerLabel = [[UILabel alloc] init];
+		headerLabel.text = @"Filtered";
+		
+		UIView *headerView = [UIView headerView:headerLabel leftButton:backButton rightButton:nil secondRightButton:nil thirdRightButton:nil];
 		[self addSubview:headerView];
 		
 		self.tableview = [[UITableView alloc] initWithFrame:self.bounds];
@@ -34,7 +40,7 @@
 		[self.tableview sety:[headerView bottomEdge]];
 		self.tableview.delegate = self;
 		self.tableview.dataSource = self;
-		self.tableview.rowHeight = 83;
+		self.tableview.rowHeight = 113;
 		[self addSubview:self.tableview];
     }
     return self;
@@ -56,6 +62,16 @@
     if (cell == nil) {
         cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
 		[cell configureForTimeline];
+		
+		ThumbView *avatarView = [cell avatarView];
+		avatarView.userInteractionEnabled = YES;
+		UITapGestureRecognizer *doubletapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(zoomAvatar:)];
+		doubletapgr.numberOfTouchesRequired = 1;
+		doubletapgr.numberOfTapsRequired = 2;
+		doubletapgr.cancelsTouchesInView = YES;
+		doubletapgr.delaysTouchesBegan = YES;
+		[avatarView addGestureRecognizer:doubletapgr];
+		[doubletapgr release];
     }
 		
 	NSDictionary *filter_data = [self.filter objectForKey:[self.keys objectAtIndex:[indexPath row]]];
@@ -64,7 +80,7 @@
 	[cell setOptions:@{
 		 @"message":		[FilterHelper stringForState:[filter_data objectForKey:@"state"]],
 		 @"name":			[NSString stringWithFormat:@"%@ %@", user.first_name, user.last_name],
-		 @"avatar":			user.image_square != nil ? user.image_square : [NSNumber numberWithInt:0] //stupid hack because nil can't exist in nsdictionary
+		 @"user":			user
 	 }];
 	
 	return cell;
@@ -80,22 +96,26 @@
 	EditFilterView *filterview = [[EditFilterView alloc] initWithFrame:self.bounds];
 	filterview.user = user;
 	
-	[filterview setInitialFilterState:[filter_data objectForKey:@"state"]];
 	[filterview setFilterStateChanged:^(NSDictionary *filter_update) {
-		NSString *state = [filter_update objectForKey:@"state"];
-		NSString *uid = [NSString stringWithFormat:@"%@", [filter_update objectForKey:@"uid"]];
-		
-		if ([state isEqualToString:@"visible"]) {
-			[self.filter removeObjectForKey:uid];
-		}
-		else { //filtered, filtered_day, filtered_week
-			[self.filter setObject:filter_update forKey:uid];
-		}
-		
+		self.keys = [NSMutableArray arrayWithArray:[self.filter allKeys]];
 		[self.tableview reloadData];
-		
 	}];
 	[self addSubview:filterview];
+}
+
+- (void)zoomAvatar:(id)sender {
+	NSLog(@"zoomAvatar");
+	
+	UITapGestureRecognizer *gr = (UITapGestureRecognizer *)sender;
+	UITableViewCell *cell = (UITableViewCell *)gr.view.superview.superview;
+	NSIndexPath *index_path = [self.tableview indexPathForCell:cell];
+	NSDictionary *filter_data = [self.filter objectForKey:[self.keys objectAtIndex:[index_path row]]];
+	User *user = [self.user_data objectForKey:[filter_data objectForKey:@"uid"]];
+	
+	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:self.bounds];
+	[avatarzoom setUser:user];
+	[self addSubview:avatarzoom];
+	[avatarzoom release];
 }
 
 @end

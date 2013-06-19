@@ -31,6 +31,9 @@ typedef void (^PDObjectBlock)(id);
 - (void)setx:(int)x;
 - (void)sety:(int)y;
 
+- (void)centerx;
+- (void)centery;
+
 -(CGFloat)w;
 -(CGFloat)h;
 -(CGFloat)x;
@@ -39,5 +42,10 @@ typedef void (^PDObjectBlock)(id);
 + (UIView *) horizontalRule;
 + (UIView *) verticalRule;
 + (UIView *) headerView:(UILabel *)label leftButton:(UIButton *)leftButton rightButton:(UIButton *)rightButton secondRightButton:(UIButton *)secondRightButton thirdRightButton:(UIButton *)thirdRightButton;
+
+- (void) shrinkAndRemove:(CGFloat)delay;
+- (void) shrinkAndRemove;
+
+- (void) addAndGrowSubview:(UIView *)view;
 
 @end

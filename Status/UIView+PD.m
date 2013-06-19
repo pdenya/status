@@ -142,6 +142,27 @@
 	self.frame = frame;
 }
 
+- (void)centerx {
+	if (self.superview) {
+		CGRect frame = CGRectIntegral(self.frame);
+		frame.origin.x = round((self.superview.frame.size.width * 0.5f) - (frame.size.width / 2));
+		self.frame = frame;
+	}
+	else {
+		NSLog(@"ERROR: UIView+PD centerx called but superview is nil");
+	}
+}
+- (void)centery {
+	if (self.superview) {
+		CGRect frame = CGRectIntegral(self.frame);
+		frame.origin.y = round((self.superview.frame.size.height * 0.5f) - (frame.size.height / 2));
+		self.frame = frame;
+	}
+	else {
+		NSLog(@"ERROR: UIView+PD centery called but superview is nil");
+	}
+}
+
 + (UIView *) horizontalRule {
 	UIView *hr = [[UIView alloc] init];
 	[hr setw:200];
@@ -271,4 +292,35 @@
 	return headerView;
 }
 
+//removal effects
+- (void) shrinkAndRemove:(CGFloat)delay {
+	[UIView animateWithDuration:0.2
+						  delay:delay
+						options:UIViewAnimationOptionCurveEaseInOut
+					 animations:^{
+						 self.transform = CGAffineTransformMakeScale(0.4, 0.4);
+						 self.alpha = 0.0f;
+					 }
+					 completion:^(BOOL finished){ [self removeFromSuperview]; }];
+}
+
+- (void) addAndGrowSubview:(UIView *)view {
+	view.transform = CGAffineTransformMakeScale(0.95, 0.95);
+	view.alpha = 0.4f;
+	[self addSubview:view];
+
+	[UIView animateWithDuration:0.1f
+						  delay:0.0f
+						options:UIViewAnimationOptionCurveEaseOut
+					 animations:^{
+						 view.transform = CGAffineTransformIdentity;
+						 view.alpha = 1.0f;
+					 }
+					 completion:^(BOOL finished){ }];
+	
+}
+
+- (void) shrinkAndRemove {
+	[self shrinkAndRemove:0.0f];
+}
 @end

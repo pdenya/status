@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "AuthView.h"
 
 @interface ViewController ()
 
@@ -19,6 +20,7 @@ const int FAILED_THRESHOLD = 30;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+	[AppHelper instance].vc = self;
 }
 
 
@@ -41,39 +43,62 @@ const int FAILED_THRESHOLD = 30;
 	
 	[self filterFilter];
 	
-	FBHelper *fb = [FBHelper instance];
+	//[[FBHelper instance] logout];
 	
-	if (FBSession.activeSession.isOpen) {
-		NSLog(@"active session");
-		[self streamRefreshInterval];
-    }
-	else {
-		[fb openSession:^(NSArray *data) {
-			[self streamRefreshInterval];
-		}];
-	}
-	
-	self.timelineview = [[TimelineView alloc] initWithFrame:self.view.bounds];
-	self.timelineview.filterButtonClicked = ^{
-		FilteredUsersView *filteredview = [[FilteredUsersView alloc] initWithFrame:self.view.bounds];
-		[self.view addSubview:filteredview];
-		[self.view bringSubviewToFront:filteredview];
-		[filteredview release];
-	};
-	
-	self.timelineview.favoriteButtonClicked = ^{
-		FavoritesView *favview = [[FavoritesView alloc] initWithFrame:self.view.bounds];
-		[self.view addSubview:favview];
-		[self.view bringSubviewToFront:favview];
-		[favview release];
-	};
-	
-	[self.view addSubview:self.timelineview];
+	[self auth];
 	
 	NSLog(@"viewWillAppear");
 }
 
-//once called, this method polls fb every 5 minutes
+- (void)auth {
+	FBHelper *fb = [FBHelper instance];
+	
+	void (^fb_success)(void) = ^ {
+		[self streamRefreshInterval];
+		[self showTimeline];
+	};
+	
+	if (FBSession.activeSession.isOpen) {
+		NSLog(@"active session");
+		fb_success();
+    }
+	else {
+		[fb openSession:fb_success
+		   allowLoginUI:NO
+				 onFail:^{
+					 NSLog(@"showAuth");
+					 AuthView *authview = [[AuthView alloc] initWithFrame:self.view.bounds];
+					 authview.success = fb_success;
+					 [self.view addSubview:authview];
+				 }
+		 ];
+	}
+}
+
+- (void) showTimeline {
+	if (!self.timelineview) {
+		self.timelineview = [[TimelineView alloc] initWithFrame:self.view.bounds];
+		self.timelineview.filterButtonClicked = ^{
+			FilteredUsersView *filteredview = [[FilteredUsersView alloc] initWithFrame:self.view.bounds];
+			[self.view addSubview:filteredview];
+			[self.view bringSubviewToFront:filteredview];
+			[filteredview release];
+		};
+		
+		self.timelineview.favoriteButtonClicked = ^{
+			FavoritesView *favview = [[FavoritesView alloc] initWithFrame:self.view.bounds];
+			[self.view addSubview:favview];
+			[self.view bringSubviewToFront:favview];
+			[favview release];
+		};
+	}
+	
+	if (!self.timelineview.superview) {
+		[self.view addSubview:self.timelineview];
+	}
+}
+
+//once called, this method polls fb
 -(void)streamRefreshInterval {
 	[self fetchFeed];
 	[self performSelector:@selector(streamRefreshInterval) withObject:nil afterDelay:30.0f];
@@ -86,7 +111,7 @@ const int FAILED_THRESHOLD = 30;
 		NSDictionary *f = [self.filter objectForKey:user_key];
 		
 		NSDate *cutoff = nil;
-		NSDate *start = [f objectForKey:@"state"];
+		NSDate *start = [f objectForKey:@"start"];
 		
 		if ([[f objectForKey:@"state"]  isEqualToString:FILTER_STATE_FILTERED_WEEK]) {
 			//edge cases where this fails exist but who cares stackoverflow.com/questions/10209427/subtract-7-days-from-current-date
@@ -97,10 +122,8 @@ const int FAILED_THRESHOLD = 30;
 			cutoff = [[NSDate date] dateByAddingTimeInterval:-1*24*60*60];
 		}
 		
-		if (cutoff != nil) {
-			if (![start isKindOfClass:[NSDate class]] || start < cutoff) {
-				[to_remove addObject:user_key];
-			}
+		if (cutoff != nil && (![start isKindOfClass:[NSDate class]] || [start compare:cutoff] == NSOrderedAscending)) {
+			[to_remove addObject:user_key];
 		}
 	}
 	
@@ -120,12 +143,7 @@ const int FAILED_THRESHOLD = 30;
 		[self.user_data addEntriesFromDictionary:[data objectForKey:@"users"]];
 		
 		[self save];
-		[self.timelineview.tableview reloadData];
-		
-		//preload the rest of the profile pics that we need
-		for (NSString *user_key in self.user_data) {
-			[[self.user_data objectForKey:user_key] loadPicSquare];
-		}
+		[self.timelineview.tableview reloadData];	
 	};
 	
 	int max_time = 0;
@@ -151,26 +169,5 @@ const int FAILED_THRESHOLD = 30;
     [[UsersHelper   instance] load];
     [[FilterHelper  instance] load];
 }
-
-- (void)loadDemoData {
-	Post *post = [Post postFromDictionary:@{
-					@"message": @"This is a pretty short post.",
-				    @"time": @"1340723958",
-					@"uid": @"12312424",
-					@"status_id": @"23981241"
-				  }];
-	
-	Post *post2 = [Post postFromDictionary:@{
-				  @"message": @"This one is much longer.  Like the ones that robby writes that are like pages long.  Who writes that much at a time on facebook of all things.  It's crazy.  It's also pretty funny that I'm doing a facebook client instead of a twitter client....but the opportunity is there, i might as well take it.  Joel and Caroline both see what I see.  Maybe this will be big.  Buuuuut it probably won't be.  You know how it is.  The biggest things are the ones made by other people.",
-				  @"time": @"1340723998",
-				  @"uid": @"12312424",
-				  @"status_id": @"239812414"
-				  }];
-	self.feed = [NSMutableArray arrayWithArray:@[post, post2]];
-	self.timelineview.feed = self.feed;
-}
-
-// UITABLEVIEW id<UITableViewDelegate> *delegate;
-//id<UITableViewDelegate> *delegate;
 
 @end

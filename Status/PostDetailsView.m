@@ -9,6 +9,9 @@
 #import "PostDetailsView.h"
 #import "PostCreateView.h"
 #import "UserAvatarView.h"
+#import "TTTAttributedLabel.h"
+#import "TTTAttributedLabelHandler.h"
+#import "ThumbView.h"
 #import <QuartzCore/QuartzCore.h>
 
 @implementation PostDetailsView
@@ -59,17 +62,24 @@
 	topView.layer.borderWidth = 1.0f;
 	
 	
-	UIImageView *avatarView = [[UIImageView alloc] initWithFrame:CGRectMake(7, 10, 60, 60)];
+	ThumbView *avatarView = [[ThumbView alloc] initWithFrame:CGRectMake(7, 10, 60, 60)];
 	[topView addSubview:avatarView];
-	avatarView.layer.cornerRadius = 3.0f;
-	avatarView.layer.borderColor = [UIColor colorWithHex:0xa2caf1].CGColor;
-	avatarView.layer.borderWidth = 1.0f;
-	avatarView.layer.masksToBounds = YES;
-	avatarView.backgroundColor = [UIColor colorWithHex:0xa2caf1];
-	avatarView.image = self.user.image_square;
+	[avatarView setUser:self.user];
 	
-	UILabel *postLabel = [[UILabel alloc] init];
+	avatarView.userInteractionEnabled = YES;
+	UITapGestureRecognizer *doubletapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(zoomUserAvatar:)];
+	doubletapgr.numberOfTouchesRequired = 1;
+	doubletapgr.numberOfTapsRequired = 2;
+	doubletapgr.cancelsTouchesInView = YES;
+	doubletapgr.delaysTouchesBegan = YES;
+	[avatarView addGestureRecognizer:doubletapgr];
+	[doubletapgr release];
+	
+	TTTAttributedLabel *postLabel = [[TTTAttributedLabel alloc] init];
+	postLabel.dataDetectorTypes = UIDataDetectorTypeLink | UIDataDetectorTypeAddress | UIDataDetectorTypePhoneNumber;
+	postLabel.lineBreakMode = UILineBreakModeWordWrap;
 	postLabel.text = self.post.message;
+	postLabel.delegate = [TTTAttributedLabelHandler instance];
 	postLabel.font = [UIFont systemFontOfSize:15.0f];
 	postLabel.textColor = [UIColor blackColor];
 	postLabel.numberOfLines = 0;
@@ -82,6 +92,8 @@
 	[topView seth:MAX(70, [postLabel h] + 10) + 30];
 
 	tableview.tableHeaderView = topView;
+	
+	self.post.last_read = [NSDate date];
 	
 	[self getFBComments];
 }
@@ -124,14 +136,6 @@
 		[self.comments addObjectsFromArray:[response objectForKey:@"comments"]];
 		[self.user_data addEntriesFromDictionary:[response objectForKey:@"users"]];
 		[self.tableview reloadData];
-		
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-			//fetch all images
-			for (NSString *user_key in self.user_data) {
-				NSLog(@"load pic square for this user");
-				[[self.user_data objectForKey:user_key] loadPicSquare];
-			}
-		});
 	}];
 }
 
@@ -145,19 +149,15 @@
 	User *comment_user = (User *)[self.user_data objectForKey:[[self.comments objectAtIndex:index_path.row] valueForKey:@"fromid"]];
 	
 	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:self.bounds];
-	avatarzoom.avatarView.image = comment_user.image_square;
-	avatarzoom.avatarView.backgroundColor = [UIColor blackColor];
+	[avatarzoom setUser:comment_user];
 	
-	[comment_user loadPicBig:^{
-		if (avatarzoom) {
-			NSLog(@"LOADED BIG PIC");
-			
-			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0), dispatch_get_main_queue(), ^{
-				[avatarzoom.avatarView setImage:comment_user.image_big];
-			});
-		}
-	}];
-	
+	[self addSubview:avatarzoom];
+	[avatarzoom release];
+}
+
+- (void)zoomUserAvatar:(id)sender {
+	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:self.bounds];
+	[avatarzoom setUser:self.user];
 	[self addSubview:avatarzoom];
 	[avatarzoom release];
 }
@@ -186,7 +186,7 @@
 	UILabel *messageLabel;
 	UILabel *dateLabel;
 	UILabel *nameLabel;
-	UIImageView *avatarView;
+	ThumbView *avatarView;
 	
 	
 	if (cell == nil) {
@@ -233,13 +233,8 @@
 		[nameLabel seth:20];
 		nameLabel.tag = 92;
 		
-		avatarView = [[UIImageView alloc] initWithFrame:CGRectMake(5, 8, 60, 60)];
+		avatarView = [[ThumbView alloc] initWithFrame:CGRectMake(5, 8, 60, 60)];
 		avatarView.tag = 96;
-		avatarView.layer.cornerRadius = 3.0f;
-		avatarView.layer.borderColor = [UIColor colorWithHex:0xa2caf1].CGColor;
-		avatarView.layer.borderWidth = 1.0f;
-		avatarView.layer.masksToBounds = YES;
-		avatarView.backgroundColor = [UIColor colorWithHex:0xa2caf1];
 		[cell.contentView addSubview:avatarView];
 				
 		avatarView.userInteractionEnabled = YES;
@@ -254,7 +249,7 @@
 		messageLabel = (UILabel *)[cell viewWithTag:90];
 		dateLabel = (UILabel *)[cell viewWithTag:91];
 		nameLabel = (UILabel *)[cell viewWithTag:92];
-		avatarView = (UIImageView *)[cell viewWithTag:96];
+		avatarView = (ThumbView *)[cell viewWithTag:96];
 	}
 	
 	User *comment_user = (User *)[self.user_data objectForKey:[[self.comments objectAtIndex:indexPath.row] valueForKey:@"fromid"]];
@@ -266,15 +261,8 @@
 	nameLabel.text = [NSString stringWithFormat:@"%@ %@", comment_user.first_name, comment_user.last_name];
 	[nameLabel sizeToFit];
 	
-	if (comment_user.image_square != nil) {
-		avatarView.image = comment_user.image_square;
-	}
-	else if (![User reachedFailureThreshold]) {
-		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, .5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-			[self.tableview reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
-		});
-	}
-	
+	avatarView.user = comment_user;
+		
 	NSDate *date = [NSDate dateWithTimeIntervalSince1970:[[[self.comments objectAtIndex:indexPath.row] valueForKey:@"time"] integerValue]];
 	NSDateFormatter *df = [[NSDateFormatter alloc] init];
 	[df setDateFormat:@"h:mma M/d"];

@@ -7,6 +7,9 @@
 //
 
 #import "FavoritesView.h"
+#import "ThumbView.h"
+#import "UserAvatarView.h"
+#import "PostDetailsView.h"
 
 @implementation FavoritesView
 @synthesize tableview, favorites, keys;
@@ -25,7 +28,10 @@
 		[backButton setImage:[UIImage imageNamed:@"back.png"] forState:UIControlStateNormal];
 		[backButton addTarget:self action:@selector(removeFromSuperview) forControlEvents:UIControlEventTouchUpInside];
 		
-		UIView *headerView = [UIView headerView:nil leftButton:backButton rightButton:nil secondRightButton:nil thirdRightButton:nil];
+		UILabel *headerLabel = [[UILabel alloc] init];
+		[headerLabel setText:@"Favorites"];
+		
+		UIView *headerView = [UIView headerView:headerLabel leftButton:backButton rightButton:nil secondRightButton:nil thirdRightButton:nil];
 		[self addSubview:headerView];
 		
 		self.tableview = [[UITableView alloc] initWithFrame:self.bounds];
@@ -33,10 +39,18 @@
 		[self.tableview sety:[headerView bottomEdge]];
 		self.tableview.delegate = self;
 		self.tableview.dataSource = self;
-		self.tableview.rowHeight = 83;
 		[self addSubview:self.tableview];
     }
     return self;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+	NSDictionary *fav_data = [self.favorites objectForKey:[self.keys objectAtIndex:[indexPath row]]];
+	User *user = [[UsersHelper instance].users objectForKey:[fav_data objectForKey:@"uid"]];
+	Post *post = [self postFromUser:user];
+	CGFloat height = [post rowHeight];
+
+	return height;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -51,49 +65,114 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 	static NSString *CellIdentifier = @"Cell";
     
-    UITableViewCell *cell = [self.tableview dequeueReusableCellWithIdentifier:CellIdentifier];
+    MCSwipeTableViewCell *cell = [self.tableview dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell = [[[MCSwipeTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
 		[cell configureForTimeline];
+		
+		ThumbView *avatarView = [cell avatarView];
+		avatarView.userInteractionEnabled = YES;
+		UITapGestureRecognizer *doubletapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(zoomAvatar:)];
+		doubletapgr.numberOfTouchesRequired = 1;
+		doubletapgr.numberOfTapsRequired = 2;
+		doubletapgr.cancelsTouchesInView = YES;
+		doubletapgr.delaysTouchesBegan = YES;
+		[avatarView addGestureRecognizer:doubletapgr];
+		[doubletapgr release];
     }
 	
 	NSDictionary *fav_data = [self.favorites objectForKey:[self.keys objectAtIndex:[indexPath row]]];
 	User *user = [[UsersHelper instance].users objectForKey:[fav_data objectForKey:@"uid"]];
 	
 	NSString *message = @"test";
+	Post *post = [self postFromUser:user];
 	
-	for (Post *post in [FeedHelper instance].feed) {
-		NSString *post_uid = [NSString stringWithFormat:@"%@", post.uid];
-		NSString *user_uid = [NSString stringWithFormat:@"%@", user.uid];
-		if ([post_uid isEqualToString:user_uid]) {
-			message = post.message;
-			break;
-		} else {
-			NSLog(@"%@ %@", post.uid, user.uid);
-		}
-	}
+	message = post.message;
 	
 	[cell setOptions:@{
 	 @"message":		message,
      @"name":			[NSString stringWithFormat:@"%@ %@", user.first_name, user.last_name],
-     @"avatar":			user.image_square != nil ? user.image_square : [NSNumber numberWithInt:0] //stupid hack because nil can't exist in nsdictionary
+     @"user":			user,
+	 @"has_comments":	[NSNumber numberWithBool:post.has_comments],
+	 @"is_expanded":	[NSNumber numberWithBool:YES],
+	 @"time":			post.time
 	 }];
+	
+	[cell setDelegate:self];
+	[cell setFirstStateIconName:@"comment_bubble.png"
+                     firstColor:[UIColor colorWithHex:0x138dff]
+            secondStateIconName:nil
+                    secondColor:nil
+                  thirdIconName:@"white_x.png"
+                     thirdColor:[UIColor colorWithHex:0xCC0000]
+                 fourthIconName:nil
+                    fourthColor:nil];
+	
+	[cell setMode:MCSwipeTableViewCellModeExit];
 	
 	return cell;
 }
 
+- (Post *) postFromUser:(User *)user {
+	Post *post;
+	
+	for (Post *p in [FeedHelper instance].feed) {
+		NSString *post_uid = [NSString stringWithFormat:@"%@", p.uid];
+		NSString *user_uid = [NSString stringWithFormat:@"%@", user.uid];
+		if ([post_uid isEqualToString:user_uid]) {
+			post = p;
+			break;
+		}
+	}
+	
+	return post;
+}
+
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath	{
-	NSDictionary *fav_data = [self.favorites objectForKey:[self.keys objectAtIndex:[indexPath row]]];
-	User *user = [[UsersHelper instance].users objectForKey:[fav_data objectForKey:@"uid"]];
-	
-	NSLog(@"View Filter State for User %@ %@", user.first_name, user.last_name);
-	
-	EditFilterView *filterview = [[EditFilterView alloc] initWithFrame:self.bounds];
-	filterview.user = user;
-	
-	[self addSubview:filterview];
 	
 }
 
+- (void)zoomAvatar:(id)sender {
+	NSLog(@"zoomAvatar");
+	
+	UITapGestureRecognizer *gr = (UITapGestureRecognizer *)sender;
+	UITableViewCell *cell = (UITableViewCell *)gr.view.superview.superview;
+	NSIndexPath *index_path = [self.tableview indexPathForCell:cell];
+	NSDictionary *fav_data = [self.favorites objectForKey:[self.keys objectAtIndex:[index_path row]]];
+	User *user = [[UsersHelper instance].users objectForKey:[fav_data objectForKey:@"uid"]];
+	
+	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:self.bounds];
+	[avatarzoom setUser:user];
+	[self addSubview:avatarzoom];
+	[avatarzoom release];
+}
+
+- (void)swipeTableViewCell:(MCSwipeTableViewCell *)cell didTriggerState:(MCSwipeTableViewCellState)state withMode:(MCSwipeTableViewCellMode)mode {
+	if (state == MCSwipeTableViewCellState1) {
+		NSLog(@"IndexPath : %@ - MCSwipeTableViewCellState : %d - MCSwipeTableViewCellMode : %d", [self.tableview indexPathForCell:cell], state, mode);
+		NSIndexPath *index_path = [self.tableview indexPathForCell:cell];
+		NSDictionary *fav_data = [self.favorites objectForKey:[self.keys objectAtIndex:[index_path row]]];
+		User *user = [[UsersHelper instance].users objectForKey:[fav_data objectForKey:@"uid"]];
+		
+		PostDetailsView *details = [[PostDetailsView alloc] initWithFrame:self.bounds];
+		details.post = [self postFromUser:user];
+		details.user = user;
+		
+		[self addSubview:details];
+		[details addedAsSubview];
+		
+		[self.tableview reloadRowsAtIndexPaths:@[[self.tableview indexPathForCell:cell]] withRowAnimation:UITableViewRowAnimationFade];
+	}
+	else if (state == MCSwipeTableViewCellState3) {
+		NSIndexPath *index_path = [self.tableview indexPathForCell:cell];
+		NSDictionary *fav_data = [self.favorites objectForKey:[self.keys objectAtIndex:[index_path row]]];
+		
+		EditFilterView *filterview = [[EditFilterView alloc] initWithFrame:self.bounds];
+		filterview.user = [[UsersHelper instance].users objectForKey:[fav_data objectForKey:@"uid"]];;
+		[self addSubview:filterview];
+		
+		[self.tableview reloadRowsAtIndexPaths:@[[self.tableview indexPathForCell:cell]] withRowAnimation:UITableViewRowAnimationFade];
+	}
+}
 
 @end

@@ -19,6 +19,7 @@
 @property (readwrite, copy) PDObjectBlock filterStateChanged;
 @property (nonatomic, retain) UITableView *tableview;
 
-- (void)setInitialFilterState:(NSString *)filter_state;
+@property (nonatomic, retain) NSString *filter_state;
+@property (nonatomic, retain) NSString *favorite_state;
 
 @end

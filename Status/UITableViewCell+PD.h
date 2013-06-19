@@ -16,7 +16,7 @@
 - (UILabel *) nameLabel;
 - (ThumbView *) avatarView;
 - (UIView *) commentsNotifierView;
-- (UIImageView *) imageView;
+- (ThumbView *) imgView;
 - (void)setOptions:(NSDictionary *)options;
 - (void)setExpanded:(BOOL)should_be_expanded;
 - (int) linesBeforeClip;

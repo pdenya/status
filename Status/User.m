@@ -9,7 +9,7 @@
 #import "User.h"
 
 @implementation User
-@synthesize first_name, last_name, pic_big, pic_square, uid, image_square, image_big;
+@synthesize first_name, last_name, pic_big, pic_square, uid, image_square, image_big, callbacks;
 
 static int total_failed = 0;
 const int max_failed = 30;
@@ -37,7 +37,7 @@ const int max_failed = 30;
 	self = [super init];
 	
 	if (self) {
-		
+		self.callbacks = [[NSMutableArray alloc] init];
 	}
 	
 	return self;
@@ -70,9 +70,32 @@ const int max_failed = 30;
 
 //public methods
 	- (void)loadPicSquare {
-		if(is_fetching_square_image) return;
+		[self loadPicSquare:nil];
+	}
+
+	- (NSString *)picSquareUrl {
+		return [NSString stringWithFormat:@"http://graph.facebook.com/%@/picture?width=150&height=150", self.uid];
+	}
+
+	- (NSString *)picBigUrl {
+		return [NSString stringWithFormat:@"http://graph.facebook.com/%@/picture?width=640", self.uid];
+	}
+
+	- (void)loadPicSquare:(PDBlock)completed {
+		NSLog(@"Don't use loadPicSquare, use SDWebImage with picSquareUrl instead unless you have a good reason!");
+		return;
+		
+		if(is_fetching_square_image) {
+			if (completed) {
+				[self.callbacks addObject:[[completed copy] autorelease]];
+			}
+			return;
+		}
 		if (total_failed > max_failed) return;
-		if (self.image_square != nil) return;
+		if (self.image_square != nil) {
+			if (completed) completed();
+			return;
+		}
 		
 		is_fetching_square_image = YES;
 		
@@ -86,6 +109,20 @@ const int max_failed = 30;
 			
 			if (image != nil) {
 				self.image_square = image;
+				if (completed) {
+					completed();
+				}
+				
+				if ([self.callbacks count] > 0) {
+					for (int j = 0; j < [self.callbacks count]; j++) {
+						PDBlock c = [self.callbacks objectAtIndex:j];
+						if (c) {
+							c();
+						}
+					}
+					
+					[self.callbacks removeAllObjects];
+				}
 			} else {
 				total_failed++;
 			}

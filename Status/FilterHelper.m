@@ -48,6 +48,7 @@
     NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
 	NSData *filterData = [NSKeyedArchiver archivedDataWithRootObject:self.filter];
 	[filterData writeToFile:[NSString stringWithFormat:@"%@/filter",docDir] atomically:YES];
+	NSLog(@"FilterHelper saved \n %@", [self.filter description]);
 }
 
 + (NSString *) stringForState:(NSString *)state {

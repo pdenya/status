@@ -8,7 +8,6 @@
 
 #import "PostCreateView.h"
 #import "PostDetailsView.h"
-#import "UserFilterView.h"
 #import "EditFilterView.h"
 #import "TimelineView.h"
 #import "UserAvatarView.h"
@@ -130,12 +129,12 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
 	Post *post = [self.feed objectAtIndex:[indexPath row]];
 	CGFloat height = [post rowHeight];
-	return [self.expanded containsObject:[self stringFromIndexPath:indexPath]] ? height : MIN([self clipHeight] + 40, height);
+	return [self.expanded containsObject:[self stringFromIndexPath:indexPath]] ? height : MIN([self clipHeight], height);
 }
 
 - (CGFloat)clipHeight {
 	//NSLog(@"clipHeight is %f", [@"some test string" sizeWithFont:[UIFont systemFontOfSize:15.0f]].height * NUM_LINES_BEFORE_CLIP);
-	return [@"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" sizeWithFont:[UIFont systemFontOfSize:15.0f]].height * NUM_LINES_BEFORE_CLIP;
+	return 50 + [@"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" sizeWithFont:[UIFont systemFontOfSize:15.0f]].height * NUM_LINES_BEFORE_CLIP;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -147,7 +146,6 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-	NSLog(@"cellForRowAtIndexPath %i", [indexPath row]);
 	static NSString *CellIdentifier = @"Cell";
     
     MCSwipeTableViewCell *cell = [self.tableview dequeueReusableCellWithIdentifier:CellIdentifier];
@@ -165,6 +163,16 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		doubletapgr.delaysTouchesBegan = YES;
 		[avatarView addGestureRecognizer:doubletapgr];
 		[doubletapgr release];
+		
+		ThumbView *imgview = [cell imgView];
+		imgview.userInteractionEnabled = YES;
+		UITapGestureRecognizer *imgview_doubletapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(zoomPostImage:)];
+		imgview_doubletapgr.numberOfTouchesRequired = 1;
+		imgview_doubletapgr.numberOfTapsRequired = 2;
+		imgview_doubletapgr.cancelsTouchesInView = YES;
+		imgview_doubletapgr.delaysTouchesBegan = YES;
+		[imgview addGestureRecognizer:imgview_doubletapgr];
+		[imgview_doubletapgr release];
     }
 	
     Post *post = [self.feed objectAtIndex:[indexPath row]];
@@ -180,22 +188,9 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		@"name":			[NSString stringWithFormat:@"%@ %@", user.first_name, user.last_name],
 		@"has_comments":	[NSNumber numberWithBool:post.has_comments],
 		@"time":			post.time,
-		@"avatar":			user.image_square != nil ? user.image_square : [NSNumber numberWithInt:0], //stupid hack because nil can't exist in nsdictionary
-		@"images":			post.images,
 		@"post":			post,
 		@"user":			user
 	}];
-	
-	//set profile pic
-	if (user.image_square == nil) {
-		//hacky polling
-		if (![User reachedFailureThreshold]) {
-			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3.0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-				[self.tableview reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-			});
-		}
-	}
-	
 	
 	[cell setDelegate:self];
 	[cell setFirstStateIconName:@"comment_bubble.png"
@@ -223,19 +218,20 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	User *user = [self.user_data objectForKey:post.uid];
 	
 	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:self.bounds];
-	avatarzoom.avatarView.image = user.image_square;
-	avatarzoom.avatarView.backgroundColor = [UIColor blackColor];
+	[avatarzoom setUser:user];
+	[self addSubview:avatarzoom];
+	[avatarzoom release];
+}
+
+- (void) zoomPostImage:(id)sender {
+	NSLog(@"zoomPostImage");
+	UITapGestureRecognizer *gr = (UITapGestureRecognizer *)sender;
+	UITableViewCell *cell = (UITableViewCell *)gr.view.superview.superview;
+	NSIndexPath *index_path = [self.tableview indexPathForCell:cell];
+	Post *post = [self.feed objectAtIndex:[index_path row]];
 	
-	[user loadPicBig:^{
-		if (avatarzoom) {
-			NSLog(@"LOADED BIG PIC");
-			
-			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0), dispatch_get_main_queue(), ^{
-				[avatarzoom.avatarView setImage:user.image_big];
-			});
-		}
-	}];
-	
+	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:self.bounds];
+	[avatarzoom setPost:post];
 	[self addSubview:avatarzoom];
 	[avatarzoom release];
 }
@@ -255,16 +251,11 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 - (void)viewFilterControls:(NSString *)uid {
 	EditFilterView *filterview = [[EditFilterView alloc] initWithFrame:self.bounds];
 	filterview.user = [self.user_data objectForKey:uid];
-	[filterview setInitialFilterState:FILTER_STATE_VISIBLE];
 	[filterview setFilterStateChanged:^(NSDictionary *filter_update) {
 		NSString *state = [filter_update objectForKey:@"state"];
 		NSString *uid = [NSString stringWithFormat:@"%@", [filter_update objectForKey:@"uid"]];
 		
-		if ([state isEqualToString:@"visible"]) {
-			[self.filter removeObjectForKey:uid];
-		}
-		else { //filtered, filtered_day, filtered_week
-			[self.filter setObject:filter_update forKey:uid];
+		if (![state isEqualToString:@"visible"]) { //filtered, filtered_day, filtered_week
 			NSLog(@"filter description %@", [self.filter description]);
 			
 			//remove filtered user's posts from feed
@@ -281,9 +272,10 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		}
 		
 		[self.tableview reloadData];
-		
 	}];
-	[self addSubview:filterview];
+	
+	[self addAndGrowSubview:filterview];
+	
 }
 
 - (void)swipeTableViewCell:(MCSwipeTableViewCell *)cell didTriggerState:(MCSwipeTableViewCellState)state withMode:(MCSwipeTableViewCellMode)mode {

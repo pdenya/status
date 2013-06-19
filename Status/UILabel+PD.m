@@ -13,10 +13,10 @@
 + (UILabel *)titleLabelWithText:(NSString *)labelText {
 	UILabel *label = [[UILabel alloc] init];
 	label.backgroundColor = [UIColor clearColor];
-	label.font = [UIFont boldSystemFontOfSize:15.0f];
-	label.textColor = [UIColor colorWithHex:0x2f2f2d];
-	label.shadowColor = [UIColor colorWithHex:0x3086cc];
-	label.shadowOffset = CGSizeMake(0,1);
+	label.font = [UIFont systemFontOfSize:24.0f];
+	label.textColor = [UIColor colorWithHex:0x0090FF];
+//	label.shadowColor = [UIColor colorWithHex:0x89FFFD];
+//	label.shadowOffset = CGSizeMake(0,-1);
 	[label setText:labelText];
 	[label sizeToFit];
 	return label;

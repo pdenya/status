@@ -20,15 +20,17 @@
 @property (nonatomic, retain) NSString *uid;
 @property (nonatomic, retain) UIImage *image_square;
 @property (nonatomic, retain) UIImage *image_big;
+@property (nonatomic, retain) NSMutableArray *callbacks;
 
 + (User *)userFromDictionary:(NSDictionary *)user_data;
 + (int)reachedFailureThreshold;
 + (NSComparisonResult(^)(id a, id b))timeComparator;
 
 - (void)loadPicSquare;
+- (void)loadPicSquare:(PDBlock)completed;
 - (void)loadPicBig:(PDBlock)loaded;
 - (NSString *)full_name;
-
-
+- (NSString *)picSquareUrl;
+- (NSString *)picBigUrl;
 
 @end
