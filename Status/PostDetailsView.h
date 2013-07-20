@@ -24,5 +24,6 @@
 @property (nonatomic, retain) NSMutableDictionary *user_data;
 
 - (void)addedAsSubview;
+- (void)userAvatarViewResized:(NSNumber *)height_difference;
 
 @end

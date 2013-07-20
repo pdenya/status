@@ -168,6 +168,27 @@ const int max_failed = 30;
 	return [NSString stringWithFormat:@"<User Name='%@ %@' PicBig='%@' PicSquare='%@' UID='%@' />", self.first_name, self.last_name, self.pic_big, self.pic_square, self.uid];
 }
 
+- (BOOL) is_favorite {
+	return (BOOL)[[FavoritesHelper instance].favorites objectForKey:self.uid];
+}
+
+- (void) favorite {
+	if (![self is_favorite]) {
+		//update user favorites
+		[[FavoritesHelper instance].favorites setObject:@{
+		  @"state": FAVORITE_STATE_FAVORITED,
+		  @"start": [NSDate date],
+		  @"uid": self.uid
+		} forKey:self.uid];
+	}
+}
+
+- (void) unfavorite {
+	if ([self is_favorite]) {
+		//update user favorites
+		[[FavoritesHelper instance].favorites removeObjectForKey:self.uid];
+	}
+}
 
 
 @end

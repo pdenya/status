@@ -19,18 +19,9 @@
     if (self) {
 		//standard images on the right of the cell
 		if ([self w] == [self h]) {
-			self.layer.cornerRadius = 3.0f;
+			self.layer.cornerRadius = 2.0f;
 			self.layer.borderColor = [UIColor colorWithHex:0x999999].CGColor;
-			self.layer.borderWidth = 1.0f;
-		}
-		//avatar images on the left of the cell
-		else {
-			CAShapeLayer *avatarMask = [CAShapeLayer layer];
-			UIBezierPath *roundedPath = [UIBezierPath bezierPathWithRoundedRect:self.bounds byRoundingCorners:(UIRectCornerTopRight | UIRectCornerBottomRight) cornerRadii:CGSizeMake(3.0f, 3.0f)];
-			avatarMask.fillColor = [[UIColor whiteColor] CGColor];
-			avatarMask.backgroundColor = [[UIColor clearColor] CGColor];
-			avatarMask.path = [roundedPath CGPath];
-			self.layer.mask = avatarMask;
+			self.layer.borderWidth = 0.5f;
 		}
 
 		self.layer.masksToBounds = YES;

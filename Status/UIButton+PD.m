@@ -68,4 +68,26 @@
 	return button;
 }
 
++ (UIButton *)flatBlueButton:(NSString *)text modifier:(CGFloat)modifier {
+	UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+	
+	button.backgroundColor = [UIColor colorWithHex:0x3e9ed5];
+	button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:round(modifier * 12.0f)];
+	[button setTitle:text forState:UIControlStateNormal];
+	
+	CGFloat vpadding = modifier * 5.0f; //height
+	CGFloat hpadding = modifier * 13.0f; //width
+	[button setw:modifier * 500];
+	[button seth:modifier * 100];
+	[button sizeToFit];
+	[button setw:[button w] + (hpadding * 2)];
+	[button seth:[button h] + (vpadding * 2)];
+	
+	return button;
+}
+
++ (UIButton *)flatBlueButton:(NSString *)text {
+	return [UIButton flatBlueButton:text modifier:1];
+}
+
 @end

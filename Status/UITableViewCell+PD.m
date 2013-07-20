@@ -17,7 +17,7 @@
 	UILabel *dateLabel;
 	UILabel *nameLabel;
 	ThumbView *avatarView;
-	UIView *commentsNotifierView;
+	UIImageView *commentsNotifierView;
 	ThumbView *imgView;
 	
 	//hide defaults
@@ -28,51 +28,44 @@
 	
 	self.selectedBackgroundView = [[UIView alloc] init];
 	
-	avatarView = [[ThumbView alloc] initWithFrame:CGRectMake(0, 15, 79, 82)];
+	avatarView = [[ThumbView alloc] initWithFrame:CGRectMake(10, 10, 50, 50)];
 	avatarView.tag = 96;
 
 	[self.contentView addSubview:avatarView];
 	
-	dateLabel = [[[UILabel alloc] init] autorelease];
-	dateLabel.backgroundColor = [UIColor clearColor];
-	[self.contentView addSubview:dateLabel];
-	dateLabel.font = [UIFont systemFontOfSize:12.0f];
-	dateLabel.textColor = [UIColor colorWithHex:0xAAAAAA];
-	dateLabel.numberOfLines = 1;
-	dateLabel.textAlignment = NSTextAlignmentRight;
-	dateLabel.text = @"an unknown amount of time ago";
-	[dateLabel sizeToFit];
-	dateLabel.text = @"";
-	[dateLabel setx:[self w] - [dateLabel w] - 10];
-	[dateLabel sety:[avatarView y] - 7];
-	[dateLabel seth:20];
-	dateLabel.tag = 91;
-	
 	messageLabel = [[[UILabel alloc] init] autorelease];
 	messageLabel.backgroundColor = [UIColor clearColor];
 	[self.contentView addSubview:messageLabel];
-	messageLabel.font = [UIFont systemFontOfSize:15.0f];
+	messageLabel.font = [Post getPostFont];
 	messageLabel.numberOfLines = 0;
 	messageLabel.textColor = [UIColor colorWithHex:0x333333];
 	//messageLabel setw ignored here.  It's in setOptions
 	[messageLabel setx:[avatarView rightEdge] + 7];
-	[messageLabel sety:[dateLabel bottomEdge] + 2];
+	[messageLabel sety:[avatarView y] - 3];
 	[messageLabel seth:60]; //sizeToFit called in setOptions, this is ignored
 	[messageLabel setwp:0.77f]; //sizeToFit called in setOptions, this is ignored
 	messageLabel.tag = 90;
 	[self bringSubviewToFront:messageLabel];
 	
+	dateLabel = [[[UILabel alloc] init] autorelease];
+	dateLabel.backgroundColor = [UIColor clearColor];
+	[self.contentView addSubview:dateLabel];
+	dateLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:9.0f];
+	dateLabel.textColor = [UIColor colorWithHex:0x5b5c5c];
+	dateLabel.numberOfLines = 1;
+	dateLabel.text = @"an unknown amount of time ago";
+	[dateLabel sizeToFit];
+	dateLabel.text = @"";
+	dateLabel.tag = 91;
+	
 	nameLabel = [[[UILabel alloc] init] autorelease];
 	nameLabel.backgroundColor = [UIColor clearColor];
 	[self.contentView addSubview:nameLabel];
-	nameLabel.font = [UIFont boldSystemFontOfSize:14.0f];
-	nameLabel.textColor = [UIColor colorWithHex:0x1F506C];
+	nameLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:11.0f];
+	nameLabel.textColor = [UIColor colorWithHex:0x3e9ed5];
 	nameLabel.numberOfLines = 1;
 	nameLabel.text = @"an unknown amount of time ago";
 	[nameLabel sizeToFit];
-	[nameLabel setx:[messageLabel x]];
-	[nameLabel sety:[dateLabel y] + 3];
-	[nameLabel seth:20];
 	nameLabel.tag = 92;
 
 	CGFloat imgview_w = 57;
@@ -81,42 +74,31 @@
 	imgView.hidden = YES;
 	[self.contentView addSubview:imgView];
 	
-	commentsNotifierView = [[UIView alloc] init];
-	[commentsNotifierView setx:0];
-	[commentsNotifierView setw:20];
-	[commentsNotifierView seth:20];
-	[commentsNotifierView sety:[self h] - [commentsNotifierView h]];
-	commentsNotifierView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
-	
-	CAShapeLayer *notifierMask = [CAShapeLayer layer];
-	UIBezierPath *roundedPath = [UIBezierPath bezierPathWithRoundedRect:commentsNotifierView.bounds byRoundingCorners:UIRectCornerTopRight cornerRadii:CGSizeMake(3.0f, 3.0f)];
-	notifierMask.fillColor = [[UIColor whiteColor] CGColor];
-	notifierMask.backgroundColor = [[UIColor clearColor] CGColor];
-	notifierMask.path = [roundedPath CGPath];
-	commentsNotifierView.layer.mask = notifierMask;
-	
-	
-	UIImageView *bars = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bars.png"]];
-	[bars sizeToFit];
-	[commentsNotifierView addSubview:bars];
-	[bars sethp:0.5f];
-	[bars centerx];
-	[bars centery];
+	commentsNotifierView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_no_comments.png"]];
+	[commentsNotifierView setw:11];
+	[commentsNotifierView seth:11];
+	[commentsNotifierView setx:[self w] - [commentsNotifierView w] - 8];
 	
 	[self.contentView addSubview:commentsNotifierView];
 	[self.contentView bringSubviewToFront:commentsNotifierView];
-	commentsNotifierView.backgroundColor = [UIColor colorWithHex:0x138dff];
 	commentsNotifierView.tag = 97;
-
 	
 	[self.contentView setBackgroundColor:[UIColor whiteColor]];
 	
+	/*
 	UIImageView *backgroundView = [[[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"cellbg.png"] stretchableImageWithLeftCapWidth:2 topCapHeight:5]] autorelease];
 	backgroundView.alpha = 0.8f;
 	[self.contentView addSubview:backgroundView];
 	[self.contentView sendSubviewToBack:backgroundView];
 	backgroundView.frame = self.contentView.bounds;
 	backgroundView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+	*/
+	
+/*	UIView *bottomBorder = [[UIView alloc] initWithFrame:CGRectMake(0.0f, [self h] - 0.5f, [self w], 1.0f)];
+	bottomBorder.backgroundColor = [UIColor colorWithHex:0x3e9ed5];
+	bottomBorder.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
+	[self.contentView addSubview:bottomBorder]; */
+	
 }
 
 - (UILabel *) messageLabel {
@@ -135,8 +117,8 @@
 	return (ThumbView *)[self viewWithTag:96];
 }
 
-- (UIView *) commentsNotifierView {
-	return (UIView *)[self viewWithTag:97];
+- (UIImageView *) commentsNotifierView {
+	return (UIImageView *)[self viewWithTag:97];
 }
 
 - (ThumbView *) imgView {
@@ -165,17 +147,16 @@
 	ThumbView *imgView = [self imgView];
 	Post *post = nil;
 	
-	//status message
-	messageLabel.text = [options objectForKey:@"message"];
-	messageLabel.numberOfLines = [[options objectForKey:@"is_expanded"] boolValue] ? 0 : [self linesBeforeClip];
-	[messageLabel sizeToFit];
-	
 	if ([options objectForKey:@"post"]) {
 		post = (Post *)[options objectForKey:@"post"];
-		[messageLabel setw:[post messageLabelWidth]];
-	} else {
-		[messageLabel setwp:.75f];
 	}
+	
+	//status message
+	CGFloat messageLabelWidth = post ? [post messageLabelWidth] : 0.75f;
+	messageLabel.text = [options objectForKey:@"message"];
+	messageLabel.numberOfLines = 0;//[[options objectForKey:@"is_expanded"] boolValue] ? 0 : [self linesBeforeClip];
+	[messageLabel setw:messageLabelWidth];
+	[messageLabel sizeToFit];
 	
 	//name
 	nameLabel.text = [options objectForKey:@"name"];
@@ -186,7 +167,7 @@
 		NSDate *date = [NSDate dateWithTimeIntervalSince1970:[[options objectForKey:@"time"] integerValue]];
 		NSDateFormatter *df = [[NSDateFormatter alloc] init];
 		[df setDateFormat:@"h:mma M/d"];
-		dateLabel.text = [[df stringFromDate:date] lowercaseString];
+		dateLabel.text = [NSString stringWithFormat:@"at %@", [[df stringFromDate:date] lowercaseString]];
 		[df release];
 	}
 	
@@ -196,14 +177,24 @@
 	//mark as read
 	if (!self.commentsNotifierView.hidden) {
 		BOOL should_mark_as_read = post && post.last_read && post.last_comment_at && [post.last_read compare:post.last_comment_at] == NSOrderedDescending;
-		self.commentsNotifierView.backgroundColor = should_mark_as_read ? [UIColor colorWithHex:0xA4D3FF] : [UIColor colorWithHex:0x138DFF];
-		
-		NSLog(@"commentsNotifierView height %f", [self.commentsNotifierView h]);
+		[self.commentsNotifierView setImage:[UIImage imageNamed:(should_mark_as_read ? @"icon_has_comments.png" : @"icon_has_unread")]];
 	}
 	else {
-		//self.commentsNotifierView.hidden = NO;
-		//self.commentsNotifierView.backgroundColor = [UIColor colorWithHex:0xBFBABA];
+		[self.commentsNotifierView setImage:[UIImage imageNamed:@"icon_no_comments.png"]];
 	}
+	
+	[nameLabel setx:[messageLabel x]];
+	[nameLabel sety:MAX(([messageLabel bottomEdge] + 7), (post ? [post minRowHeight] - 21 : 0))];
+	
+	[nameLabel setw:[messageLabel w]];
+	[nameLabel sizeToFit];
+	
+	[dateLabel sety:[nameLabel bottomEdge] - [dateLabel h]];
+	[dateLabel setx:[nameLabel rightEdge] + 2];
+	
+	[self.commentsNotifierView sety:[nameLabel y] + 2];
+
+	
 	
 	//post images thumbnail
 	if (post && [post hasImages]) {

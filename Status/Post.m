@@ -29,6 +29,9 @@
 	return post;
 }
 
++ (UIFont *)getPostFont {
+	return [UIFont fontWithName:@"HelveticaNeue-Light" size:15.0f];
+}
 
 - (BOOL)hasImages {
 	if (self.images) {
@@ -51,20 +54,23 @@
 - (CGFloat)rowHeight {
 	CGFloat w = [self messageLabelWidth];
 	
-	CGFloat height = [self.message sizeWithFont:[UIFont systemFontOfSize:15.0f]
+	CGFloat height = [self.message sizeWithFont:[Post getPostFont]
 							  constrainedToSize:CGSizeMake(w, FLT_MAX)
 								  lineBreakMode:UILineBreakModeWordWrap].height;
 	
-	CGFloat min_height = [self hasImages] || [self has_comments] ? 60 : 43;
-	min_height += 15;
+	height += 36;
 	
-	height = MAX(min_height, height) + 45;
+	height = MAX([self minRowHeight], height);
 	
 	return height;
 }
 
+- (CGFloat) minRowHeight {
+	return 69; //[self hasImages] || [self has_comments] ? 60 : 33;
+}
+
 - (CGFloat)messageLabelWidth {
-	return round([UIScreen mainScreen].bounds.size.width * ([self hasImages] ? 0.58 : .71));
+	return round([UIScreen mainScreen].bounds.size.width * ([self hasImages] ? 0.58 : .75));
 }
 
 //NSCoding

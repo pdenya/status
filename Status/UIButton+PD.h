@@ -12,5 +12,7 @@
 
 + (UIButton *)greyButtonWithText:(NSString *)buttonText;
 + (UIButton *)blueButtonWithText:(NSString *)buttonText;
++ (UIButton *)flatBlueButton:(NSString *)text;
++ (UIButton *)flatBlueButton:(NSString *)text modifier:(CGFloat)modifier;
 
 @end

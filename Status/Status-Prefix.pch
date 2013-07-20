@@ -26,5 +26,7 @@
     #import "FavoritesHelper.h"
     #import "UsersHelper.h"
     #import "FilterHelper.h"
-    #import "AppHelper.h"
+    #import "AppHelper.h" 
 #endif
+
+#define SYSTEM_VERSION_LESS_THAN(v)                 ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)

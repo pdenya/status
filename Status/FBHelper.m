@@ -46,10 +46,12 @@
 		NSLog(@"completion");
 		switch (status) {
 			case FBSessionStateOpen:
+				NSLog(@"FB State Open");
 				opened_callback();
 				break;
 			case FBSessionStateClosed:
 			case FBSessionStateClosedLoginFailed:
+				NSLog(@"FB State closed");
 				[FBSession.activeSession closeAndClearTokenInformation];
 				failed_callback();
 				break;
@@ -59,7 +61,7 @@
 		}
 		
 		if (error) {
-			NSLog(@"error");
+			NSLog(@"error %@", [error description]);
 			session = [[FBSession alloc] initWithPermissions:permissions];
 		}
 	};

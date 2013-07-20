@@ -38,7 +38,47 @@
 	return self.frame.size.width;
 }
 
+-(UIView *)parents:(Class)class_name {
+	UIView *s = self.superview;
+	while (![s isKindOfClass:class_name]) {
+		if (s.superview) {
+			s = s.superview;
+		}
+		else {
+			return nil;
+		}
+	}
+	
+	return s;
+}
+
+
 //styling
+- (void) addBottomBorder:(UIColor *)borderColor {
+	CALayer *border = [CALayer layer];
+	border.frame = CGRectMake(0, [self h] - 0.5f, [self w], 0.5f);
+	border.backgroundColor = borderColor.CGColor;
+	[self.layer addSublayer:border];
+}
+
+- (void) addFlexibleBottomBorder:(UIColor *)borderColor {
+	UIView *border = [[UIView alloc] init];
+	NSLog(@"content view frame %@", NSStringFromCGRect(self.frame));
+	border.frame = CGRectMake(0, 10, [self w], 1/[[UIScreen mainScreen] scale]);
+	NSLog(@"content view frame %@", NSStringFromCGRect(border.frame));
+	border.backgroundColor = borderColor;
+	border.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;// | UIViewAutoresizingFlexibleWidth;
+	[self addSubview:border];
+	[self bringSubviewToFront:border];
+}
+
+- (void) addTopBorder:(UIColor *)borderColor {
+	CALayer *border = [CALayer layer];
+	border.frame = CGRectMake(0, 0, [self w], 0.5f);
+	border.backgroundColor = borderColor.CGColor;
+	[self.layer addSublayer:border];
+}
+
 -(void)addBlueBackground {
 	self.backgroundColor = [UIColor blackColor];
  	
@@ -67,7 +107,7 @@
 
 -(void)addRedBorder {
 	self.layer.borderColor = [UIColor redColor].CGColor;
-	self.layer.borderWidth = 2.0f;
+	self.layer.borderWidth = 1.0f;
 }
 
 //relative positioning
@@ -175,121 +215,12 @@
 + (UIView *) verticalRule {
 	UIView *hr = [[[UIView alloc] init] autorelease];
 	hr.backgroundColor = [UIColor colorWithHex:0x317ca7];
-	
-	/*
-	hr.layer.shadowColor = [UIColor colorWithHex:0x3586b4].CGColor;
-	hr.layer.shadowOffset = CGSizeMake(1.0f, 0.0f);
-	hr.layer.shadowOpacity = 1.0f;
-	hr.layer.shadowRadius = 0.0f;
-	*/
-	
 	hr.alpha = 0.6f;
 	
 	[hr setw:1];
 	[hr seth:40];
 	
 	return hr;
-}
-
-+ (UIView *) headerView:(UILabel *)label leftButton:(UIButton *)leftButton
-			rightButton:(UIButton *)rightButton secondRightButton:(UIButton *)secondRightButton thirdRightButton:(UIButton *)thirdRightButton  {
-	
-	UIView *headerView = [[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds];
-	[headerView seth:50];
-	headerView.backgroundColor = [UIColor colorWithHex:0x3e9ed5];
-	
-	//do something with leftbutton
-	UIView *leftvr;
-	
-	if (leftButton) {
-		[leftButton setImageEdgeInsets:UIEdgeInsetsMake(10, 10, 10, 10)];
-		[headerView addSubview:leftButton];
-		[leftButton seth:50];
-		[leftButton setw:50];
-		[leftButton setyp:0.5f];
-		[leftButton setx:5];
-		
-		leftvr = [UIView verticalRule];
-		[headerView addSubview:leftvr];
-		[leftvr seth:35];
-		[leftvr setyp:0.5f];
-		[leftvr setx:[leftButton rightEdge] + [leftvr w] + 0];
-	}
-	
-	UIView *vr;
-	UIView *secondvr;
-	UIView *thirdvr;
-	
-	if (rightButton) {
-		[rightButton setImageEdgeInsets:UIEdgeInsetsMake(10, 10, 10, 10)];
-		[headerView addSubview:rightButton];
-		[rightButton seth:50];
-		[rightButton setw:50];
-		[rightButton setyp:0.5f];
-		[rightButton sety:[rightButton y] + 1];
-		[rightButton setx:[headerView w] - [rightButton w] - 5];
-		
-		vr = [UIView verticalRule];
-		[headerView addSubview:vr];
-		[vr seth:35];
-		[vr setyp:0.5f];
-		[vr setx:[rightButton x] - [vr w] - 10];
-		
-		if (secondRightButton) {
-			[secondRightButton setImageEdgeInsets:UIEdgeInsetsMake(10, 10, 10, 10)];
-			[headerView addSubview:secondRightButton];
-			[secondRightButton seth:50];
-			[secondRightButton setw:50];
-			[secondRightButton setx:[vr x] - [secondRightButton w] - 7];
-			[secondRightButton setyp:0.5f];
-			
-			secondvr = [UIView verticalRule];
-			[headerView addSubview:secondvr];
-			[secondvr seth:35];
-			[secondvr setyp:0.5f];
-			[secondvr setx:[secondRightButton x] - [secondvr w] - 10];
-			
-			if (thirdRightButton) {
-				[thirdRightButton setImageEdgeInsets:UIEdgeInsetsMake(10, 10, 10, 10)];
-				[headerView addSubview:thirdRightButton];
-				[thirdRightButton seth:50];
-				[thirdRightButton setw:50];
-				[thirdRightButton setx:[secondvr x] - [thirdRightButton w] - 7];
-				[thirdRightButton setyp:0.5f];
-				
-				thirdvr = [UIView verticalRule];
-				[headerView addSubview:thirdvr];
-				[thirdvr seth:35];
-				[thirdvr setyp:0.5f];
-				[thirdvr setx:[thirdRightButton x] - [thirdvr w] - 10];
-
-			}
-		}
-	}
-	
-	//do something with label
-	if (label) {
-		label.backgroundColor = [UIColor clearColor];
-		label.font = [UIFont boldSystemFontOfSize:20.0f];
-		label.textColor = [UIColor colorWithHex:0xFFFFFF];
-		
-		[label setx:(leftButton ? [leftvr rightEdge] : 0) + 15];
-		
-		[label setw:[headerView w] - [label x]];
-		
-		if (secondRightButton) {
-			[label setw:[label w] - ([headerView w] - [secondvr x])];
-		}
-		else if (rightButton) {
-			[label setw:[label w] - ([headerView w] - [vr x])];
-		}
-		
-		[headerView addSubview:label];
-		[label sethp:0.8f];
-		[label setyp:0.5f];
-	}
-	
-	return headerView;
 }
 
 //removal effects
@@ -323,4 +254,15 @@
 - (void) shrinkAndRemove {
 	[self shrinkAndRemove:0.0f];
 }
+
++ (UIView *) starView:(CGFloat)height {
+	UIView *v = [[UIView alloc] init];
+	[v seth:height];
+	[v setw:height];
+	
+	
+	
+	return v;
+}
+
 @end

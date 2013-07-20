@@ -12,11 +12,12 @@
 #import "TimelineView.h"
 #import "UserAvatarView.h"
 #import "ThumbView.h"
+#import "ViewController.h"
 #import <QuartzCore/QuartzCore.h>
-
+#import "UpgradeHeader.h"
 
 @implementation TimelineView
-@synthesize feed, user_data, tableview, expanded, filter, filterButtonClicked, favoriteButtonClicked;
+@synthesize feed, user_data, tableview, filter, filterButtonClicked, favoriteButtonClicked;
 
 const int NUM_LINES_BEFORE_CLIP = 5;
 
@@ -28,14 +29,13 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		self.tableview = [[UITableView alloc] initWithFrame:self.bounds style:UITableViewStylePlain];
 		self.tableview.delegate = self;
 		self.tableview.dataSource = self;
-		self.tableview.separatorStyle = UITableViewCellSeparatorStyleNone;
-		[self.tableview seth:[self h] - 50];
-		[self.tableview sety:50];
+		self.tableview.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+		self.tableview.separatorColor = [UIColor colorWithHex:0x3e9ed5];
+		self.tableview.backgroundColor = [UIColor whiteColor];
 		[self addSubview:self.tableview];
 		
 		self.feed = [FeedHelper instance].feed;
 		self.user_data = [UsersHelper instance].users;
-		self.expanded = [[NSMutableArray alloc] init];
 		self.filter = [FilterHelper instance].filter;
 		
 		UIButton *postButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -49,20 +49,98 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		UIButton *favoritesButton = [UIButton buttonWithType:UIButtonTypeCustom];
 		[favoritesButton setImage:[UIImage imageNamed:@"favorites.png"] forState:UIControlStateNormal];
 		[favoritesButton addTarget:self action:@selector(didClickFavoritesButton) forControlEvents:UIControlEventTouchUpInside];
-		
-		UIView *headerView = [UIView headerView:nil leftButton:nil rightButton:postButton secondRightButton:filterButton thirdRightButton:favoritesButton];
-		
-		//tableview.tableHeaderView = headerView; //can scroll offscreen
-		[self addSubview:headerView]; //fixed top position, does not scroll offscreen
     }
     return self;
 }
 
+#pragma mark - helpers
 
 - (NSString *)stringFromIndexPath:(NSIndexPath *)indexPath {
 	return [NSString stringWithFormat:@"%i", indexPath.row];
 }
 
+- (void)reloadRows:(NSArray *)to_reload {
+	[tableview beginUpdates];
+	[self.tableview reloadRowsAtIndexPaths:to_reload withRowAnimation:UITableViewRowAnimationFade];
+	[tableview endUpdates];
+}
+
+
+- (void) setUpgradeHeader:(NSDictionary *)options {
+	UpgradeHeader *header = [[UpgradeHeader alloc] initWithFrame:self.bounds];
+	
+	// NOTE: almost all of this configuration could be moved into UpgradeHeader.m
+	//		 but it's only called from here anyway at the moment
+	
+	header.backgroundColor = [UIColor colorWithHex:0xf7f6f6];
+	
+	UILabel *title = [[UILabel alloc] init];
+	title.text = [options objectForKey:@"title"];
+	title.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:13.0f];
+	[title sizeToFit];
+	[title setx:93];
+	[title sety:7];
+	[header addSubview:title];
+	
+	UILabel *message = [[UILabel alloc] init];
+	message.text = [options objectForKey:@"message"];
+	message.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:12.0f];
+	message.numberOfLines = 0;
+	[message setw:215];
+	[message sizeToFit];
+	[message setx:[title x]];
+	[message sety:[title bottomEdge] + 3];
+	[header addSubview:message];
+	
+	UIView *gradient_view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [message x] - 10, [message bottomEdge] + 10)];
+	gradient_view.backgroundColor = [UIColor colorWithHex:0x3e9ed5];
+	[header addSubview:gradient_view];
+	
+	CALayer *blueBorder = [CALayer layer];
+	blueBorder.frame = CGRectMake(0.0f, [gradient_view bottomEdge], [header w], 0.5f);
+	blueBorder.backgroundColor = [UIColor colorWithHex:0x3e9ed5].CGColor; //grey - c3c2c2
+	[header.layer addSublayer:blueBorder];
+	
+	UIButton *upgradeBtn = [UIButton flatBlueButton:@"Upgrade to Pro - $1.99"];
+	[upgradeBtn addTarget:self action:@selector(promoUpgrade:) forControlEvents:UIControlEventTouchUpInside];
+	[header addSubview:upgradeBtn];
+	[upgradeBtn setx:[header w] - [upgradeBtn w] - 30];
+	[upgradeBtn sety:[gradient_view bottomEdge] + 13];
+	
+
+	UIButton *learnmoreBtn = [UIButton flatBlueButton:@"Learn More"];
+	[learnmoreBtn setTitleColor:[UIColor colorWithHex:0x3e9ed5] forState:UIControlStateNormal];
+	[header addSubview:learnmoreBtn];
+	[learnmoreBtn sety:[upgradeBtn y]];
+	[learnmoreBtn.titleLabel underline];
+	learnmoreBtn.backgroundColor = [UIColor clearColor];
+	[learnmoreBtn addTarget:[ViewController instance] action:@selector(showLearnMoreView) forControlEvents:UIControlEventTouchUpInside];
+	
+	UILabel *orlabel = [[UILabel alloc] init];
+	orlabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:12.0f];
+	orlabel.text = @"or";
+	orlabel.textColor = [UIColor colorWithHex:0x444444];
+	[orlabel sizeToFit];
+	[header addSubview:orlabel];
+	[orlabel setx:[upgradeBtn x] - [orlabel w] - 20];
+	[orlabel sety:[upgradeBtn y] + ([upgradeBtn h] / 2) - ([orlabel h] / 2)];
+	
+	[learnmoreBtn setx:[orlabel x] - [learnmoreBtn w] - 2];
+	
+	[header seth:[upgradeBtn bottomEdge] + 14];
+	
+	CALayer *greyBorder = [CALayer layer];
+	greyBorder.frame = CGRectMake(0.0f, [header bottomEdge] - 1.0f, [header w], 0.5f);
+	greyBorder.backgroundColor = [UIColor colorWithHex:0x5d5c5c].CGColor;
+	[header.layer addSublayer:greyBorder];
+	
+	
+	[self.tableview setTableHeaderView:header];
+	[header release];
+	
+}
+
+#pragma mark - Event Handlers
 
 -(void)didClickFilterButton {
 	if (self.filterButtonClicked) {
@@ -77,142 +155,11 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	}
 }
 
-- (void)showPostCreateView {
-	PostCreateView *postcreateview = [[[PostCreateView alloc] initWithFrame:self.bounds] autorelease];
-	[self addSubview:postcreateview];
-	[self bringSubviewToFront:postcreateview];
-	[postcreateview addedAsSubview:@{ @"autofocus": [NSNumber numberWithBool:YES] }];
-	postcreateview.postClicked = ^{
-		FBHelper *fb = [FBHelper instance];
-		[fb postStatus:postcreateview.messageTextField.text completed:^(NSArray *response) {
-			//nothing
-			[postcreateview removeFromSuperview];
-		}];
-	};
-}
-
-- (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	Post *post = [self.feed objectAtIndex:[indexPath row]];
-	CGFloat height = [post rowHeight];
-	return [self clipHeight] < height ? indexPath : nil;
-}
-
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	NSLog(@"didSelectRowAtIndexPath start expanded: %@", [self.expanded description]);
-	
-	if ([self.expanded containsObject:[self stringFromIndexPath:indexPath]]) {
-		[self.expanded removeObject:[self stringFromIndexPath:indexPath]];
-		[self reloadRows:@[indexPath]];
-	}
-	else {
-		//for now I guess
-		NSMutableArray *to_reload = [[NSMutableArray alloc] init];
-		for (int i = 0; i < [self.expanded count]; i++) {
-			//split the nsindexpath format back into a row int
-			NSInteger row = [[self.expanded objectAtIndex:i] integerValue];
-			[to_reload addObject:[NSIndexPath indexPathForRow:row inSection:0]];
-		}
-		
-		[self.expanded removeAllObjects];
-		[self.expanded addObject:[self stringFromIndexPath:indexPath]];
-		[to_reload addObject:indexPath];
-		[self reloadRows:to_reload];
-	}
-}
-
-- (void)reloadRows:(NSArray *)to_reload {
-	[tableview beginUpdates];
-	[self.tableview reloadRowsAtIndexPaths:to_reload withRowAnimation:UITableViewRowAnimationFade];
-	[tableview endUpdates];
-}
-
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-	Post *post = [self.feed objectAtIndex:[indexPath row]];
-	CGFloat height = [post rowHeight];
-	return [self.expanded containsObject:[self stringFromIndexPath:indexPath]] ? height : MIN([self clipHeight], height);
-}
-
-- (CGFloat)clipHeight {
-	//NSLog(@"clipHeight is %f", [@"some test string" sizeWithFont:[UIFont systemFontOfSize:15.0f]].height * NUM_LINES_BEFORE_CLIP);
-	return 50 + [@"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" sizeWithFont:[UIFont systemFontOfSize:15.0f]].height * NUM_LINES_BEFORE_CLIP;
-}
-
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
-}
-
-- (int)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	return [self.feed count];
-}
-
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-	static NSString *CellIdentifier = @"Cell";
-    
-    MCSwipeTableViewCell *cell = [self.tableview dequeueReusableCellWithIdentifier:CellIdentifier];
-    if (cell == nil) {
-        cell = [[[MCSwipeTableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier] autorelease];
-		[cell configureForTimeline];
-		
-		ThumbView *avatarView = [cell avatarView];
-		
-		avatarView.userInteractionEnabled = YES;
-		UITapGestureRecognizer *doubletapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(zoomAvatar:)];
-		doubletapgr.numberOfTouchesRequired = 1;
-		doubletapgr.numberOfTapsRequired = 2;
-		doubletapgr.cancelsTouchesInView = YES;
-		doubletapgr.delaysTouchesBegan = YES;
-		[avatarView addGestureRecognizer:doubletapgr];
-		[doubletapgr release];
-		
-		ThumbView *imgview = [cell imgView];
-		imgview.userInteractionEnabled = YES;
-		UITapGestureRecognizer *imgview_doubletapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(zoomPostImage:)];
-		imgview_doubletapgr.numberOfTouchesRequired = 1;
-		imgview_doubletapgr.numberOfTapsRequired = 2;
-		imgview_doubletapgr.cancelsTouchesInView = YES;
-		imgview_doubletapgr.delaysTouchesBegan = YES;
-		[imgview addGestureRecognizer:imgview_doubletapgr];
-		[imgview_doubletapgr release];
-    }
-	
-    Post *post = [self.feed objectAtIndex:[indexPath row]];
-	User *user = [self.user_data objectForKey:post.uid];
-	
-	if ([post hasImages]) {
-		NSLog(@"Post has images %@", [post.images description]);
-	}
-	
-	[cell setOptions:@{
-		@"message":			post.message,
-		@"is_expanded":		[NSNumber numberWithBool:[self.expanded containsObject:[self stringFromIndexPath:indexPath]]],
-		@"name":			[NSString stringWithFormat:@"%@ %@", user.first_name, user.last_name],
-		@"has_comments":	[NSNumber numberWithBool:post.has_comments],
-		@"time":			post.time,
-		@"post":			post,
-		@"user":			user
-	}];
-	
-	[cell setDelegate:self];
-	[cell setFirstStateIconName:@"comment_bubble.png"
-                     firstColor:[UIColor colorWithHex:0x138dff]
-            secondStateIconName:nil
-                    secondColor:nil
-                  thirdIconName:@"white_x.png"
-                     thirdColor:[UIColor colorWithHex:0xCC0000]
-                 fourthIconName:nil
-                    fourthColor:nil];
-	
-	[cell setMode:MCSwipeTableViewCellModeExit];
-
-	
-    return cell;
-}
-
 - (void)zoomAvatar:(id)sender {
 	NSLog(@"zoomAvatar");
 	
 	UITapGestureRecognizer *gr = (UITapGestureRecognizer *)sender;
-	UITableViewCell *cell = (UITableViewCell *)gr.view.superview.superview;
+	UITableViewCell *cell = (UITableViewCell *)[gr.view parents:[UITableViewCell class]];
 	NSIndexPath *index_path = [self.tableview indexPathForCell:cell];
 	Post *post = [self.feed objectAtIndex:[index_path row]];
 	User *user = [self.user_data objectForKey:post.uid];
@@ -236,6 +183,20 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	[avatarzoom release];
 }
 
+- (void)showPostCreateView {
+	PostCreateView *postcreateview = [[[PostCreateView alloc] initWithFrame:self.bounds] autorelease];
+	[self addSubview:postcreateview];
+	[self bringSubviewToFront:postcreateview];
+	[postcreateview addedAsSubview:@{ @"autofocus": [NSNumber numberWithBool:YES] }];
+	postcreateview.postClicked = ^{
+		FBHelper *fb = [FBHelper instance];
+		[fb postStatus:postcreateview.messageTextField.text completed:^(NSArray *response) {
+			//nothing
+			[postcreateview removeFromSuperview];
+		}];
+	};
+}
+
 - (void)viewComments:(id)sender {
 	NSLog(@"view comments");
 	
@@ -244,52 +205,159 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	details.post = [self.feed objectAtIndex:index_path.row];
 	details.user = [self.user_data objectForKey:details.post.uid];
 	
-	[self addSubview:details];
+	[[ViewController instance] openModal:details];
 	[details addedAsSubview];
 }
 
-- (void)viewFilterControls:(NSString *)uid {
-	EditFilterView *filterview = [[EditFilterView alloc] initWithFrame:self.bounds];
-	filterview.user = [self.user_data objectForKey:uid];
-	[filterview setFilterStateChanged:^(NSDictionary *filter_update) {
-		NSString *state = [filter_update objectForKey:@"state"];
-		NSString *uid = [NSString stringWithFormat:@"%@", [filter_update objectForKey:@"uid"]];
-		
-		if (![state isEqualToString:@"visible"]) { //filtered, filtered_day, filtered_week
-			NSLog(@"filter description %@", [self.filter description]);
-			
-			//remove filtered user's posts from feed
-			NSMutableIndexSet *to_remove = [[NSMutableIndexSet alloc] init];
-			for (int i = 0; i < [self.feed count]; i++) {
-				Post *post = [self.feed objectAtIndex:i];
-				NSString *postuid = [NSString stringWithFormat:@"%@", post.uid];
-				
-				if ([postuid isEqualToString:uid]) {
-					[to_remove addIndex:i];
-				}
-			}
-			[self.feed removeObjectsAtIndexes:to_remove];
-		}
-		
-		[self.tableview reloadData];
-	}];
-	
-	[self addAndGrowSubview:filterview];
+- (void)promoLearnMore:(id)sender {
 	
 }
 
-- (void)swipeTableViewCell:(MCSwipeTableViewCell *)cell didTriggerState:(MCSwipeTableViewCellState)state withMode:(MCSwipeTableViewCellMode)mode {
-	if (state == MCSwipeTableViewCellState1) {
-		NSLog(@"IndexPath : %@ - MCSwipeTableViewCellState : %d - MCSwipeTableViewCellMode : %d", [self.tableview indexPathForCell:cell], state, mode);
-		[self viewComments:[self.tableview indexPathForCell:cell]];
-		[self.tableview reloadRowsAtIndexPaths:@[[self.tableview indexPathForCell:cell]] withRowAnimation:UITableViewRowAnimationFade];
+- (void)promoUpgrade:(id)sender {
+	
+}
+
+#pragma mark - TableViewDelegate
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+	Post *post = [self.feed objectAtIndex:[indexPath row]];
+	CGFloat h = [post rowHeight];
+	if (h < 20) {
+		NSLog(@"Height is less than 20: %f", h);
 	}
-	else if (state == MCSwipeTableViewCellState3) {
-		Post *post = [self.feed objectAtIndex:[self.tableview indexPathForCell:cell].row];
+	return h;
+}
+
+- (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+	return indexPath;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+
+- (int)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+	return [self.feed count];
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+	static NSString *CellIdentifier = @"Cell";
+    
+    ZKRevealingTableViewCell *cell = [self.tableview dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil) {
+        cell = [[[ZKRevealingTableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier] autorelease];
+		cell.delegate = self;
+		cell.direction = ZKRevealingTableViewCellDirectionLeft;
+		[cell configureForTimeline];
 		
-		[self viewFilterControls:post.uid];
-		[self.tableview reloadRowsAtIndexPaths:@[[self.tableview indexPathForCell:cell]] withRowAnimation:UITableViewRowAnimationFade];
+		//add bottom border
+		//[cell addFlexibleBottomBorder:[UIColor colorWithHex:0x3e9ed5]];
+		
+		ThumbView *avatarView = [cell avatarView];
+		avatarView.userInteractionEnabled = YES;
+		UITapGestureRecognizer *doubletapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(zoomAvatar:)];
+		doubletapgr.numberOfTouchesRequired = 1;
+		doubletapgr.numberOfTapsRequired = 2;
+		doubletapgr.cancelsTouchesInView = YES;
+		doubletapgr.delaysTouchesBegan = YES;
+		[avatarView addGestureRecognizer:doubletapgr];
+		[doubletapgr release];
+		
+		ThumbView *imgview = [cell imgView];
+		imgview.userInteractionEnabled = YES;
+		UITapGestureRecognizer *imgview_doubletapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(zoomPostImage:)];
+		imgview_doubletapgr.numberOfTouchesRequired = 1;
+		imgview_doubletapgr.numberOfTapsRequired = 2;
+		imgview_doubletapgr.cancelsTouchesInView = YES;
+		imgview_doubletapgr.delaysTouchesBegan = YES;
+		[imgview addGestureRecognizer:imgview_doubletapgr];
+		[imgview_doubletapgr release];
+		
+		
+    }
+	
+    Post *post = [self.feed objectAtIndex:[indexPath row]];
+	User *user = [self.user_data objectForKey:post.uid];
+	
+	cell.revealedView = [self revealedView:indexPath];
+	cell.pixelsToReveal = [cell.revealedView w];
+	((RevealedView *)cell.revealedView).post = post;
+	
+	if ([post hasImages]) {
+		NSLog(@"Post has images %@", [post.images description]);
 	}
+	
+	[cell setOptions:@{
+	   @"message":		post.message,
+	   @"name":			[NSString stringWithFormat:@"%@ %@", user.first_name, user.last_name],
+	   @"has_comments":	[NSNumber numberWithBool:post.has_comments],
+	   @"time":			post.time,
+	   @"post":			post,
+	   @"user":			user
+	}];
+	
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+	[self viewComments:indexPath];
+}
+
+#pragma mark - ZKRevealingTableViewCellDelegate
+
+- (BOOL)cellShouldReveal:(ZKRevealingTableViewCell *)cell {
+	return YES;
+}
+
+- (void)cellDidReveal:(ZKRevealingTableViewCell *)cell {
+	NSLog(@"Revealed Cell with title: %@", cell.textLabel.text);
+	[((RevealedView *)cell.revealedView) refresh];
+	self.currentlyRevealedCell = cell;
+}
+
+- (void)cellDidBeginPan:(ZKRevealingTableViewCell *)cell {
+	if (cell != self.currentlyRevealedCell) {
+		self.currentlyRevealedCell = nil;
+	}
+}
+
+- (void)cellDidPan:(ZKRevealingTableViewCell *)cell {
+    //UILabel *starLabel = (UILabel *)cell.revealedView.subviews[0];
+    if (cell.pannedAmount == 1) {
+     
+    }
+}
+
+- (void)cellWillSnapBack:(ZKRevealingTableViewCell *)cell {
+    NSLog(@"Will snap back");
+    self.currentlyRevealedCell = nil;
+}
+
+#pragma mark - ZKRevealing - Accessors
+
+- (void)setCurrentlyRevealedCell:(ZKRevealingTableViewCell *)currentlyRevealedCell {
+	if (_currentlyRevealedCell == currentlyRevealedCell)
+		return;
+	
+	[_currentlyRevealedCell setRevealing:NO];
+	
+    //UILabel *starLabel = (UILabel *)_currentlyRevealedCell.revealedView.subviews[0];
+    //starLabel.textColor = [UIColor whiteColor];
+	
+	_currentlyRevealedCell = currentlyRevealedCell;
+}
+
+- (RevealedView *)revealedView:(NSIndexPath *)indexPath {
+	Post *post = [self.feed objectAtIndex:[indexPath row]];
+	
+    RevealedView *revealedview = [[RevealedView alloc] initWithFrame:CGRectMake(0, -1, 201, 100)];
+	revealedview.post = post;
+	
+    return revealedview;
+}
+
+- (void)updateButtonsForPost:(Post *)post {
+	
 }
 
 @end

@@ -8,12 +8,13 @@
 
 #import <UIKit/UIKit.h>
 #import "MCSwipeTableViewCell.h"
+#import "ZKRevealingTableViewCell.h"
+#import "RevealedView.h"
 
-@interface TimelineView : UIView <UITableViewDataSource, UITableViewDelegate, MCSwipeTableViewCellDelegate> {
+@interface TimelineView : UIView <UITableViewDataSource, UITableViewDelegate, ZKRevealingTableViewCellDelegate> {
 	NSMutableDictionary *user_data;
 	NSMutableArray *feed;
 	UITableView *tableview;
-	NSMutableArray *expanded;
 	NSMutableDictionary *filter;
 	PDBlock filterButtonClicked;
     PDBlock favoriteButtonClicked;
@@ -22,11 +23,11 @@
 @property (nonatomic, retain) NSMutableDictionary *user_data;
 @property (nonatomic, retain) NSMutableArray *feed;
 @property (nonatomic, retain) UITableView *tableview;
-@property (nonatomic, retain) NSMutableArray *expanded;
 @property (nonatomic, retain) NSMutableDictionary *filter;
 @property (readwrite, copy) PDBlock filterButtonClicked;
 @property (readwrite, copy) PDBlock favoriteButtonClicked;
+@property (nonatomic, strong) ZKRevealingTableViewCell *currentlyRevealedCell;
 
-- (void)swipeTableViewCell:(MCSwipeTableViewCell *)cell didTriggerState:(MCSwipeTableViewCellState)state withMode:(MCSwipeTableViewCellMode)mode;
+- (void) setUpgradeHeader:(NSDictionary *)options;
 
 @end

@@ -17,9 +17,12 @@ typedef void (^PDObjectBlock)(id);
 -(CGFloat)rightEdge;
 -(CGFloat)bottomEdge;
 
--(void)addBlueBackground;
--(void)addBlueTableCellBackground;
+-(UIView *)parents:(Class)class_name;
+
 -(void)addRedBorder;
+- (void)addTopBorder:(UIColor *)borderColor;
+- (void)addBottomBorder:(UIColor *)borderColor;
+- (void) addFlexibleBottomBorder:(UIColor *)borderColor;
 
 -(void)setxp:(CGFloat)percent;
 -(void)setyp:(CGFloat)percent;
@@ -41,11 +44,16 @@ typedef void (^PDObjectBlock)(id);
 
 + (UIView *) horizontalRule;
 + (UIView *) verticalRule;
-+ (UIView *) headerView:(UILabel *)label leftButton:(UIButton *)leftButton rightButton:(UIButton *)rightButton secondRightButton:(UIButton *)secondRightButton thirdRightButton:(UIButton *)thirdRightButton;
 
 - (void) shrinkAndRemove:(CGFloat)delay;
 - (void) shrinkAndRemove;
 
 - (void) addAndGrowSubview:(UIView *)view;
+
+//app specific
++ (UIView *) starView:(CGFloat)height;
+
+-(void)addBlueBackground;
+-(void)addBlueTableCellBackground;
 
 @end

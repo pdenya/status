@@ -12,7 +12,7 @@
 #import "UserAvatarView.h"
 
 @implementation FilteredUsersView
-@synthesize filter, tableview, keys, user_data;
+@synthesize filter, tableview, keys, user_data, timeline, feed;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -25,25 +25,38 @@
 		self.keys = [NSMutableArray arrayWithArray:[self.filter allKeys]];
 		self.user_data = [UsersHelper instance].users;
 		
-		UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
-		[backButton setImage:[UIImage imageNamed:@"back.png"] forState:UIControlStateNormal];
-		[backButton addTarget:self action:@selector(removeFromSuperview) forControlEvents:UIControlEventTouchUpInside];
-
-		UILabel *headerLabel = [[UILabel alloc] init];
-		headerLabel.text = @"Filtered";
-		
-		UIView *headerView = [UIView headerView:headerLabel leftButton:backButton rightButton:nil secondRightButton:nil thirdRightButton:nil];
-		[self addSubview:headerView];
-		
 		self.tableview = [[UITableView alloc] initWithFrame:self.bounds];
-		[self.tableview seth:[self.tableview h] - [headerView h]];
-		[self.tableview sety:[headerView bottomEdge]];
 		self.tableview.delegate = self;
 		self.tableview.dataSource = self;
 		self.tableview.rowHeight = 113;
 		[self addSubview:self.tableview];
+		
+		/*
+		self.timeline = [[TimelineView alloc] initWithFrame:self.bounds];
+		self.timeline.feed = self.feed;
+		[self.timeline.tableview reloadData];
+		[self addSubview:self.timeline];
+		 */
     }
     return self;
+}
+
+- (void) refreshFeed {
+	
+	
+	[self.keys removeAllObjects];
+	[self.keys addObjectsFromArray:[self.filter allKeys]];
+	
+	[self.feed removeAllObjects];
+	
+	for (NSString *key in self.keys) {
+		NSDictionary *filter_data = [self.filter objectForKey:key];
+		User *user = [self.user_data objectForKey:[filter_data objectForKey:@"uid"]];
+		//Post *post = [self postFromUser:user];
+		//[self.feed addObject:post];
+	}
+	
+	[self.timeline.tableview reloadData];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -112,7 +125,7 @@
 	NSDictionary *filter_data = [self.filter objectForKey:[self.keys objectAtIndex:[index_path row]]];
 	User *user = [self.user_data objectForKey:[filter_data objectForKey:@"uid"]];
 	
-	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:self.bounds];
+	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	[avatarzoom setUser:user];
 	[self addSubview:avatarzoom];
 	[avatarzoom release];

@@ -15,7 +15,7 @@
 - (UILabel *) dateLabel;
 - (UILabel *) nameLabel;
 - (ThumbView *) avatarView;
-- (UIView *) commentsNotifierView;
+- (UIImageView *) commentsNotifierView;
 - (ThumbView *) imgView;
 - (void)setOptions:(NSDictionary *)options;
 - (void)setExpanded:(BOOL)should_be_expanded;

@@ -32,5 +32,8 @@
 - (NSString *)full_name;
 - (NSString *)picSquareUrl;
 - (NSString *)picBigUrl;
+- (BOOL) is_favorite;
+- (void) favorite;
+- (void) unfavorite;
 
 @end

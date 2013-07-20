@@ -8,18 +8,20 @@
 
 #import <UIKit/UIKit.h>
 #import "EditFilterView.h"
-#import "MCSwipeTableViewCell.h"
+#import "TimelineView.h"
 
-@interface FavoritesView : UIView <UITableViewDataSource, UITableViewDelegate, MCSwipeTableViewCellDelegate> {
-    UITableView *tableview;
+@interface FavoritesView : UIView {
+    TimelineView *timeline;
 	NSMutableDictionary *favorites;
 	NSMutableArray *keys;
+	NSMutableArray *feed;
 }
 
-@property (nonatomic, retain) UITableView *tableview;
+@property (nonatomic, retain) TimelineView *timeline;
 @property (nonatomic, retain) NSMutableDictionary *favorites;
 @property (nonatomic, retain) NSMutableArray *keys;
+@property (nonatomic, retain) NSMutableArray *feed;
 
-- (void)swipeTableViewCell:(MCSwipeTableViewCell *)cell didTriggerState:(MCSwipeTableViewCellState)state withMode:(MCSwipeTableViewCellMode)mode;
+- (void) refreshFeed;
 
 @end

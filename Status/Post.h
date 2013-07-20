@@ -25,4 +25,6 @@
 - (CGFloat)rowHeight;
 - (CGFloat)messageLabelWidth;
 - (NSString *)image:(NSInteger)index size:(NSString *)size;
++ (UIFont *)getPostFont;
+- (CGFloat) minRowHeight;
 @end

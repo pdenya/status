@@ -33,6 +33,7 @@ static NSString * encodeByAddingPercentEscapes(NSString *input) {
 }
 
 - (void)attributedLabel:(TTTAttributedLabel *)label didSelectLinkWithURL:(NSURL *)inputURL {
+	NSLog(@"attributedLabel didSelectLinkWithURL");
 	
 	//change url to open in chrome if it's installed…
 	NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
