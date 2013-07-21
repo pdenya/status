@@ -75,6 +75,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	header.backgroundColor = [UIColor colorWithHex:0xf7f6f6];
 	
 	UILabel *title = [[UILabel alloc] init];
+	title.backgroundColor = [UIColor clearColor];
 	title.text = [options objectForKey:@"title"];
 	title.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:13.0f];
 	[title sizeToFit];
@@ -83,6 +84,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	[header addSubview:title];
 	
 	UILabel *message = [[UILabel alloc] init];
+	message.backgroundColor = [UIColor clearColor];
 	message.text = [options objectForKey:@"message"];
 	message.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:12.0f];
 	message.numberOfLines = 0;
@@ -117,6 +119,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	[learnmoreBtn addTarget:[ViewController instance] action:@selector(showLearnMoreView) forControlEvents:UIControlEventTouchUpInside];
 	
 	UILabel *orlabel = [[UILabel alloc] init];
+	orlabel.backgroundColor = [UIColor clearColor];
 	orlabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:12.0f];
 	orlabel.text = @"or";
 	orlabel.textColor = [UIColor colorWithHex:0x444444];
@@ -164,9 +167,9 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	Post *post = [self.feed objectAtIndex:[index_path row]];
 	User *user = [self.user_data objectForKey:post.uid];
 	
-	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:self.bounds];
+	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	[avatarzoom setUser:user];
-	[self addSubview:avatarzoom];
+	[[ViewController instance] openModal:avatarzoom];
 	[avatarzoom release];
 }
 

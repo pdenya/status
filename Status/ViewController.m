@@ -9,6 +9,7 @@
 #import "ViewController.h"
 #import "AuthView.h"
 #import "LearnMoreView.h"
+#import "PostCreateView.h"
 #import <QuartzCore/QuartzCore.h>
 
 @interface ViewController ()
@@ -200,6 +201,12 @@ const int FAILED_THRESHOLD = 30;
 	[self openModal:learnmore];
 }
 
+- (void) showNewPost {
+	PostCreateView *postcreate = [[PostCreateView alloc] initWithFrame:self.view.bounds];
+	[self openModal:postcreate];
+	[postcreate addedAsSubview:@{}];
+}
+
 - (CGRect) contentFrame {
 	return CGRectMake(0, [self.headerView bottomEdge], [self.view w], [self.view h] - [self.headerView bottomEdge]);
 }
@@ -261,7 +268,7 @@ const int FAILED_THRESHOLD = 30;
 	[newPostButton setImageEdgeInsets:insets];
 	[header_view addSubview:newPostButton];
 	newPostButton.frame = CGRectMake([header_view w] - (btn_height + btn_offset), btn_y, btn_height, btn_height);
-	//[newPostButton addTarget:self action:@selector(showUnreadTab) forControlEvents:UIControlEventTouchUpInside];
+	[newPostButton addTarget:self action:@selector(showNewPost) forControlEvents:UIControlEventTouchUpInside];
 	newPostButton.tag = 74;
 	
 	return header_view;

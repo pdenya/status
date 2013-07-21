@@ -27,4 +27,6 @@
 - (NSString *)image:(NSInteger)index size:(NSString *)size;
 + (UIFont *)getPostFont;
 - (CGFloat) minRowHeight;
+- (BOOL)has_unread_comments;
+
 @end

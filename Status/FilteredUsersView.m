@@ -35,6 +35,10 @@
 		self.timeline = [[TimelineView alloc] initWithFrame:self.bounds];
 		self.timeline.feed = self.feed;
 		[self.timeline.tableview reloadData];
+		 [self.timeline setUpgradeHeader:@{
+		 @"title": @"Keep tabs on your favorite people",
+		 @"message": @"The last status each of your favorite people has posted.  See 5 favorites at once or upgrade to Pro to see them all."
+		 }];
 		[self addSubview:self.timeline];
 		 */
     }
@@ -50,8 +54,8 @@
 	[self.feed removeAllObjects];
 	
 	for (NSString *key in self.keys) {
-		NSDictionary *filter_data = [self.filter objectForKey:key];
-		User *user = [self.user_data objectForKey:[filter_data objectForKey:@"uid"]];
+		//NSDictionary *filter_data = [self.filter objectForKey:key];
+		//User *user = [self.user_data objectForKey:[filter_data objectForKey:@"uid"]];
 		//Post *post = [self postFromUser:user];
 		//[self.feed addObject:post];
 	}

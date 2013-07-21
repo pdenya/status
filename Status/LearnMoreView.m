@@ -17,6 +17,8 @@
     if (self) {
 		self.backgroundColor = [UIColor whiteColor];
 		
+		int padding = SYSTEM_VERSION_LESS_THAN(@"7.0") ? 10 : 15;
+		
         // Initialization code
 		HeaderView *header_view = [[HeaderView alloc] init];
 		[header_view addCloseButton];
@@ -29,7 +31,7 @@
 						@"through to read the comments the post is removed from the stream until someone else responds."
 	   }];
 		
-		[unreadsection sety:[header_view bottomEdge] + 15];
+		[unreadsection sety:[header_view bottomEdge] + padding];
 		[self addSubview:unreadsection];
 		
 		UIView *filtersection = [self getSection:@{
@@ -41,7 +43,7 @@
 	   }];
 		
 		
-		[filtersection sety:[unreadsection bottomEdge] + 15];
+		[filtersection sety:[unreadsection bottomEdge] + padding];
 		[self addSubview:filtersection];
 		
 		UIView *favoritesection = [self getSection:@{
@@ -50,7 +52,7 @@
 	   }];
 		
 		
-		[favoritesection sety:[filtersection bottomEdge] + 15];
+		[favoritesection sety:[filtersection bottomEdge] + padding];
 		[self addSubview:favoritesection];
 		
 		

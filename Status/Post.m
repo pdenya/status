@@ -41,6 +41,22 @@
 	return NO;
 }
 
+- (BOOL)has_unread_comments {
+	if (![self has_comments]) {
+		return NO;
+	}
+	
+	if (!self.last_read) {
+		return YES;
+	}
+	
+	if ([self.last_read compare:self.last_comment_at] == NSOrderedAscending) {
+		return YES;
+	}
+	
+	return NO;
+}
+
 - (NSString *)image:(NSInteger)index size:(NSString *)size {
 	if ([self hasImages] && [self.images objectAtIndex:index]) {
 		return [[[self.images objectAtIndex:index] valueForKey:@"src"] stringByReplacingOccurrencesOfString:@"_s" withString:[NSString stringWithFormat:@"_%@", size]];

@@ -150,11 +150,23 @@
 	[topView addSubview:hr];
 	[hr sety:[topView h] - [hr h]];
 	
+	// footer
+	UIView *bottomview = [[UIView alloc] initWithFrame:self.bounds];
+	bottomview.backgroundColor = [UIColor colorWithHex:0xf7f6f6];
+	[bottomview seth:100];
+	[bottomview addTopBorder:[UIColor colorWithHex:0xa7a6a6]];
+	
+	UIButton *upgradeBtn = [UIButton flatBlueButton:@"Add a comment" modifier:1.5f];
+	[bottomview addSubview:upgradeBtn];
+	[upgradeBtn centerx];
+	[upgradeBtn centery];
+	
 	//comments list
 	self.tableview = [[UITableView alloc] initWithFrame:[[ViewController instance] contentFrame]];
 	self.tableview.delegate = self;
 	self.tableview.dataSource = self;
 	self.tableview.tableHeaderView = topView;
+	[self.tableview setTableFooterView:bottomview];
 	[self addSubview:self.tableview];
 	
 	[self updateFavBtn];
@@ -249,7 +261,7 @@
 	
 	User *comment_user = (User *)[self.user_data objectForKey:[[self.comments objectAtIndex:index_path.row] valueForKey:@"fromid"]];
 	
-	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:self.bounds];
+	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	[avatarzoom setUser:comment_user];
 	
 	[self addSubview:avatarzoom];
