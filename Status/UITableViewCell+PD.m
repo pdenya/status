@@ -18,6 +18,7 @@
 	UILabel *nameLabel;
 	ThumbView *avatarView;
 	UIImageView *commentsNotifierView;
+	UIImageView *imageNotifierView;
 	ThumbView *imgView;
 	
 	//hide defaults
@@ -78,10 +79,19 @@
 	[commentsNotifierView setw:11];
 	[commentsNotifierView seth:11];
 	[commentsNotifierView setx:[self w] - [commentsNotifierView w] - 8];
-	
+	commentsNotifierView.tag = 97;
 	[self.contentView addSubview:commentsNotifierView];
 	[self.contentView bringSubviewToFront:commentsNotifierView];
-	commentsNotifierView.tag = 97;
+	
+	imageNotifierView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_no_comments.png"]];
+	[imageNotifierView setw:11];
+	[imageNotifierView seth:11];
+	[imageNotifierView setx:[commentsNotifierView x] - [imageNotifierView w] - 8];
+	imageNotifierView.tag = 93;
+	[self.contentView addSubview:commentsNotifierView];
+	[self.contentView bringSubviewToFront:commentsNotifierView];
+	
+	
 	
 	[self.contentView setBackgroundColor:[UIColor whiteColor]];
 	
@@ -119,6 +129,10 @@
 
 - (UIImageView *) commentsNotifierView {
 	return (UIImageView *)[self viewWithTag:97];
+}
+
+- (UIImageView *) imageNotifierView {
+	return (UIImageView *)[self viewWithTag:93];
 }
 
 - (ThumbView *) imgView {
@@ -198,9 +212,11 @@
 	
 	//post images thumbnail
 	if (post && [post hasImages]) {
-		imgView.hidden = NO;
-		imgView.post = [options objectForKey:@"post"];
+		[self imageNotifierView].hidden = NO;
+		//imgView.hidden = NO;
+		//imgView.post = [options objectForKey:@"post"];
 	} else {
+		[self imageNotifierView].hidden = YES;
 		imgView.hidden = YES;
 	}
 	

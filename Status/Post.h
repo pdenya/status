@@ -10,7 +10,6 @@
 
 @interface Post : NSObject <NSCoding>
 
-
 @property (nonatomic, retain) NSString *message;
 @property (nonatomic, retain) NSString *status_id;
 @property (nonatomic, retain) NSString *time;
@@ -28,5 +27,6 @@
 + (UIFont *)getPostFont;
 - (CGFloat) minRowHeight;
 - (BOOL)has_unread_comments;
-
+- (User *)user;
+- (NSString *)combined_id;
 @end

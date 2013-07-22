@@ -11,7 +11,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 @implementation PostCreateView
-@synthesize messageTextField, postClicked, focused;
+@synthesize messageTextField, postClicked, focused, post;
 
 - (id)initWithFrame:(CGRect)frame {
 	
@@ -23,7 +23,8 @@
 		int padding = 4;
 		self.messageTextField = [[UITextView alloc] init];
 		[self addSubview:self.messageTextField];
-		[self.messageTextField seth:[self h] - 216 - 50 + 5];
+		NSLog(@"self h %f", [self h]);
+		[self.messageTextField seth:[self h] - (216 + 65)];
 		[self.messageTextField setw:[self w] - (padding * 2)];
 		[self.messageTextField setx:padding];
 		[self.messageTextField sety:padding];
@@ -35,6 +36,7 @@
 		[postButton sety:[messageTextField bottomEdge] + padding];
 		[postButton setx:[messageTextField rightEdge] - [postButton w] - padding];
 		[postButton addTarget:self action:@selector(postToFacebookClicked:) forControlEvents:UIControlEventTouchUpInside];
+		postButton.tag = 60;
 		
 		UILabel *close_btn = [[UILabel alloc] init];
 		close_btn.backgroundColor = [UIColor clearColor];
@@ -66,17 +68,42 @@
 	[self.messageTextField becomeFirstResponder];
 }
 
+- (void) switchToComment:(Post *)p {
+	self.post = p;
+	UIButton *postbtn = (UIButton *)[self viewWithTag:60];
+	postbtn.titleLabel.text = @"Post comment";
+	[postbtn removeTarget:nil action:NULL forControlEvents:UIControlEventTouchUpInside];
+	[postbtn addTarget:self action:@selector(postCommentClicked:) forControlEvents:UIControlEventTouchUpInside];
+	
+	//todo: build post display view and add to the top
+	
+}
+
+- (void)postCommentClicked:(id)sender {
+	FBHelper *fb = [FBHelper instance];
+	
+	[fb postComment:self.messageTextField.text onStatus:[self.post combined_id] completed:
+	 ^(NSArray *response) {
+		 if ([self postClicked]) {
+			 [self postClicked]();
+		 }
+		 
+	  	 //todo: make this happen immediately rather than waiting for this response
+		 [[ViewController instance] closeModal:self];
+	 }];
+}
+
 - (void)postToFacebookClicked:(id)sender {
 	NSLog(@"post to facebook clicked");
 	
 	FBHelper *fb = [FBHelper instance];
 	[fb postStatus:self.messageTextField.text completed:^(NSArray *response) {
-		//todo: make this happen immediately rather than waiting for this response
-		[[ViewController instance] closeModal:self];
-		
 		if ([self postClicked]) {
 			[self postClicked]();
 		}
+		
+		//todo: make this happen immediately rather than waiting for this response
+		[[ViewController instance] closeModal:self];
 	}];
 }
 

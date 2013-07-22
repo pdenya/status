@@ -57,6 +57,14 @@
 	return NO;
 }
 
+- (NSString *)combined_id {
+	return [NSString stringWithFormat:@"%@_%@",self.uid, self.status_id];
+}
+
+- (User *)user {
+	return [[UsersHelper instance].users objectForKey:self.uid];
+}
+
 - (NSString *)image:(NSInteger)index size:(NSString *)size {
 	if ([self hasImages] && [self.images objectAtIndex:index]) {
 		return [[[self.images objectAtIndex:index] valueForKey:@"src"] stringByReplacingOccurrencesOfString:@"_s" withString:[NSString stringWithFormat:@"_%@", size]];

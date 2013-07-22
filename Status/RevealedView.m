@@ -156,6 +156,7 @@
 	lbl.font = [UIFont fontWithName:@"HelveticaNeue" size:11.0f];
 	[lbl sizeToFit];
 	lbl.textColor = [UIColor colorWithHex:0x7f7e7e];
+	lbl.backgroundColor = btn.backgroundColor;
 	[btn addSubview:lbl];
 	[lbl centerx];
 	[lbl sety:[iconview bottomEdge] + 1];

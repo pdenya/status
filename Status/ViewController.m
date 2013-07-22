@@ -17,7 +17,7 @@
 @end
 
 @implementation ViewController
-@synthesize timelineview, feed, user_data, total_failed, filter, favorites, headerView, favoritesview, filteredview;
+@synthesize timelineview, feed, user_data, total_failed, filter, favorites, headerView, favoritesview, filteredview, unreadview;
 
 const int FAILED_THRESHOLD = 30;
 
@@ -109,6 +109,9 @@ const int FAILED_THRESHOLD = 30;
 	else if (self.timelineview && self.timelineview.superview) {
 		return self.timelineview;
 	}
+	else if (self.unreadview && self.unreadview.superview) {
+		return self.unreadview;
+	}
 	
 	return nil;
 }
@@ -137,6 +140,11 @@ const int FAILED_THRESHOLD = 30;
 	else if ([c isEqualToString:@"FilteredUsersView"]) {
 		[(UIButton *)[self.headerView viewWithTag:72] setImage:[UIImage imageNamed:@"icon_filter_active.png"] forState:UIControlStateNormal];
 	}
+	else if ([c isEqualToString:@"UnreadPostsView"]) {
+		[(UIButton *)[self.headerView viewWithTag:73] setImage:[UIImage imageNamed:@"icon_unread_active.png"] forState:UIControlStateNormal];
+	}
+	
+	NSLog(@"updateNav %@", c);
 	
 	[self.view bringSubviewToFront:self.headerView];
 }
@@ -196,13 +204,31 @@ const int FAILED_THRESHOLD = 30;
 	[self updateNav];
 }
 
+- (void) showUnread {
+	if (!self.unreadview) {
+		self.unreadview = [[UnreadPostsView alloc] initWithFrame:[self contentFrame]];
+	}
+	else {
+		[self.unreadview refreshFeed];
+	}
+	
+	[self removeActiveView];
+	
+	if (!self.unreadview.superview) {
+		[self.view addSubview:self.unreadview];
+	}
+	
+	[self.view bringSubviewToFront:self.unreadview];
+	[self updateNav];
+}
+
 - (void) showLearnMoreView {
 	LearnMoreView *learnmore = [[LearnMoreView alloc] initWithFrame:self.view.bounds];
 	[self openModal:learnmore];
 }
 
 - (void) showNewPost {
-	PostCreateView *postcreate = [[PostCreateView alloc] initWithFrame:self.view.bounds];
+	PostCreateView *postcreate = [[PostCreateView alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	[self openModal:postcreate];
 	[postcreate addedAsSubview:@{}];
 }
@@ -261,7 +287,7 @@ const int FAILED_THRESHOLD = 30;
 	[unreadButton setImageEdgeInsets:insets];
 	[header_view addSubview:unreadButton];
 	unreadButton.frame = CGRectMake([filterButton rightEdge] + btn_offset, btn_y, btn_height, btn_height);
-	//[unreadButton addTarget:self action:@selector(showUnreadTab) forControlEvents:UIControlEventTouchUpInside];
+	[unreadButton addTarget:self action:@selector(showUnread) forControlEvents:UIControlEventTouchUpInside];
 	unreadButton.tag = 73;
 	
 	UIButton *newPostButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -360,6 +386,7 @@ const int FAILED_THRESHOLD = 30;
 
 - (void) closeModal:(id)sender {
 	//sender or viewWithTag:50
+	NSLog(@"sender tag %i", ((UIView *)sender).tag);
 	UIView *view = [sender isKindOfClass:[UIView class]] && ((UIView *)sender).tag == 50 ? (UIView *)sender : [self.view viewWithTag:50];
 	[view shrinkAndRemove];
 	

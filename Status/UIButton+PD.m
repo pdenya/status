@@ -73,6 +73,7 @@
 	
 	button.backgroundColor = [UIColor colorWithHex:0x3e9ed5];
 	button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:round(modifier * 12.0f)];
+	button.titleLabel.textAlignment = UITextAlignmentCenter;
 	[button setTitle:text forState:UIControlStateNormal];
 	
 	CGFloat vpadding = modifier * 5.0f; //height

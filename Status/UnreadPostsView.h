@@ -17,4 +17,6 @@
 @property (nonatomic, retain) NSMutableArray *feed;
 @property (nonatomic, retain) TimelineView *timeline;
 
+- (void) refreshFeed;
+
 @end

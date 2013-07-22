@@ -158,6 +158,7 @@
 	
 	UIButton *upgradeBtn = [UIButton flatBlueButton:@"Add a comment" modifier:1.5f];
 	[bottomview addSubview:upgradeBtn];
+	[upgradeBtn addTarget:self action:@selector(addCommentClicked) forControlEvents:UIControlEventTouchUpInside];
 	[upgradeBtn centerx];
 	[upgradeBtn centery];
 	
@@ -212,32 +213,17 @@
 
 
 - (void)addCommentClicked {
-	PostCreateView *postcreate = [[PostCreateView alloc] initWithFrame:self.bounds];
-	postcreate.focused = ^{
-		CGRect rect = self.tableview.bounds;
-		rect.origin.y = self.tableview.contentSize.height - rect.size.height;
-		
-		[self.tableview scrollRectToVisible:rect animated:YES];
-	};
 	
+	PostCreateView *postcreate = [[PostCreateView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+	[postcreate switchToComment:self.post];
 	
 	postcreate.postClicked = ^{
 		NSLog(@"post postclicked");
-		FBHelper *fb = [FBHelper instance];
-		
-		[fb postComment:postcreate.messageTextField.text onStatus:[NSString stringWithFormat:@"%@_%@",self.user.uid, self.post.status_id] completed:
-		 ^(NSArray *response) {
-			 [self getFBComments];
-		 }
-		 ];
-		
+		[self getFBComments];
 	};
 	
-	[self addSubview:postcreate];
-	[postcreate addedAsSubview:@{
-	 @"autofocus": [NSNumber numberWithBool:YES],
-	 @"button_text": @"Post Comment"
-	 }];
+	[[ViewController instance] openModal:postcreate];
+	[postcreate addedAsSubview:@{}];
 	postcreate.messageTextField.text = @"";
 }
 

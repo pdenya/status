@@ -14,12 +14,15 @@ typedef void (^PCBlock)(void);
 	UITextView *messageTextField;
 	PCBlock postClicked;
 	PCBlock focused;
+	Post *post;
 }
 
 @property (nonatomic, retain) UITextView *messageTextField;
+@property (nonatomic, retain) Post *post;
 @property (readwrite, copy) PCBlock postClicked;
 @property (readwrite, copy) PCBlock focused;
 
 - (void)addedAsSubview:(NSDictionary *)options;
+- (void)switchToComment:(Post *)p;
 
 @end

@@ -25,8 +25,10 @@
 		self.timeline.feed = self.feed;
 		[self.timeline.tableview reloadData];
 		[self.timeline setUpgradeHeader:@{
-		 @"title": @"Keep tabs on your favorite people",
-		 @"message": @"The last status each of your favorite people has posted.  See 5 favorites at once or upgrade to Pro to see them all."
+		 @"title": @"Join the conversation",
+		 @"message": @"View the posts from your timeline which have comments you haven’t read yet. View the 5 most recent unread posts for free or upgrade to Pro to browse them all.",
+		 @"icon": @"icon_unread_large",
+		 @"icon_label": @"Unread"
 		 }];
 		[self addSubview:self.timeline];
     }

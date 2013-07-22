@@ -32,6 +32,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		self.tableview.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
 		self.tableview.separatorColor = [UIColor colorWithHex:0x3e9ed5];
 		self.tableview.backgroundColor = [UIColor whiteColor];
+		[self.tableview setTableFooterView:[UIView new]];
 		[self addSubview:self.tableview];
 		
 		self.feed = [FeedHelper instance].feed;
@@ -94,10 +95,30 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	[message sety:[title bottomEdge] + 3];
 	[header addSubview:message];
 	
+	// left blue box
 	UIView *gradient_view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [message x] - 10, [message bottomEdge] + 10)];
 	gradient_view.backgroundColor = [UIColor colorWithHex:0x3e9ed5];
 	[header addSubview:gradient_view];
 	
+	UIImageView *iconview = [[UIImageView alloc] initWithImage:[UIImage imageNamed:[options objectForKey:@"icon"]]];
+	int icon_padding = 15;
+	iconview.contentMode = UIViewContentModeScaleAspectFit;
+	iconview.frame = CGRectMake(icon_padding, 7, [gradient_view w] - (icon_padding * 2), [gradient_view h] - (icon_padding * 2));
+	[iconview sizeToFit];
+	[gradient_view addSubview:iconview];
+	
+	UILabel *iconlabel = [UILabel boldLabel:[options objectForKey:@"icon_label"]];
+	iconlabel.textColor = header.backgroundColor;
+	iconlabel.backgroundColor = [UIColor clearColor];
+	[gradient_view addSubview:iconlabel];
+	[iconlabel centerx];
+	[iconlabel sety:[iconview bottomEdge] + 4];
+	
+	//vertically center gradient box contents
+	[iconview sety:([gradient_view h] - ([iconlabel bottomEdge] - [iconview y])) / 2];
+	[iconlabel sety:[iconview bottomEdge] + 4];
+	
+	// bottom border
 	CALayer *blueBorder = [CALayer layer];
 	blueBorder.frame = CGRectMake(0.0f, [gradient_view bottomEdge], [header w], 0.5f);
 	blueBorder.backgroundColor = [UIColor colorWithHex:0x3e9ed5].CGColor; //grey - c3c2c2

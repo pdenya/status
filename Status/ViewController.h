@@ -12,12 +12,13 @@
 #import "PostDetailsView.h"
 #import "FilteredUsersView.h"
 #import "FavoritesView.h"
-
+#import "UnreadPostsView.h"
 
 @interface ViewController : UIViewController {
 	TimelineView *timelineview;
 	FavoritesView *favoritesview;
 	FilteredUsersView *filteredview;
+	UnreadPostsView *unreadview;
 	NSMutableArray *feed;
 	NSMutableDictionary *user_data;
 	NSMutableDictionary *filter;
@@ -29,6 +30,7 @@
 @property (nonatomic, retain) TimelineView *timelineview;
 @property (nonatomic, retain) FavoritesView *favoritesview;
 @property (nonatomic, retain) FilteredUsersView *filteredview;
+@property (nonatomic, retain) UnreadPostsView *unreadview;
 @property (nonatomic, retain) NSMutableArray *feed;
 @property (nonatomic, retain) NSMutableDictionary *user_data;
 @property (nonatomic, retain) NSMutableDictionary *filter;

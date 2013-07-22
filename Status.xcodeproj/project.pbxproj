@@ -113,6 +113,9 @@
 		61E5AA3E16CCCC500068C613 /* icon57.png in Resources */ = {isa = PBXBuildFile; fileRef = 61E5AA3D16CCCC500068C613 /* icon57.png */; };
 		61E5AA4116CDDC880068C613 /* PostCreateView.m in Sources */ = {isa = PBXBuildFile; fileRef = 61E5AA4016CDDC880068C613 /* PostCreateView.m */; };
 		61EE9C191730C92E00DF3BD2 /* EditFilterView.m in Sources */ = {isa = PBXBuildFile; fileRef = 61EE9C181730C92E00DF3BD2 /* EditFilterView.m */; };
+		61F243B4179D136700787D03 /* icon_favorite_large@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 61F243B1179D136700787D03 /* icon_favorite_large@2x.png */; };
+		61F243B5179D136700787D03 /* icon_filter_large@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 61F243B2179D136700787D03 /* icon_filter_large@2x.png */; };
+		61F243B6179D136700787D03 /* icon_unread_large@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 61F243B3179D136700787D03 /* icon_unread_large@2x.png */; };
 		61FDBD1416E1112A003CC66F /* UITableViewCell+PD.m in Sources */ = {isa = PBXBuildFile; fileRef = 61FDBD1316E1112A003CC66F /* UITableViewCell+PD.m */; };
 		78210F6A16FF7F0F005CAF53 /* FeedHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 78210F6916FF7F0F005CAF53 /* FeedHelper.m */; };
 		78210F6D16FF7F3E005CAF53 /* FavoritesHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 78210F6C16FF7F3E005CAF53 /* FavoritesHelper.m */; };
@@ -259,6 +262,9 @@
 		61E5AA4016CDDC880068C613 /* PostCreateView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PostCreateView.m; sourceTree = "<group>"; };
 		61EE9C171730C92E00DF3BD2 /* EditFilterView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditFilterView.h; sourceTree = "<group>"; };
 		61EE9C181730C92E00DF3BD2 /* EditFilterView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditFilterView.m; sourceTree = "<group>"; };
+		61F243B1179D136700787D03 /* icon_favorite_large@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "icon_favorite_large@2x.png"; path = "icons/icon_favorite_large@2x.png"; sourceTree = "<group>"; };
+		61F243B2179D136700787D03 /* icon_filter_large@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "icon_filter_large@2x.png"; path = "icons/icon_filter_large@2x.png"; sourceTree = "<group>"; };
+		61F243B3179D136700787D03 /* icon_unread_large@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "icon_unread_large@2x.png"; path = "icons/icon_unread_large@2x.png"; sourceTree = "<group>"; };
 		61FDBD1216E1112A003CC66F /* UITableViewCell+PD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UITableViewCell+PD.h"; sourceTree = "<group>"; };
 		61FDBD1316E1112A003CC66F /* UITableViewCell+PD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UITableViewCell+PD.m"; sourceTree = "<group>"; };
 		78210F6816FF7F0F005CAF53 /* FeedHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FeedHelper.h; sourceTree = "<group>"; };
@@ -482,6 +488,9 @@
 				61443A2916DAC1B50061B700 /* button_grey@2x.png */,
 				61443A2C16DAC6E40061B700 /* button_blue.png */,
 				61443A2D16DAC6E40061B700 /* button_blue@2x.png */,
+				61F243B1179D136700787D03 /* icon_favorite_large@2x.png */,
+				61F243B2179D136700787D03 /* icon_filter_large@2x.png */,
+				61F243B3179D136700787D03 /* icon_unread_large@2x.png */,
 				614D76FA16E489A100FC6120 /* cellbg.png */,
 				614D76FB16E489A100FC6120 /* cellbg@2x.png */,
 				61C29C9E16F18BA300331B6D /* bg_hr.png */,
@@ -776,6 +785,9 @@
 				611B74D71761955D00805115 /* bars@2x.png in Resources */,
 				617BA2BE177187A00096EBB7 /* icon_filter_active@2x.png in Resources */,
 				611AD0F517728FA000752752 /* icon_new_post@2x.png in Resources */,
+				61F243B4179D136700787D03 /* icon_favorite_large@2x.png in Resources */,
+				61F243B5179D136700787D03 /* icon_filter_large@2x.png in Resources */,
+				61F243B6179D136700787D03 /* icon_unread_large@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
