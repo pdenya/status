@@ -10,7 +10,7 @@
 #import "EditFilterView.h"
 #import "TimelineView.h"
 
-@interface FavoritesView : UIView {
+@interface FavoritesView : UIView <TimelineContainer> {
     TimelineView *timeline;
 	NSMutableDictionary *favorites;
 	NSMutableArray *keys;

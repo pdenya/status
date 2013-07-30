@@ -90,11 +90,15 @@
 }
 
 - (CGFloat) minRowHeight {
-	return 69; //[self hasImages] || [self has_comments] ? 60 : 33;
+	return [[self user] is_filtered] ? 83 : 69; //[self hasImages] || [self has_comments] ? 60 : 33;
 }
 
 - (CGFloat)messageLabelWidth {
 	return round([UIScreen mainScreen].bounds.size.width * ([self hasImages] ? 0.58 : .75));
+}
+
+- (NSDate *)date {
+	return [NSDate dateWithTimeIntervalSince1970:[self.time integerValue]];
 }
 
 //NSCoding

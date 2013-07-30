@@ -57,7 +57,7 @@
 
 - (void) setPost:(Post *)new_post {
 	post = new_post;
-	self.user = [[UsersHelper instance].users objectForKey:post.uid];
+	self.user = [post user];
 	
 	[self refresh];
 }
@@ -66,6 +66,7 @@
 	NSDictionary *filter_dict = [[FilterHelper instance].filter objectForKey:[NSString stringWithFormat:@"%@", self.user.uid]];
 	NSString *filter_state = filter_dict ? [filter_dict objectForKey:@"state"] : FILTER_STATE_VISIBLE;
 	[self updateBtn:self.filterbtn forState:filter_state];
+	NSLog(@"Refreshing Filter Button: %@", filter_state);
 	
 	NSString *favorite_state  = ([[FavoritesHelper instance].favorites objectForKey:self.user.uid]) ? FAVORITE_STATE_FAVORITED : FAVORITE_STATE_NOT_FAVORITED;
 	[self updateBtn:self.favbtn forState:favorite_state];

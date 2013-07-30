@@ -40,8 +40,12 @@
 }
 
 + (UILabel *)label:(NSString *)text {
+	return [self label:text modifier:1.0f];
+}
+
++ (UILabel *)label:(NSString *)text modifier:(CGFloat)modifier {
 	UILabel *title = [[UILabel alloc] init];
-	title.font = [UIFont fontWithName:@"HelveticaNeue" size:12.0f];;
+	title.font = [UIFont fontWithName:@"HelveticaNeue" size:round(12.0f * modifier)];
 	title.textColor = [UIColor colorWithHex:0x444444];
 	title.text = text;
 	title.numberOfLines = 0;

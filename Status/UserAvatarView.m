@@ -23,12 +23,6 @@
 		self.backgroundColor = [UIColor blackColor];
 		self.should_resize = NO;
 		
-        // Initialization code
-		UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
-		[backButton setImage:[UIImage imageNamed:@"back.png"] forState:UIControlStateNormal];
-		[backButton addTarget:self action:@selector(removeFromSuperview) forControlEvents:UIControlEventTouchUpInside];
-		
-		
 		self.headerView = [[HeaderView alloc] init];
 		[self.headerView addCloseButton];
 		[self addSubview:self.headerView];

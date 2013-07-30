@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "TimelineView.h"
 
-@interface FilteredUsersView : UIView <UITableViewDataSource, UITableViewDelegate> {
+@interface FilteredUsersView : UIView <UITableViewDataSource, UITableViewDelegate, TimelineContainer> {
 	NSMutableDictionary *filter;
 	UITableView *tableview;
 	NSMutableArray *keys;

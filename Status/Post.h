@@ -29,4 +29,5 @@
 - (BOOL)has_unread_comments;
 - (User *)user;
 - (NSString *)combined_id;
+- (NSDate *) date;
 @end

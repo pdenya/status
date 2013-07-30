@@ -64,7 +64,7 @@
 }
 
 - (void)close:(id)sender {
-	[[ViewController instance] closeModal:self];
+	[[ViewController instance] closeModal:(self.superview && self.superview.tag == 50) ? self.superview : self];
 }
 
 - (void)addTitle:(NSString *)text {

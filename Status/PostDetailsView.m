@@ -23,7 +23,7 @@
 	self = [super initWithFrame:frame];
 
 	if (self) {
-		self.backgroundColor = [UIColor whiteColor];
+		self.backgroundColor = [UIColor colorWithHex:0xf7f6f6];
 	}
 	
 	return self;
@@ -59,6 +59,7 @@
 	
 	//comments table header view which contains the post and stuff
 	UIView *topView = [[UIView alloc] initWithFrame:self.bounds];
+	topView.backgroundColor = [UIColor whiteColor];
 	[topView seth:250];
 	
 	// User Avatar
@@ -78,6 +79,7 @@
 	UILabel *dateLabel = [[UILabel alloc] init];
 	dateLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:9.0f];
 	dateLabel.textColor = [UIColor colorWithHex:0x7c7c7c];
+	dateLabel.backgroundColor = [UIColor clearColor];
 	[dateLabel setw:[avatarView w]];
 	[dateLabel setx:[avatarView x]];
 	[dateLabel sety:[avatarView bottomEdge] + 2];
@@ -111,6 +113,7 @@
 	
 	// Post Message
 	UILabel *postLabel = [[UILabel alloc] init];
+	postLabel.backgroundColor = [UIColor clearColor];
 	postLabel.lineBreakMode = UILineBreakModeWordWrap;
 	postLabel.text = self.post.message;
 	postLabel.font = [Post getPostFont];
@@ -167,9 +170,10 @@
 	self.tableview.delegate = self;
 	self.tableview.dataSource = self;
 	self.tableview.tableHeaderView = topView;
+	self.tableview.backgroundColor = [UIColor colorWithHex:0xf7f6f6];
 	[self.tableview setTableFooterView:bottomview];
 	[self addSubview:self.tableview];
-	
+		
 	[self updateFavBtn];
 	[self getFBComments];
 	self.post.last_read = [NSDate date];
@@ -250,14 +254,16 @@
 	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	[avatarzoom setUser:comment_user];
 	
-	[self addSubview:avatarzoom];
+	[[ViewController instance] openModal:avatarzoom];
 	[avatarzoom release];
 }
 
 - (void)zoomUserAvatar:(id)sender {
-	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:self.bounds];
+	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	[avatarzoom setUser:self.user];
-	[self addSubview:avatarzoom];
+	
+	[[ViewController instance] openModal:avatarzoom];
+	
 	[avatarzoom release];
 }
 
@@ -308,6 +314,7 @@
 		cell.textLabel.hidden = YES;
 		cell.detailTextLabel.hidden = YES;
 		cell.selectedBackgroundView = [[UIView alloc] init];
+		cell.contentView.backgroundColor = [UIColor whiteColor];
 		
 		messageLabel = [[[UILabel alloc] init] autorelease];
 		[cell.contentView addSubview:messageLabel];

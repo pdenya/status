@@ -97,7 +97,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	
 	// left blue box
 	UIView *gradient_view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [message x] - 10, [message bottomEdge] + 10)];
-	gradient_view.backgroundColor = [UIColor colorWithHex:0x3e9ed5];
+	gradient_view.backgroundColor = [UIColor brandBlueColor];
 	[header addSubview:gradient_view];
 	
 	UIImageView *iconview = [[UIImageView alloc] initWithImage:[UIImage imageNamed:[options objectForKey:@"icon"]]];
@@ -274,9 +274,6 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		cell.direction = ZKRevealingTableViewCellDirectionLeft;
 		[cell configureForTimeline];
 		
-		//add bottom border
-		//[cell addFlexibleBottomBorder:[UIColor colorWithHex:0x3e9ed5]];
-		
 		ThumbView *avatarView = [cell avatarView];
 		avatarView.userInteractionEnabled = YES;
 		UITapGestureRecognizer *doubletapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(zoomAvatar:)];
@@ -296,8 +293,6 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		imgview_doubletapgr.delaysTouchesBegan = YES;
 		[imgview addGestureRecognizer:imgview_doubletapgr];
 		[imgview_doubletapgr release];
-		
-		
     }
 	
     Post *post = [self.feed objectAtIndex:[indexPath row]];

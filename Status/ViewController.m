@@ -10,6 +10,7 @@
 #import "AuthView.h"
 #import "LearnMoreView.h"
 #import "PostCreateView.h"
+#import "TimelineView.h"
 #import <QuartzCore/QuartzCore.h>
 
 @interface ViewController ()
@@ -17,7 +18,7 @@
 @end
 
 @implementation ViewController
-@synthesize timelineview, feed, user_data, total_failed, filter, favorites, headerView, favoritesview, filteredview, unreadview;
+@synthesize newsfeed, feed, user_data, total_failed, filter, favorites, headerView, favoritesview, filteredview, unreadview;
 
 const int FAILED_THRESHOLD = 30;
 
@@ -79,7 +80,7 @@ const int FAILED_THRESHOLD = 30;
 	
 	void (^fb_success)(void) = ^ {
 		[self streamRefreshInterval];
-		[self showTimeline];
+		[self showNewsFeed];
 	};
 	
 	if (FBSession.activeSession.isOpen) {
@@ -99,15 +100,15 @@ const int FAILED_THRESHOLD = 30;
 	}
 }
 
-- (UIView *) activeView {
+- (UIView<TimelineContainer> *) activeView {
 	if (self.favoritesview && self.favoritesview.superview) {
 		return self.favoritesview;
 	}
 	else if (self.filteredview && self.filteredview.superview) {
 		return self.filteredview;
 	}
-	else if (self.timelineview && self.timelineview.superview) {
-		return self.timelineview;
+	else if (self.newsfeed && self.newsfeed.superview) {
+		return self.newsfeed;
 	}
 	else if (self.unreadview && self.unreadview.superview) {
 		return self.unreadview;
@@ -131,7 +132,7 @@ const int FAILED_THRESHOLD = 30;
 	[(UIButton *)[self.headerView viewWithTag:73] setImage:[UIImage imageNamed:@"icon_unread.png"] forState:UIControlStateNormal];
 	[(UIButton *)[self.headerView viewWithTag:74] setImage:[UIImage imageNamed:@"icon_new_post.png"] forState:UIControlStateNormal];
 	
-	if ([c isEqualToString:@"TimelineView"]) {
+	if ([c isEqualToString:@"NewsFeedView"]) {
 		[(UIButton *)[self.headerView viewWithTag:70] setImage:[UIImage imageNamed:@"icon_home_active.png"] forState:UIControlStateNormal];
 	}
 	else if ([c isEqualToString:@"FavoritesView"]) {
@@ -149,20 +150,25 @@ const int FAILED_THRESHOLD = 30;
 	[self.view bringSubviewToFront:self.headerView];
 }
 
-- (void) showTimeline {
+//todo: combine these show methods
+
+- (void) showNewsFeed {
 	if (!self.headerView) {
 		self.headerView = [self makeHeader];
 		[self.view addSubview:self.headerView];
 	}
 	
-	if (!self.timelineview) {
-		self.timelineview = [[TimelineView alloc] initWithFrame:[self contentFrame]];
+	if (!self.newsfeed) {
+		self.newsfeed = [[NewsFeedView alloc] initWithFrame:[self contentFrame]];
+	}
+	else {
+		[self.newsfeed refreshFeed];
 	}
 	
 	[self removeActiveView];
 	
-	if (!self.timelineview.superview) {
-		[self.view addSubview:self.timelineview];
+	if (!self.newsfeed.superview) {
+		[self.view addSubview:self.newsfeed];
 	}
 	
 	[self updateNav];
@@ -266,7 +272,7 @@ const int FAILED_THRESHOLD = 30;
 	[homeButton setImageEdgeInsets:insets];
 	[header_view addSubview:homeButton];
 	homeButton.frame = CGRectMake(btn_offset, btn_y, btn_height, btn_height);
-	[homeButton addTarget:self action:@selector(showTimeline) forControlEvents:UIControlEventTouchUpInside];
+	[homeButton addTarget:self action:@selector(showNewsFeed) forControlEvents:UIControlEventTouchUpInside];
 	homeButton.tag = 70;
 	
 	UIButton *favoriteButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -302,7 +308,7 @@ const int FAILED_THRESHOLD = 30;
 
 //once called, this method polls fb
 -(void)streamRefreshInterval {
-	[self fetchFeed];
+	[[FeedHelper instance] refresh];
 	[self performSelector:@selector(streamRefreshInterval) withObject:nil afterDelay:30.0f];
 }
 
@@ -332,50 +338,13 @@ const int FAILED_THRESHOLD = 30;
 	[self.filter removeObjectsForKeys:to_remove];
 }
 
-- (void)fetchFeed {
-	NSLog(@"FetchFeed");
-	FBHelper *fb = [FBHelper instance];
+- (void)refreshFeeds:(NSArray *)added_row_indexes {
+	//TODO: pass added_row_index to the tableviews for better handling
+	//[self.timelineview.tableview beginUpdates];
+	//[self.timelineview.tableview insertRowsAtIndexPaths:added_rows withRowAnimation:UITableViewRowAnimationAutomatic];
+	//[self.timelineview.tableview endUpdates];
 	
-	FBDictionaryBlock completed = ^(NSDictionary *data) {
-		//grab a reference to this for use below
-		Post *first_post = (Post *)[self.feed objectAtIndex:0];
-		
-		//add to feed and sort reverse chronologically
-		[self.feed addObjectsFromArray:[data objectForKey:@"feed"]];
-		[self.feed sortUsingComparator:[User timeComparator]];
-		
-		//todo: check overwrite policy on this
-		[self.user_data addEntriesFromDictionary:[data objectForKey:@"users"]];
-		[self save];
-		
-		//get an array of the index paths of rows we added
-		int index = [self.feed indexOfObject:first_post];
-		NSMutableArray *added_rows = [[NSMutableArray alloc] init];
-		for (int i = 0; i < index; i++) {
-			[added_rows addObject:[NSIndexPath indexPathForRow:i inSection:0]];
-		}
-		
-		//if we added any rows notify the tableview
-		if ([added_rows count] > 0) {
-			[self.timelineview.tableview beginUpdates];
-			//[self.timelineview.tableview reloadData];
-			[self.timelineview.tableview insertRowsAtIndexPaths:added_rows withRowAnimation:UITableViewRowAnimationAutomatic];
-			[self.timelineview.tableview endUpdates];
-			
-			if (self.favoritesview) {
-				[self.favoritesview refreshFeed];
-			}
-		}
-	};
-	
-	int max_time = 0;
-	if ([self.feed count] > 0) {
-		for (int i = 0; i < [self.feed count]; i++) {
-			max_time = MAX(max_time, [[[self.feed objectAtIndex:i] valueForKey:@"time"] integerValue]);
-		}
-	}
-	
-	[fb getStream:completed options:@{ @"max_time": @(max_time), @"filtered_uids": [self.filter allKeys] }];
+	[[self activeView] refreshFeed];
 }
 
 - (void) openModal:(UIView *)view {

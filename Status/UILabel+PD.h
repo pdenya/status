@@ -13,6 +13,7 @@
 + (UILabel *)titleLabelWithText:(NSString *)labelText;
 + (UILabel *)boldLabel:(NSString *)text;
 + (UILabel *)label:(NSString *)text;
++ (UILabel *)label:(NSString *)text modifier:(CGFloat)modifier;
 - (void) underline;
 
 

@@ -11,6 +11,10 @@
 #import "ZKRevealingTableViewCell.h"
 #import "RevealedView.h"
 
+@protocol TimelineContainer
+-(void)refreshFeed;
+@end
+
 @interface TimelineView : UIView <UITableViewDataSource, UITableViewDelegate, ZKRevealingTableViewCellDelegate> {
 	NSMutableDictionary *user_data;
 	NSMutableArray *feed;

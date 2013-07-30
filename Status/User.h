@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+@class Post;
 
 @interface User : NSObject <NSCoding> {
 	BOOL is_fetching_square_image;
@@ -29,10 +30,14 @@
 - (void)loadPicSquare;
 - (void)loadPicSquare:(PDBlock)completed;
 - (void)loadPicBig:(PDBlock)loaded;
+- (Post *)most_recent_post;
+- (NSString *)filter_state;
+- (NSDate *)filtered_until;
 - (NSString *)full_name;
 - (NSString *)picSquareUrl;
 - (NSString *)picBigUrl;
 - (BOOL) is_favorite;
+- (BOOL) is_filtered;
 - (void) favorite;
 - (void) unfavorite;
 

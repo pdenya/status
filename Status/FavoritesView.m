@@ -50,26 +50,11 @@
 	for (NSString *key in self.keys) {
 		NSDictionary *fav_data = [self.favorites objectForKey:key];
 		User *user = [[UsersHelper instance].users objectForKey:[fav_data objectForKey:@"uid"]];
-		Post *post = [self postFromUser:user];
+		Post *post = [user most_recent_post];
 		[self.feed addObject:post];
 	}
 	
 	[self.timeline.tableview reloadData];
-}
-
-- (Post *) postFromUser:(User *)user {
-	Post *post;
-	
-	for (Post *p in [FeedHelper instance].feed) {
-		NSString *post_uid = [NSString stringWithFormat:@"%@", p.uid];
-		NSString *user_uid = [NSString stringWithFormat:@"%@", user.uid];
-		if ([post_uid isEqualToString:user_uid]) {
-			post = p;
-			break;
-		}
-	}
-	
-	return post;
 }
 
 @end

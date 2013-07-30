@@ -122,7 +122,7 @@
 	//select app_data, attachment, post_id from stream where post_id IN ('1315663027_10200756640981133') AND app_data.images != ''
 	//post_id is ${uid}_${status_id}
 	NSString *query = @"{"
-		@"'status_query': 'SELECT uid,status_id,message,time,concat(uid,\"_\",status_id) FROM status WHERE (uid IN (SELECT uid2 FROM friend WHERE uid1= me()) OR uid=me()) AND message != \"\" AND time > %@ %@ LIMIT 400', "
+		@"'status_query': 'SELECT uid,status_id,message,time,concat(uid,\"_\",status_id) FROM status WHERE (uid IN (SELECT uid2 FROM friend WHERE uid1= me()) OR uid=me()) AND message != \"\" AND time > \"%@\" %@ LIMIT 100', "
 		@"'friend_info_query': 'SELECT uid,first_name, last_name, pic_square, pic_big FROM user WHERE uid IN (SELECT uid FROM #status_query)', "
 		@"'comment_count_query': 'SELECT object_id, time FROM comment WHERE object_id IN (SELECT status_id FROM #status_query) %@', "
 		@"'photo_query': 'SELECT attachment.media, post_id FROM stream WHERE post_id IN (SELECT anon FROM #status_query ) AND app_data.images != \"\"' "
@@ -153,7 +153,7 @@
 	query = [NSString stringWithFormat:query, latest_stream_time, condition, comment_condition];
 	
 	
-	//NSLog(@"query: \n %@", query);
+	NSLog(@"query: \n %@", query);
 	
     // Set up the query parameter
     NSDictionary *queryParam = @{ @"q": query };
@@ -162,12 +162,12 @@
     [FBRequestConnection startWithGraphPath:@"/fql" parameters:queryParam HTTPMethod:@"GET" completionHandler:
 	 ^(FBRequestConnection *connection, id result, NSError *error) {
 		 if (error) {
-			 NSLog(@"Error: %@", [error localizedDescription]);
-			 NSLog(@"Error: %@", [error description]);
-			 NSLog(@"Error: %@", [[error userInfo] description]);
+			 //NSLog(@"Error: %@", [error localizedDescription]);
+			 //NSLog(@"Error: %@", [error description]);
+			 //NSLog(@"Error: %@", [[error userInfo] description]);
+			 NSLog(@"Error getting stream");
 			 completed(nil);
 		 } else {
-			 NSLog(@"Result: %@", [result description]);
 			 // Get the friend data to display
 			 NSArray *results = (NSArray *) [result objectForKey:@"data"];
 			 NSMutableArray *statuses = [[NSMutableArray alloc] init];
@@ -181,8 +181,8 @@
 				 
 				 //Handle Statuses
 				 if ([[query_result valueForKey:@"name"] isEqualToString:@"status_query"]) {
-					 NSLog(@"handle statuses");
 					 NSArray *fql_result_set = [query_result valueForKey:@"fql_result_set"];
+					 NSLog(@"handle statuses. %i rows", [fql_result_set count]);
 					 
 					 //set post data
 					 for (int j = 0; j < [fql_result_set count]; j++) {
@@ -195,8 +195,8 @@
 					 
 				 }	//Handle user data
 				 else if ([[query_result valueForKey:@"name"] isEqualToString:@"friend_info_query"]) {
-					 NSLog(@"handle user data");
 					 NSArray *fql_result_set = [query_result valueForKey:@"fql_result_set"];
+					 NSLog(@"handle user data. %i users", [fql_result_set count]);
 					 
 					 //set user data
 					 for (int j = 0; j < [fql_result_set count]; j++) {
@@ -208,7 +208,7 @@
 				 } //Handle comments list
 				 else if ([[query_result valueForKey:@"name"] isEqualToString:@"comment_count_query"]) {
 					 NSArray *comment_results = [query_result valueForKey:@"fql_result_set"];
-					 NSLog(@"handle comments map %@", [comment_map description]);
+					 NSLog(@"handle comments map: %i rows", [comment_map count]);
 					 
 					 //set up comments map to be { #status_id#: date_of_most_recent_comment } for each status
 					 for (int j= 0; j < [comment_results count]; j++) {
@@ -244,7 +244,7 @@
 						 }
 					 }
 					 
-					 NSLog(@"User images %@", [images_map description]);
+					 NSLog(@"User images %i", [images_map count]);
 				 }
 			 }
 			 

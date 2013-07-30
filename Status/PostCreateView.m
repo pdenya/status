@@ -24,10 +24,11 @@
 		self.messageTextField = [[UITextView alloc] init];
 		[self addSubview:self.messageTextField];
 		NSLog(@"self h %f", [self h]);
+		
 		[self.messageTextField seth:[self h] - (216 + 65)];
 		[self.messageTextField setw:[self w] - (padding * 2)];
+		[self.messageTextField sety:SYSTEM_VERSION_LESS_THAN(@"7.0") ? padding : 20];
 		[self.messageTextField setx:padding];
-		[self.messageTextField sety:padding];
 		self.messageTextField.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:15.0f];
 		self.messageTextField.textColor = [UIColor colorWithHex:0x333333];
 		
@@ -61,7 +62,7 @@
 }
 
 - (void)addedAsSubview:(NSDictionary *)options {
-	[self performSelector:@selector(focus) withObject:nil afterDelay:0.2f];
+	[self performSelector:@selector(focus) withObject:nil afterDelay:0.0f];
 }
 
 - (void)focus {

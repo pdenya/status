@@ -8,14 +8,15 @@
 
 #import <UIKit/UIKit.h>
 #import "FBHelper.h"
-#import "TimelineView.h"
+#import "NewsFeedView.h"
 #import "PostDetailsView.h"
 #import "FilteredUsersView.h"
 #import "FavoritesView.h"
 #import "UnreadPostsView.h"
 
+
 @interface ViewController : UIViewController {
-	TimelineView *timelineview;
+	NewsFeedView *newsfeed;
 	FavoritesView *favoritesview;
 	FilteredUsersView *filteredview;
 	UnreadPostsView *unreadview;
@@ -27,7 +28,7 @@
 	int total_failed;
 }
 
-@property (nonatomic, retain) TimelineView *timelineview;
+@property (nonatomic, retain) NewsFeedView *newsfeed;
 @property (nonatomic, retain) FavoritesView *favoritesview;
 @property (nonatomic, retain) FilteredUsersView *filteredview;
 @property (nonatomic, retain) UnreadPostsView *unreadview;
@@ -45,5 +46,6 @@
 - (UIView *)headerContainer;
 - (CGRect) contentFrame;
 - (void) showLearnMoreView;
+- (void)refreshFeeds:(NSArray *)added_row_indexes;
 
 @end

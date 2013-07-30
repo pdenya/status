@@ -20,48 +20,44 @@
     if (self) {
         // Initialization code
 		self.backgroundColor = [UIColor whiteColor];
+		
 		self.filter = [FilterHelper instance].filter;
-		NSLog(@"Got Filter\n %@", [self.filter description]);
 		self.keys = [NSMutableArray arrayWithArray:[self.filter allKeys]];
 		self.user_data = [UsersHelper instance].users;
+		self.feed = [NSMutableArray new];
 		
-		self.tableview = [[UITableView alloc] initWithFrame:self.bounds];
-		self.tableview.delegate = self;
-		self.tableview.dataSource = self;
-		self.tableview.rowHeight = 113;
-		[self addSubview:self.tableview];
+		[self refreshFeed];
 		
-		/*
 		self.timeline = [[TimelineView alloc] initWithFrame:self.bounds];
 		self.timeline.feed = self.feed;
 		[self.timeline.tableview reloadData];
-		 [self.timeline setUpgradeHeader:@{
-		 @"title": @"Keep tabs on your favorite people",
-		 @"message": @"The last status each of your favorite people has posted.  See 5 favorites at once or upgrade to Pro to see them all."
-		 }];
+		[self.timeline setUpgradeHeader:@{
+		 @"title": @"Read what you want to read",
+		 @"message": @"Filter your friends so their statuses don't show up in your timeline for a day, a week, or forever. Hide 5 people for free or upgrade to pro to take back your timeline."
+		}];
 		[self addSubview:self.timeline];
-		 */
+		
     }
     return self;
 }
 
 - (void) refreshFeed {
-	
-	
 	[self.keys removeAllObjects];
 	[self.keys addObjectsFromArray:[self.filter allKeys]];
 	
 	[self.feed removeAllObjects];
 	
 	for (NSString *key in self.keys) {
-		//NSDictionary *filter_data = [self.filter objectForKey:key];
-		//User *user = [self.user_data objectForKey:[filter_data objectForKey:@"uid"]];
-		//Post *post = [self postFromUser:user];
-		//[self.feed addObject:post];
+		NSDictionary *filter_data = [self.filter objectForKey:key];
+		User *user = [self.user_data objectForKey:[filter_data objectForKey:@"uid"]];
+		Post *post = [user most_recent_post];
+		[self.feed addObject:post];
 	}
 	
 	[self.timeline.tableview reloadData];
 }
+
+
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return 1;

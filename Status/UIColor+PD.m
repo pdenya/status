@@ -19,7 +19,7 @@
 }
 
 + (UIColor *)brandBlueColor {
-	return [UIColor colorWithHex:0x105FA0];
+	return [UIColor colorWithHex:0x3e9ed5];
 }
 
 @end

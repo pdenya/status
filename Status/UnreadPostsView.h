@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "TimelineView.h"
 
-@interface UnreadPostsView : UIView {
+@interface UnreadPostsView : UIView <TimelineContainer> {
 	NSMutableArray *feed;
 	TimelineView *timeline;
 }

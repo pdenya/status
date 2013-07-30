@@ -59,7 +59,7 @@
 		UIView *bottomview = [[UIView alloc] initWithFrame:self.bounds];
 		bottomview.backgroundColor = [UIColor colorWithHex:0xf7f6f6];
 		[self addSubview:bottomview];
-		[bottomview sethp:0.2f];
+		[bottomview sethp:(SYSTEM_VERSION_LESS_THAN(@"7.0") ? 0.1f : 0.2f)];
 		[bottomview sety:[self h] - [bottomview h]];
 		[bottomview addTopBorder:[UIColor colorWithHex:0xa7a6a6]];
 		

@@ -16,6 +16,7 @@
 
 + (FeedHelper *)instance;
 - (FeedHelper *)init;
+- (void)refresh;
 - (void)load;
 - (void)save;
 

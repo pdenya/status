@@ -12,11 +12,14 @@
 
 @implementation UITableViewCell (PD)
 
+//TODO: move this into timelineview
 - (void) configureForTimeline {
 	UILabel *messageLabel;
 	UILabel *dateLabel;
 	UILabel *nameLabel;
 	ThumbView *avatarView;
+	UIView *filter_countdown;
+	UILabel *countdown_label;
 	UIImageView *commentsNotifierView;
 	UIImageView *imageNotifierView;
 	ThumbView *imgView;
@@ -25,15 +28,49 @@
 	self.textLabel.hidden = YES;
 	self.detailTextLabel.hidden = YES;
 	[self setSelectionStyle:UITableViewCellSelectionStyleNone];
-	//self.clipsToBounds = YES;
 	
 	self.selectedBackgroundView = [[UIView alloc] init];
+	[self.contentView setBackgroundColor:[UIColor whiteColor]];
 	
+	
+	// Avatar View
 	avatarView = [[ThumbView alloc] initWithFrame:CGRectMake(10, 10, 50, 50)];
 	avatarView.tag = 96;
-
 	[self.contentView addSubview:avatarView];
 	
+	
+	// Filter Countdown
+	filter_countdown = [[UIView alloc] initWithFrame:CGRectMake(10, [avatarView bottomEdge] + 2, [avatarView w], 14)];
+	filter_countdown.backgroundColor = [UIColor brandBlueColor];
+	filter_countdown.tag = 99;
+	
+	UILabel *infinity_label = [UILabel label:@"∞" modifier:1.5f];
+	infinity_label.textColor = [UIColor whiteColor];
+	infinity_label.backgroundColor = [UIColor clearColor];
+	[filter_countdown addSubview:infinity_label];
+	[infinity_label setx:0];
+	[infinity_label setw:[filter_countdown w]];
+	[infinity_label centery];
+	[infinity_label sety:[infinity_label y] + (SYSTEM_VERSION_LESS_THAN(@"7.0") ? -1 : -2)];
+	infinity_label.textAlignment = NSTextAlignmentCenter;
+	infinity_label.hidden = YES;
+	infinity_label.tag = 94;
+	
+	countdown_label = [UILabel label:@"2d 4hrs" modifier:0.9f];
+	countdown_label.textColor = [UIColor whiteColor];
+	countdown_label.backgroundColor = [UIColor clearColor];
+	[filter_countdown addSubview:countdown_label];
+	[countdown_label setx:0];
+	[countdown_label setw:[filter_countdown w]];
+	[countdown_label centery];
+	[countdown_label sety:[countdown_label y] + (SYSTEM_VERSION_LESS_THAN(@"7.0") ? 1 : -1)];
+	countdown_label.textAlignment = NSTextAlignmentCenter;
+	countdown_label.tag = 95;
+
+	[self.contentView addSubview:filter_countdown];
+
+	
+	// Main Post
 	messageLabel = [[[UILabel alloc] init] autorelease];
 	messageLabel.backgroundColor = [UIColor clearColor];
 	[self.contentView addSubview:messageLabel];
@@ -48,6 +85,7 @@
 	messageLabel.tag = 90;
 	[self bringSubviewToFront:messageLabel];
 	
+	// Time stamp
 	dateLabel = [[[UILabel alloc] init] autorelease];
 	dateLabel.backgroundColor = [UIColor clearColor];
 	[self.contentView addSubview:dateLabel];
@@ -59,6 +97,7 @@
 	dateLabel.text = @"";
 	dateLabel.tag = 91;
 	
+	// User's Name
 	nameLabel = [[[UILabel alloc] init] autorelease];
 	nameLabel.backgroundColor = [UIColor clearColor];
 	[self.contentView addSubview:nameLabel];
@@ -75,6 +114,7 @@
 	imgView.hidden = YES;
 	[self.contentView addSubview:imgView];
 	
+	// Comments icon
 	commentsNotifierView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_no_comments.png"]];
 	[commentsNotifierView setw:11];
 	[commentsNotifierView seth:11];
@@ -83,6 +123,7 @@
 	[self.contentView addSubview:commentsNotifierView];
 	[self.contentView bringSubviewToFront:commentsNotifierView];
 	
+	// Images icon
 	imageNotifierView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_no_comments.png"]];
 	[imageNotifierView setw:11];
 	[imageNotifierView seth:11];
@@ -90,10 +131,6 @@
 	imageNotifierView.tag = 93;
 	[self.contentView addSubview:commentsNotifierView];
 	[self.contentView bringSubviewToFront:commentsNotifierView];
-	
-	
-	
-	[self.contentView setBackgroundColor:[UIColor whiteColor]];
 	
 	/*
 	UIImageView *backgroundView = [[[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"cellbg.png"] stretchableImageWithLeftCapWidth:2 topCapHeight:5]] autorelease];
@@ -139,6 +176,19 @@
 	return (ThumbView *)[self viewWithTag:98];
 }
 
+- (UIView *) filter_countdown {
+	return (UIView *)[self viewWithTag:99];
+}
+
+- (UILabel *) infinity_label {
+	return (UILabel *)[self.contentView viewWithTag:94];
+}
+
+- (UILabel *) countdown_label {
+	return (UILabel *)[self.contentView viewWithTag:95];
+}
+
+
 - (int) linesBeforeClip {
 	return 5;
 }
@@ -153,6 +203,7 @@
 	}
 }
 
+//TODO: move this into Timelineview
 - (void)setOptions:(NSDictionary *)options {
 	UILabel *messageLabel = [self messageLabel];
 	UILabel *dateLabel = [self dateLabel];
@@ -160,10 +211,75 @@
 	ThumbView *avatarView = [self avatarView];
 	ThumbView *imgView = [self imgView];
 	Post *post = nil;
+	User *user = nil;
+	NSDateFormatter *df = [[NSDateFormatter alloc] init];
 	
 	if ([options objectForKey:@"post"]) {
 		post = (Post *)[options objectForKey:@"post"];
+		user = [post user];
 	}
+	else if ([options objectForKey:@"user"]) {
+		user = (User *)[options objectForKey:@"user"];
+	}
+	
+	
+	if (user && [user is_filtered]) {
+		NSLog(@" = = is_filtered = = %@", [user filter_state]);
+		[self filter_countdown].hidden = NO;
+		
+		if ([[user filter_state] isEqualToString:FILTER_STATE_FILTERED]) {
+			[self infinity_label].hidden = NO;
+			[self countdown_label].hidden = YES;
+		}
+		else {
+			[self infinity_label].hidden = YES;
+			[self countdown_label].hidden = NO;
+			
+			//print date to countdown_label
+			NSCalendar *calendar = [[[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar] autorelease];
+			NSDateComponents *components = [calendar components:NSDayCalendarUnit|NSHourCalendarUnit|NSMinuteCalendarUnit fromDate:[NSDate date] toDate:[user filtered_until] options:0];
+			
+			if (components.day > 1) {
+				[self countdown_label].text = [NSString stringWithFormat:@"%i days", components.day];
+			}
+			//1d 4hrs
+			else if (components.day > 0 && components.hour > 1) {
+				[self countdown_label].text = [NSString stringWithFormat:@"%id %ihrs", components.day, components.hour];
+			}
+			//1d 1hr
+			else if (components.day > 0 && components.hour == 1) {
+				[self countdown_label].text = [NSString stringWithFormat:@"%id %ihr", components.day, components.hour];
+			}
+			//1 day  ..this probably won't happen
+			else if (components.day > 0 && components.hour == 0) {
+				[self countdown_label].text = [NSString stringWithFormat:@"%i day", components.day];
+			}
+			//12 hours
+			else if (components.hour > 1) {
+				[self countdown_label].text = [NSString stringWithFormat:@"%i hours", components.hour];
+			}
+			//1 hour
+			else if (components.hour == 1) {
+				[self countdown_label].text = @"1 hour";
+			}
+			//48 mins
+			else if (components.minute > 1) {
+				[self countdown_label].text = [NSString stringWithFormat:@"%i mins", components.minute];
+			}
+			//1 min
+			else if (components.minute == 1) {
+				[self countdown_label].text = @"1 min";
+			}
+			//0 min or less
+			else  {
+				[self countdown_label].text = @"now";
+			}
+		}
+	}
+	else {
+		[self filter_countdown].hidden = YES;
+	}
+	
 	
 	//status message
 	CGFloat messageLabelWidth = post ? [post messageLabelWidth] : 0.75f;
@@ -179,10 +295,8 @@
 	//date string
 	if ([options objectForKey:@"time"]) {
 		NSDate *date = [NSDate dateWithTimeIntervalSince1970:[[options objectForKey:@"time"] integerValue]];
-		NSDateFormatter *df = [[NSDateFormatter alloc] init];
 		[df setDateFormat:@"h:mma M/d"];
 		dateLabel.text = [NSString stringWithFormat:@"at %@", [[df stringFromDate:date] lowercaseString]];
-		[df release];
 	}
 	
 	//blue bar on the left
@@ -222,12 +336,13 @@
 	
 	//profile pic
 	if ([options objectForKey:@"user"]) {
-		User *user = (User *)[options objectForKey:@"user"];
 		avatarView.user = user;
 	} else {
 		//stupid
 		avatarView.image = [[options objectForKey:@"avatar"] isKindOfClass:[UIImage class]] ? [options objectForKey:@"avatar"] : nil;
 	}
+	
+	[df release];
 }
 
 @end
