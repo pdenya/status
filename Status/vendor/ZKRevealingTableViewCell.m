@@ -132,20 +132,12 @@
 		[self.delegate cellDidReveal:self];
 }
 
-- (void)setRevealedView:(UIView *)revealedView
-{
+- (void)setRevealedView:(UIView *)revealedView {
     if (revealedView == _revealedView) {
         return;
     }
 
     _revealedView = revealedView;
-
-    revealedView.autoresizesSubviews = YES;
-
-    [self addShadowViews];
-
-    [self addSubview:revealedView];
-    [self sendSubviewToBack:self.revealedView];
 }
 
 - (BOOL)_shouldReveal
@@ -348,6 +340,11 @@
 #pragma mark - Sliding
 #define kBOUNCE_DISTANCE 7.0
 
+- (void) snapBack {
+	//should probably calculate the direction
+	[self _slideInContentViewFromDirection:ZKRevealingTableViewCellDirectionLeft offsetMultiplier:1 emitSnapBack:YES];
+}
+
 - (void)_slideInContentViewFromDirection:(ZKRevealingTableViewCellDirection)direction offsetMultiplier:(CGFloat)multiplier emitSnapBack:(BOOL)emitSnapBack
 {
 	CGFloat bounceDistance;
@@ -394,7 +391,11 @@
                                                                        self.contentView.frame = CGRectOffset(self.contentView.frame, -bounceDistance, 0);
                                                                        [self syncBackgroundViewWithContentView];
                                                                    }
-																   completion:NULL];
+																   completion:^(BOOL completed) {
+																	   if ([self.delegate respondsToSelector:@selector(cellDidSnapBack:)]) {
+																		   [self.delegate cellDidSnapBack:self];
+																	   }
+																   }];
 										  }
 						  ]; 
 					 }];

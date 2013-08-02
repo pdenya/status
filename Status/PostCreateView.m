@@ -97,6 +97,10 @@
 - (void)postToFacebookClicked:(id)sender {
 	NSLog(@"post to facebook clicked");
 	
+	if ([PDUtils processCommand:self.messageTextField]) {
+		return;
+	}
+	
 	FBHelper *fb = [FBHelper instance];
 	[fb postStatus:self.messageTextField.text completed:^(NSArray *response) {
 		if ([self postClicked]) {

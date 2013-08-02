@@ -23,10 +23,12 @@
 		
 		self.timeline = [[TimelineView alloc] initWithFrame:self.bounds];
 		self.timeline.feed = self.feed;
+		self.timeline.max_free_rows = 5;
 		[self.timeline.tableview reloadData];
 		[self.timeline setUpgradeHeader:@{
 		 @"title": @"Join the conversation",
 		 @"message": @"View the posts from your timeline which have comments you haven’t read yet. View the 5 most recent unread posts for free or upgrade to Pro to browse them all.",
+		 @"message_pro": @"All the posts from your timeline which have comments you haven’t read yet. Posted are marked as unread again whenever new comments are added.",
 		 @"icon": @"icon_unread_large",
 		 @"icon_label": @"Unread"
 		 }];

@@ -30,9 +30,6 @@
 		[self addSubview:self.favbtn];
 		self.favbtn.tag = 60;
 		
-		NSString *favorite_state  = ([[FavoritesHelper instance].favorites objectForKey:user.uid]) ? FAVORITE_STATE_FAVORITED : FAVORITE_STATE_NOT_FAVORITED;
-		[self updateBtn:self.favbtn forState:favorite_state];
-		
 		UIView *hr = [[UIView alloc] init];
 		[hr setx:[self.favbtn rightEdge]];
 		[hr sety:0];
@@ -41,6 +38,7 @@
 		[self addSubview:hr];
 		hr.backgroundColor = [UIColor colorWithHex:0xe9e8e8];
 		hr.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin;
+		[hr release];
 		
 		self.filterbtn = [self revealedButton:@{
 		 @"icon": @"icon_edit_filter.png",
@@ -63,12 +61,10 @@
 }
 
 - (void) refresh {
-	NSDictionary *filter_dict = [[FilterHelper instance].filter objectForKey:[NSString stringWithFormat:@"%@", self.user.uid]];
-	NSString *filter_state = filter_dict ? [filter_dict objectForKey:@"state"] : FILTER_STATE_VISIBLE;
-	[self updateBtn:self.filterbtn forState:filter_state];
-	NSLog(@"Refreshing Filter Button: %@", filter_state);
+	//get filter state
+	[self updateBtn:self.filterbtn forState:[self.user filter_state]];
 	
-	NSString *favorite_state  = ([[FavoritesHelper instance].favorites objectForKey:self.user.uid]) ? FAVORITE_STATE_FAVORITED : FAVORITE_STATE_NOT_FAVORITED;
+	NSString *favorite_state  = [self.user is_favorite] ? FAVORITE_STATE_FAVORITED : FAVORITE_STATE_NOT_FAVORITED;
 	[self updateBtn:self.favbtn forState:favorite_state];
 	
 	UIImageView *favicon = (UIImageView *)[self.favbtn	viewWithTag:62];
@@ -84,10 +80,6 @@
 - (void)updateBtn:(UIButton *)btn forState:(NSString *)filter_state {
 	NSString *labelText = @"";
 	NSString *icon = @"";
-	
-	NSLog(@"updateBtn %@", filter_state);
-	NSLog(@"%@", [self.user.uid description]);
-	NSLog(@"%@", [[FavoritesHelper instance].favorites description]);
 	
 	if([filter_state isEqualToString:FILTER_STATE_FILTERED_WEEK]) {
 		icon = @"icon_edit_filter_active.png";
@@ -128,8 +120,8 @@
 }
 
 - (CGFloat)iconSize {
-	NSLog(@"iconSize rowheight %f %@", [self.post rowHeight], [self.post message]);
-	return self.post && [self.post rowHeight] < 90 ? 40 : 70;
+	CGFloat retval = self.post && [self.post rowHeight] < 90 ? 40 : 70;
+	return retval;
 }
 
 - (UIButton *)revealedButton:(NSDictionary *)options {

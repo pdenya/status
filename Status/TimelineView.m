@@ -32,12 +32,14 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		self.tableview.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
 		self.tableview.separatorColor = [UIColor colorWithHex:0x3e9ed5];
 		self.tableview.backgroundColor = [UIColor whiteColor];
+		self.max_free_rows = 0;
 		[self.tableview setTableFooterView:[UIView new]];
 		[self addSubview:self.tableview];
 		
 		self.feed = [FeedHelper instance].feed;
 		self.user_data = [UsersHelper instance].users;
 		self.filter = [FilterHelper instance].filter;
+		self.isSnappingBack = NO;
 		
 		UIButton *postButton = [UIButton buttonWithType:UIButtonTypeCustom];
 		[postButton setImage:[UIImage imageNamed:@"visible.png"] forState:UIControlStateNormal];
@@ -86,7 +88,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	
 	UILabel *message = [[UILabel alloc] init];
 	message.backgroundColor = [UIColor clearColor];
-	message.text = [options objectForKey:@"message"];
+	message.text = [PDUtils isPro] && [options objectForKey:@"message_pro"] ? [options objectForKey:@"message_pro"] : [options objectForKey:@"message"];
 	message.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:12.0f];
 	message.numberOfLines = 0;
 	[message setw:215];
@@ -118,41 +120,45 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	[iconview sety:([gradient_view h] - ([iconlabel bottomEdge] - [iconview y])) / 2];
 	[iconlabel sety:[iconview bottomEdge] + 4];
 	
-	// bottom border
-	CALayer *blueBorder = [CALayer layer];
-	blueBorder.frame = CGRectMake(0.0f, [gradient_view bottomEdge], [header w], 0.5f);
-	blueBorder.backgroundColor = [UIColor colorWithHex:0x3e9ed5].CGColor; //grey - c3c2c2
-	[header.layer addSublayer:blueBorder];
-	
-	UIButton *upgradeBtn = [UIButton flatBlueButton:@"Upgrade to Pro - $1.99"];
-	[upgradeBtn addTarget:self action:@selector(promoUpgrade:) forControlEvents:UIControlEventTouchUpInside];
-	[header addSubview:upgradeBtn];
-	[upgradeBtn setx:[header w] - [upgradeBtn w] - 30];
-	[upgradeBtn sety:[gradient_view bottomEdge] + 13];
-	
-
-	UIButton *learnmoreBtn = [UIButton flatBlueButton:@"Learn More"];
-	[learnmoreBtn setTitleColor:[UIColor colorWithHex:0x3e9ed5] forState:UIControlStateNormal];
-	[header addSubview:learnmoreBtn];
-	[learnmoreBtn sety:[upgradeBtn y]];
-	[learnmoreBtn.titleLabel underline];
-	learnmoreBtn.backgroundColor = [UIColor clearColor];
-	[learnmoreBtn addTarget:[ViewController instance] action:@selector(showLearnMoreView) forControlEvents:UIControlEventTouchUpInside];
-	
-	UILabel *orlabel = [[UILabel alloc] init];
-	orlabel.backgroundColor = [UIColor clearColor];
-	orlabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:12.0f];
-	orlabel.text = @"or";
-	orlabel.textColor = [UIColor colorWithHex:0x444444];
-	[orlabel sizeToFit];
-	[header addSubview:orlabel];
-	[orlabel setx:[upgradeBtn x] - [orlabel w] - 20];
-	[orlabel sety:[upgradeBtn y] + ([upgradeBtn h] / 2) - ([orlabel h] / 2)];
-	
-	[learnmoreBtn setx:[orlabel x] - [learnmoreBtn w] - 2];
-	
-	[header seth:[upgradeBtn bottomEdge] + 14];
-	
+	if (![PDUtils isPro]) {
+		// bottom border
+		CALayer *blueBorder = [CALayer layer];
+		blueBorder.frame = CGRectMake(0.0f, [gradient_view bottomEdge], [header w], 0.5f);
+		blueBorder.backgroundColor = [UIColor colorWithHex:0x3e9ed5].CGColor; //grey - c3c2c2
+		[header.layer addSublayer:blueBorder];
+		
+		UIButton *upgradeBtn = [UIButton flatBlueButton:@"Upgrade to Pro - $1.99"];
+		[upgradeBtn addTarget:self action:@selector(promoUpgrade:) forControlEvents:UIControlEventTouchUpInside];
+		[header addSubview:upgradeBtn];
+		[upgradeBtn setx:[header w] - [upgradeBtn w] - 30];
+		[upgradeBtn sety:[gradient_view bottomEdge] + 13];
+		
+		UIButton *learnmoreBtn = [UIButton flatBlueButton:@"Learn More"];
+		[learnmoreBtn setTitleColor:[UIColor colorWithHex:0x3e9ed5] forState:UIControlStateNormal];
+		[header addSubview:learnmoreBtn];
+		[learnmoreBtn sety:[upgradeBtn y]];
+		[learnmoreBtn.titleLabel underline];
+		learnmoreBtn.backgroundColor = [UIColor clearColor];
+		[learnmoreBtn addTarget:[ViewController instance] action:@selector(showLearnMoreView) forControlEvents:UIControlEventTouchUpInside];
+		
+		UILabel *orlabel = [[UILabel alloc] init];
+		orlabel.backgroundColor = [UIColor clearColor];
+		orlabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:12.0f];
+		orlabel.text = @"or";
+		orlabel.textColor = [UIColor colorWithHex:0x444444];
+		[orlabel sizeToFit];
+		[header addSubview:orlabel];
+		[orlabel setx:[upgradeBtn x] - [orlabel w] - 20];
+		[orlabel sety:[upgradeBtn y] + ([upgradeBtn h] / 2) - ([orlabel h] / 2)];
+		
+		[learnmoreBtn setx:[orlabel x] - [learnmoreBtn w] - 2];
+		
+		[header seth:[upgradeBtn bottomEdge] + 14];
+	}
+	else {
+		[header seth:[gradient_view bottomEdge] + 1];
+	}
+		
 	CALayer *greyBorder = [CALayer layer];
 	greyBorder.frame = CGRectMake(0.0f, [header bottomEdge] - 1.0f, [header w], 0.5f);
 	greyBorder.backgroundColor = [UIColor colorWithHex:0x5d5c5c].CGColor;
@@ -161,7 +167,6 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	
 	[self.tableview setTableHeaderView:header];
 	[header release];
-	
 }
 
 #pragma mark - Event Handlers
@@ -238,7 +243,11 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 }
 
 - (void)promoUpgrade:(id)sender {
+	[PDUtils upgradeToPro];
 	
+	UIAlertView *alert = [[UIAlertView alloc] initWithTitle: @"Upgrade complete!" message: @"All Status features are fully unlocked. Thanks for upgrading." delegate: nil cancelButtonTitle:@"Continue" otherButtonTitles:nil];
+	[alert show];
+	[alert release];
 }
 
 #pragma mark - TableViewDelegate
@@ -261,20 +270,145 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 }
 
 - (int)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	return [self.feed count];
+	BOOL limit = self.max_free_rows > 0 && self.max_free_rows < [self.feed count] && ![PDUtils isPro];
+	return limit ? self.max_free_rows : [self.feed count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 	static NSString *CellIdentifier = @"Cell";
+	
+	RevealedView *revealedview;
+	UIView *rightBorder;
+	UILabel *messageLabel;
+	UILabel *dateLabel;
+	UILabel *nameLabel;
+	ThumbView *avatarView;
+	UIView *filter_countdown;
+	UILabel *countdown_label;
+	UIImageView *commentsNotifierView;
+	UIImageView *imageNotifierView;
+	ThumbView *imgView;
     
     ZKRevealingTableViewCell *cell = [self.tableview dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[[ZKRevealingTableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier] autorelease];
 		cell.delegate = self;
 		cell.direction = ZKRevealingTableViewCellDirectionLeft;
-		[cell configureForTimeline];
 		
-		ThumbView *avatarView = [cell avatarView];
+		//hide defaults
+		cell.textLabel.hidden = YES;
+		cell.detailTextLabel.hidden = YES;
+		[cell setSelectionStyle:UITableViewCellSelectionStyleNone];
+		
+		cell.selectedBackgroundView = [[UIView alloc] init];
+		[cell.contentView setBackgroundColor:[UIColor whiteColor]];
+		
+		// right border
+		rightBorder = [[UIView alloc] init];
+		rightBorder.frame = CGRectMake([cell.contentView w], 0.0f, 0.5f, [cell h]);
+		rightBorder.backgroundColor = [UIColor colorWithHex:0xDDDDDD]; //grey - c3c2c2
+		[cell.contentView addSubview:rightBorder];
+		rightBorder.tag = 51;
+		
+		// Avatar View
+		avatarView = [[ThumbView alloc] initWithFrame:CGRectMake(10, 10, 50, 50)];
+		avatarView.tag = 96;
+		[cell.contentView addSubview:avatarView];
+		
+		
+		// Filter Countdown
+		filter_countdown = [[UIView alloc] initWithFrame:CGRectMake(10, [avatarView bottomEdge] + 2, [avatarView w], 14)];
+		filter_countdown.backgroundColor = [UIColor brandBlueColor];
+		filter_countdown.tag = 99;
+		
+		UILabel *infinity_label = [UILabel label:@"∞" modifier:1.5f];
+		infinity_label.textColor = [UIColor whiteColor];
+		infinity_label.backgroundColor = [UIColor clearColor];
+		[filter_countdown addSubview:infinity_label];
+		[infinity_label setx:0];
+		[infinity_label setw:[filter_countdown w]];
+		[infinity_label centery];
+		[infinity_label sety:[infinity_label y] + (SYSTEM_VERSION_LESS_THAN(@"7.0") ? -1 : -2)];
+		infinity_label.textAlignment = NSTextAlignmentCenter;
+		infinity_label.hidden = YES;
+		infinity_label.tag = 94;
+		
+		countdown_label = [UILabel label:@"2d 4hrs" modifier:0.9f];
+		countdown_label.textColor = [UIColor whiteColor];
+		countdown_label.backgroundColor = [UIColor clearColor];
+		[filter_countdown addSubview:countdown_label];
+		[countdown_label setx:0];
+		[countdown_label setw:[filter_countdown w]];
+		[countdown_label centery];
+		[countdown_label sety:[countdown_label y] + (SYSTEM_VERSION_LESS_THAN(@"7.0") ? 1 : -1)];
+		countdown_label.textAlignment = NSTextAlignmentCenter;
+		countdown_label.tag = 95;
+		
+		[cell.contentView addSubview:filter_countdown];
+		
+		
+		// Main Post
+		messageLabel = [[[UILabel alloc] init] autorelease];
+		messageLabel.backgroundColor = [UIColor clearColor];
+		[cell.contentView addSubview:messageLabel];
+		messageLabel.font = [Post getPostFont];
+		messageLabel.numberOfLines = 0;
+		messageLabel.textColor = [UIColor colorWithHex:0x333333];
+		//messageLabel setw ignored here.  It's in setOptions
+		[messageLabel setx:[avatarView rightEdge] + 7];
+		[messageLabel sety:[avatarView y] - 3];
+		[messageLabel seth:60]; //sizeToFit called in setOptions, this is ignored
+		[messageLabel setwp:0.77f]; //sizeToFit called in setOptions, this is ignored
+		messageLabel.tag = 90;
+		[cell bringSubviewToFront:messageLabel];
+		
+		// Time stamp
+		dateLabel = [[[UILabel alloc] init] autorelease];
+		dateLabel.backgroundColor = [UIColor clearColor];
+		[cell.contentView addSubview:dateLabel];
+		dateLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:9.0f];
+		dateLabel.textColor = [UIColor colorWithHex:0x5b5c5c];
+		dateLabel.numberOfLines = 1;
+		dateLabel.text = @"an unknown amount of time ago";
+		[dateLabel sizeToFit];
+		dateLabel.text = @"";
+		dateLabel.tag = 91;
+		
+		// User's Name
+		nameLabel = [[[UILabel alloc] init] autorelease];
+		nameLabel.backgroundColor = [UIColor clearColor];
+		[cell.contentView addSubview:nameLabel];
+		nameLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:11.0f];
+		nameLabel.textColor = [UIColor colorWithHex:0x3e9ed5];
+		nameLabel.numberOfLines = 1;
+		nameLabel.text = @"an unknown amount of time ago";
+		[nameLabel sizeToFit];
+		nameLabel.tag = 92;
+		
+		CGFloat imgview_w = 57;
+		imgView = [[ThumbView alloc] initWithFrame:CGRectMake([cell.contentView w] - (imgview_w + 4), [messageLabel y], imgview_w, imgview_w)];//CGRectMake(0, 0, 67, 67)];
+		imgView.tag = 98;
+		imgView.hidden = YES;
+		[cell.contentView addSubview:imgView];
+		
+		// Comments icon
+		commentsNotifierView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_no_comments.png"]];
+		[commentsNotifierView setw:11];
+		[commentsNotifierView seth:11];
+		[commentsNotifierView setx:[cell w] - [commentsNotifierView w] - 8];
+		commentsNotifierView.tag = 97;
+		[cell.contentView addSubview:commentsNotifierView];
+		[cell.contentView bringSubviewToFront:commentsNotifierView];
+		
+		// Images icon
+		imageNotifierView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_no_comments.png"]];
+		[imageNotifierView setw:11];
+		[imageNotifierView seth:11];
+		[imageNotifierView setx:[commentsNotifierView x] - [imageNotifierView w] - 8];
+		imageNotifierView.tag = 93;
+		[cell.contentView addSubview:commentsNotifierView];
+		[cell.contentView bringSubviewToFront:commentsNotifierView];
+		
 		avatarView.userInteractionEnabled = YES;
 		UITapGestureRecognizer *doubletapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(zoomAvatar:)];
 		doubletapgr.numberOfTouchesRequired = 1;
@@ -293,27 +427,169 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		imgview_doubletapgr.delaysTouchesBegan = YES;
 		[imgview addGestureRecognizer:imgview_doubletapgr];
 		[imgview_doubletapgr release];
+
+		int reveal_w = 201;
+		revealedview = [[RevealedView alloc] initWithFrame:CGRectMake(0, -1, reveal_w, 100)];
+		revealedview.tag = 50;
+		cell.pixelsToReveal = reveal_w;
+		[cell addSubview:revealedview];
+		[cell sendSubviewToBack:revealedview];
+		cell.revealedView = revealedview;
     }
+	else {
+		revealedview = (RevealedView *)[cell viewWithTag:50];
+		rightBorder = (UIView *)[cell viewWithTag:51];
+		
+		messageLabel = [cell messageLabel];
+		dateLabel = [cell dateLabel];
+		nameLabel = [cell nameLabel];
+		avatarView = [cell avatarView];
+		imgView = [cell imgView];
+	}
 	
     Post *post = [self.feed objectAtIndex:[indexPath row]];
 	User *user = [self.user_data objectForKey:post.uid];
 	
-	cell.revealedView = [self revealedView:indexPath];
-	cell.pixelsToReveal = [cell.revealedView w];
-	((RevealedView *)cell.revealedView).post = post;
+	[revealedview seth:[post rowHeight]];
+	revealedview.post = post;
+	
+	[rightBorder seth:[revealedview h]];
 	
 	if ([post hasImages]) {
 		NSLog(@"Post has images %@", [post.images description]);
 	}
+
 	
-	[cell setOptions:@{
-	   @"message":		post.message,
-	   @"name":			[NSString stringWithFormat:@"%@ %@", user.first_name, user.last_name],
-	   @"has_comments":	[NSNumber numberWithBool:post.has_comments],
-	   @"time":			post.time,
-	   @"post":			post,
-	   @"user":			user
-	}];
+
+	NSDateFormatter *df = [NSDateFormatter instance];
+	
+	if ([user is_filtered]) {
+		[cell filter_countdown].hidden = NO;
+		
+		if ([[user filter_state] isEqualToString:FILTER_STATE_FILTERED]) {
+			[cell infinity_label].hidden = NO;
+			[cell countdown_label].hidden = YES;
+		}
+		else {
+			[cell infinity_label].hidden = YES;
+			[cell countdown_label].hidden = NO;
+			
+			//print date to countdown_label
+			
+			static dispatch_once_t onceMark;
+			static NSCalendar *calendar = nil;
+			
+			dispatch_once(&onceMark, ^{
+				calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+			});
+			
+			
+			NSDateComponents *components = [calendar components:NSDayCalendarUnit|NSHourCalendarUnit|NSMinuteCalendarUnit fromDate:[NSDate date] toDate:[user filtered_until] options:0];
+			
+			if (components.day > 1) {
+				[cell countdown_label].text = [NSString stringWithFormat:@"%i days", components.day];
+			}
+			//1d 4hrs
+			else if (components.day > 0 && components.hour > 1) {
+				[cell countdown_label].text = [NSString stringWithFormat:@"%id %ihrs", components.day, components.hour];
+			}
+			//1d 1hr
+			else if (components.day > 0 && components.hour == 1) {
+				[cell countdown_label].text = [NSString stringWithFormat:@"%id %ihr", components.day, components.hour];
+			}
+			//1 day  ..this probably won't happen
+			else if (components.day > 0 && components.hour == 0) {
+				[cell countdown_label].text = [NSString stringWithFormat:@"%i day", components.day];
+			}
+			//12 hours
+			else if (components.hour > 1) {
+				[cell countdown_label].text = [NSString stringWithFormat:@"%i hours", components.hour];
+			}
+			//1 hour
+			else if (components.hour == 1) {
+				[cell countdown_label].text = @"1 hour";
+			}
+			//48 mins
+			else if (components.minute > 1) {
+				[cell countdown_label].text = [NSString stringWithFormat:@"%i mins", components.minute];
+			}
+			//1 min
+			else if (components.minute == 1) {
+				[cell countdown_label].text = @"1 min";
+			}
+			//0 min or less
+			else  {
+				[cell countdown_label].text = @"now";
+			}
+		}
+	}
+	else {
+		[cell filter_countdown].hidden = YES;
+	}
+	
+	
+	//status message
+	CGFloat messageLabelWidth = post ? [post messageLabelWidth] : 0.75f;
+	messageLabel.text = post.message;
+	messageLabel.numberOfLines = 0;//[[options objectForKey:@"is_expanded"] boolValue] ? 0 : [cell linesBeforeClip];
+	[messageLabel setw:messageLabelWidth];
+	[messageLabel sizeToFit];
+	
+	//name
+	nameLabel.text = [user full_name];
+	[nameLabel sizeToFit];
+	
+	/*
+	 [cell setOptions:@{
+	 @"message":		post.message,
+	 @"name":			[NSString stringWithFormat:@"%@ %@", user.first_name, user.last_name],
+	 @"has_comments":	[NSNumber numberWithBool:post.has_comments],
+	 @"time":			post.time,
+	 @"post":			post,
+	 @"user":			user
+	 }];
+	 */
+	
+	//date string
+	NSDate *date = [NSDate dateWithTimeIntervalSince1970:[post.time integerValue]];
+	[df setDateFormat:@"h:mma M/d"];
+	dateLabel.text = [NSString stringWithFormat:@"at %@", [[df stringFromDate:date] lowercaseString]];
+	
+	//blue bar on the left
+	[cell commentsNotifierView].hidden = !post.has_comments;
+	
+	//mark as read
+	if (!cell.commentsNotifierView.hidden) {
+		BOOL should_mark_as_read = post && post.last_read && post.last_comment_at && [post.last_read compare:post.last_comment_at] == NSOrderedDescending;
+		[cell.commentsNotifierView setImage:[UIImage imageNamed:(should_mark_as_read ? @"icon_has_comments.png" : @"icon_has_unread")]];
+	}
+	else {
+		[cell.commentsNotifierView setImage:[UIImage imageNamed:@"icon_no_comments.png"]];
+	}
+	
+	[nameLabel setx:[messageLabel x]];
+	[nameLabel sety:MAX(([messageLabel bottomEdge] + 7), (post ? [post minRowHeight] - 21 : 0))];
+	
+	[nameLabel setw:[messageLabel w]];
+	[nameLabel sizeToFit];
+	
+	[dateLabel sety:[nameLabel bottomEdge] - [dateLabel h]];
+	[dateLabel setx:[nameLabel rightEdge] + 2];
+	
+	[cell.commentsNotifierView sety:[nameLabel y] + 2];
+	
+	//post images thumbnail
+	if (post && [post hasImages]) {
+		[cell imageNotifierView].hidden = NO;
+		//imgView.hidden = NO;
+		//imgView.post = [options objectForKey:@"post"];
+	} else {
+		[cell imageNotifierView].hidden = YES;
+		imgView.hidden = YES;
+	}
+	
+	//profile pic
+	avatarView.user = user;
 	
     return cell;
 }
@@ -329,13 +605,14 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 }
 
 - (void)cellDidReveal:(ZKRevealingTableViewCell *)cell {
-	NSLog(@"Revealed Cell with title: %@", cell.textLabel.text);
-	[((RevealedView *)cell.revealedView) refresh];
 	self.currentlyRevealedCell = cell;
+	
+	[self.tableview scrollToRowAtIndexPath:[self.tableview indexPathForCell:cell] atScrollPosition:UITableViewScrollPositionNone animated:YES];
 }
 
 - (void)cellDidBeginPan:(ZKRevealingTableViewCell *)cell {
 	if (cell != self.currentlyRevealedCell) {
+		[((RevealedView *)cell.revealedView) refresh];
 		self.currentlyRevealedCell = nil;
 	}
 }
@@ -347,9 +624,32 @@ const int NUM_LINES_BEFORE_CLIP = 5;
     }
 }
 
+
+-(UIView*) hitTest:(CGPoint)point withEvent:(UIEvent*)event {
+	UIView *hitview = [super hitTest:point withEvent:event];
+	
+	if (self.currentlyRevealedCell || self.isSnappingBack) {
+		if (!hitview || ![hitview parents:[RevealedView class]]) {
+			if (self.currentlyRevealedCell) {
+				[[self currentlyRevealedCell] snapBack];
+			}
+			
+			hitview = nil;
+		}
+	}
+	
+	return hitview;
+}
+
 - (void)cellWillSnapBack:(ZKRevealingTableViewCell *)cell {
     NSLog(@"Will snap back");
     self.currentlyRevealedCell = nil;
+	self.isSnappingBack = YES;
+}
+
+- (void)cellDidSnapBack:(ZKRevealingTableViewCell *)cell {
+	NSLog(@"Did snap back");
+	self.isSnappingBack = NO;
 }
 
 #pragma mark - ZKRevealing - Accessors
@@ -364,15 +664,6 @@ const int NUM_LINES_BEFORE_CLIP = 5;
     //starLabel.textColor = [UIColor whiteColor];
 	
 	_currentlyRevealedCell = currentlyRevealedCell;
-}
-
-- (RevealedView *)revealedView:(NSIndexPath *)indexPath {
-	Post *post = [self.feed objectAtIndex:[indexPath row]];
-	
-    RevealedView *revealedview = [[RevealedView alloc] initWithFrame:CGRectMake(0, -1, 201, 100)];
-	revealedview.post = post;
-	
-    return revealedview;
 }
 
 - (void)updateButtonsForPost:(Post *)post {

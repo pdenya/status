@@ -31,6 +31,8 @@
 @property (readwrite, copy) PDBlock filterButtonClicked;
 @property (readwrite, copy) PDBlock favoriteButtonClicked;
 @property (nonatomic, strong) ZKRevealingTableViewCell *currentlyRevealedCell;
+@property (assign) BOOL isSnappingBack;
+@property (assign) int max_free_rows;
 
 - (void) setUpgradeHeader:(NSDictionary *)options;
 

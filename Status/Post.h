@@ -17,6 +17,7 @@
 @property (nonatomic, retain) NSMutableArray *images;
 @property (nonatomic, retain) NSDate *last_read;
 @property (nonatomic, retain) NSDate *last_comment_at;
+@property (assign) CGFloat row_height;
 @property (readwrite) BOOL has_comments;
 
 +(Post *)postFromDictionary:(NSDictionary *)post_data;

@@ -188,6 +188,14 @@
 	return (UILabel *)[self.contentView viewWithTag:95];
 }
 
+- (BOOL) isCompletelyVisible {
+	UITableView *tableview = (UITableView *)[self parents:[UITableView class]];
+	CGRect cellRect = [tableview rectForRowAtIndexPath:[tableview indexPathForCell:self]];
+	cellRect = [tableview convertRect:cellRect toView:tableview.superview];
+	BOOL completelyVisible = CGRectContainsRect(tableview.frame, cellRect);
+
+	return completelyVisible;
+}
 
 - (int) linesBeforeClip {
 	return 5;

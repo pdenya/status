@@ -30,10 +30,14 @@
 		
 		self.timeline = [[TimelineView alloc] initWithFrame:self.bounds];
 		self.timeline.feed = self.feed;
+		self.timeline.max_free_rows = 5;
 		[self.timeline.tableview reloadData];
 		[self.timeline setUpgradeHeader:@{
 		 @"title": @"Read what you want to read",
-		 @"message": @"Filter your friends so their statuses don't show up in your timeline for a day, a week, or forever. Hide 5 people for free or upgrade to pro to take back your timeline."
+		 @"message": @"Filter your friends so their statuses don't show up in your timeline for a day, a week, or forever. Hide 5 people for free or upgrade to pro to take back your timeline.",
+		 @"message_pro": @"Filter your friends so their statuses don't show up in your timeline for a day, a week or forever. The most recent update from each user you've filtered is listed here.",
+		 @"icon": @"icon_filter_large",
+		 @"icon_label": @"Filtered"
 		}];
 		[self addSubview:self.timeline];
 		
@@ -51,6 +55,7 @@
 		NSDictionary *filter_data = [self.filter objectForKey:key];
 		User *user = [self.user_data objectForKey:[filter_data objectForKey:@"uid"]];
 		Post *post = [user most_recent_post];
+		post.row_height = 0;
 		[self.feed addObject:post];
 	}
 	

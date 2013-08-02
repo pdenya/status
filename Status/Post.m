@@ -76,6 +76,8 @@
 }
 
 - (CGFloat)rowHeight {
+	if (self.row_height && self.row_height > 0) return self.row_height;
+	
 	CGFloat w = [self messageLabelWidth];
 	
 	CGFloat height = [self.message sizeWithFont:[Post getPostFont]
@@ -85,6 +87,9 @@
 	height += 36;
 	
 	height = MAX([self minRowHeight], height);
+	
+	//cache
+	self.row_height = height;
 	
 	return height;
 }
