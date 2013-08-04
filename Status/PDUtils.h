@@ -15,4 +15,6 @@
 + (void) downgradeFromPro;
 + (BOOL) processCommand:(UITextView *)tf;
 + (void) upgradeComplete;
++ (void) openURL:(NSURL *)inputURL;
++ (BOOL) parseAndOpenLink:(NSString *)message;
 @end

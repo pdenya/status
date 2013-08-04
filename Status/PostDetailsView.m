@@ -9,8 +9,6 @@
 #import "PostDetailsView.h"
 #import "PostCreateView.h"
 #import "UserAvatarView.h"
-#import "TTTAttributedLabel.h"
-#import "TTTAttributedLabelHandler.h"
 #import "ThumbView.h"
 #import "ViewController.h"
 #import "HeaderView.h"
@@ -92,24 +90,6 @@
 	
 	[dateLabel sizeToFit];
 	[topView addSubview:dateLabel];
-	
-	
-	/*
-	// Attributed Post Message
-	TTTAttributedLabel *postLabel = [[TTTAttributedLabel alloc] init];
-	postLabel.dataDetectorTypes = UIDataDetectorTypeLink | UIDataDetectorTypeAddress | UIDataDetectorTypePhoneNumber;
-	postLabel.lineBreakMode = UILineBreakModeWordWrap;
-	postLabel.text = self.post.message;
-	postLabel.delegate = [TTTAttributedLabelHandler instance];
-	postLabel.font = [UIFont systemFontOfSize:15.0f];
-	postLabel.textColor = [UIColor blackColor];
-	postLabel.numberOfLines = 0;
-	[postLabel setw:200];
-	[postLabel sizeToFit];
-	[postLabel sety:[avatarView y]];
-	[postLabel setx:[avatarView rightEdge] + 10];
-	[topView addSubview:postLabel];
-	*/
 	
 	// Post Message
 	UILabel *postLabel = [[UILabel alloc] init];
@@ -282,9 +262,7 @@
 	[((UIButton *)[self viewWithTag:97]) setImage:[UIImage imageNamed:([self.user is_favorite] ? @"icon_favorite_active.png" : @"icon_favorite.png")] forState:UIControlStateNormal];
 }
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	
-}
+#pragma mark - UITableView Delegate
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
 	CGFloat height = [[[self.comments objectAtIndex:indexPath.row] valueForKey:@"text"] sizeWithFont:[UIFont systemFontOfSize:15.0f] constrainedToSize:CGSizeMake(round([self w] * .75), FLT_MAX) lineBreakMode:UILineBreakModeWordWrap].height;
@@ -390,6 +368,10 @@
 	[df release];
 	
 	return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+	[PDUtils parseAndOpenLink:[[self.comments objectAtIndex:indexPath.row] valueForKey:@"text"]];
 }
 
 @end
