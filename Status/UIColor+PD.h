@@ -12,5 +12,6 @@
 
 + (UIColor *)colorWithHex:(UInt32)hex;
 + (UIColor *)brandBlueColor;
++ (UIColor *)brandGreyColor;
 
 @end

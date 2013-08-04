@@ -31,39 +31,59 @@
 		[self.messageTextField setx:padding];
 		self.messageTextField.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:15.0f];
 		self.messageTextField.textColor = [UIColor colorWithHex:0x333333];
-		
-		UIButton *postButton = [UIButton flatBlueButton:@"Post to Facebook" modifier:1.2];
-		[self addSubview:postButton];
-		[postButton sety:[messageTextField bottomEdge] + padding];
-		[postButton setx:[messageTextField rightEdge] - [postButton w] - padding];
-		[postButton addTarget:self action:@selector(postToFacebookClicked:) forControlEvents:UIControlEventTouchUpInside];
-		postButton.tag = 60;
-		
-		UILabel *close_btn = [[UILabel alloc] init];
-		close_btn.backgroundColor = [UIColor clearColor];
-		close_btn.text = @"×";
-		close_btn.textColor = [UIColor colorWithHex:0x444444];
-		close_btn.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:40.0f];
-		close_btn.userInteractionEnabled = YES;
-		close_btn.textAlignment = NSTextAlignmentCenter;
-		
-		UITapGestureRecognizer *gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cancelClicked:)];
-		gr.numberOfTapsRequired = 1;
-		gr.numberOfTouchesRequired = 1;
-		[close_btn addGestureRecognizer:gr];
-		
-		[self addSubview:close_btn];
-		[close_btn sizeToFit];
-		[close_btn setx:padding];
-		[close_btn setw:[close_btn w] + 10];
-		[close_btn sety:[postButton y] - 14];
     }
     return self;
 }
 
 - (void)addedAsSubview:(NSDictionary *)options {
 	[self performSelector:@selector(focus) withObject:nil afterDelay:0.0f];
+	[self performSelector:@selector(addControls) withObject:nil afterDelay:0.3f];
 }
+
+
+- (void)addControls {
+	int padding = 4;
+	
+	UIButton *postButton = [UIButton flatBlueButton:@"Post to Facebook" modifier:1.2];
+	postButton.hidden = YES;
+	postButton.alpha = 0;
+	[self addSubview:postButton];
+	[postButton sety:[self.messageTextField bottomEdge] + padding];
+	[postButton setx:[self.messageTextField rightEdge] - [postButton w] - padding];
+	[postButton addTarget:self action:@selector(postToFacebookClicked:) forControlEvents:UIControlEventTouchUpInside];
+	postButton.tag = 60;
+	
+	UILabel *close_btn = [[UILabel alloc] init];
+	close_btn.hidden = YES;
+	close_btn.alpha = 0;
+	close_btn.backgroundColor = [UIColor clearColor];
+	close_btn.text = @"×";
+	close_btn.textColor = [UIColor colorWithHex:0x444444];
+	close_btn.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:40.0f];
+	close_btn.userInteractionEnabled = YES;
+	close_btn.textAlignment = NSTextAlignmentCenter;
+	
+	UITapGestureRecognizer *gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cancelClicked:)];
+	gr.numberOfTapsRequired = 1;
+	gr.numberOfTouchesRequired = 1;
+	[close_btn addGestureRecognizer:gr];
+	
+	[self addSubview:close_btn];
+	[close_btn sizeToFit];
+	[close_btn setx:padding];
+	[close_btn setw:[close_btn w] + 10];
+	[close_btn sety:[postButton y] - 14];
+	
+	[UIView animateWithDuration:0.2f animations:^{
+		postButton.alpha = 1;
+		postButton.hidden = NO;
+		close_btn.alpha = 1;
+		close_btn.hidden = NO;
+	} completion:^(BOOL finished) {
+		[close_btn release];
+	}];
+}
+
 
 - (void)focus {
 	[self.messageTextField becomeFirstResponder];

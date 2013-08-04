@@ -8,7 +8,6 @@
 
 #import "PostCreateView.h"
 #import "PostDetailsView.h"
-#import "EditFilterView.h"
 #import "TimelineView.h"
 #import "UserAvatarView.h"
 #import "ThumbView.h"
@@ -33,6 +32,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		self.tableview.separatorColor = [UIColor colorWithHex:0x3e9ed5];
 		self.tableview.backgroundColor = [UIColor whiteColor];
 		self.max_free_rows = 0;
+		self.removeWhenFiltered = NO;
 		[self.tableview setTableFooterView:[UIView new]];
 		[self addSubview:self.tableview];
 		
@@ -75,7 +75,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	// NOTE: almost all of this configuration could be moved into UpgradeHeader.m
 	//		 but it's only called from here anyway at the moment
 	
-	header.backgroundColor = [UIColor colorWithHex:0xf7f6f6];
+	header.backgroundColor = [UIColor brandGreyColor];
 	
 	UILabel *title = [[UILabel alloc] init];
 	title.backgroundColor = [UIColor clearColor];
@@ -244,15 +244,15 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 
 - (void)promoUpgrade:(id)sender {
 	[PDUtils upgradeToPro];
-	
-	UIAlertView *alert = [[UIAlertView alloc] initWithTitle: @"Upgrade complete!" message: @"All Status features are fully unlocked. Thanks for upgrading." delegate: nil cancelButtonTitle:@"Continue" otherButtonTitles:nil];
-	[alert show];
-	[alert release];
 }
 
 #pragma mark - TableViewDelegate
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+	if (self.max_free_rows > 0 && ![PDUtils isPro] && [indexPath row] >= self.max_free_rows) {
+		return 100;
+	}
+	
 	Post *post = [self.feed objectAtIndex:[indexPath row]];
 	CGFloat h = [post rowHeight];
 	if (h < 20) {
@@ -271,11 +271,30 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 
 - (int)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 	BOOL limit = self.max_free_rows > 0 && self.max_free_rows < [self.feed count] && ![PDUtils isPro];
-	return limit ? self.max_free_rows : [self.feed count];
+	return limit ? self.max_free_rows + 1 : [self.feed count];
+}
+
+- (UITableViewCell *)upgradeCell {
+	static NSString *UpgradeCellIdentifier = @"UpgradeCell";
+	UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:UpgradeCellIdentifier];
+	
+	cell.textLabel.hidden = YES;
+	cell.contentView.backgroundColor = [UIColor brandGreyColor];
+	
+	UIButton *btn = [UIButton flatBlueButton:[NSString stringWithFormat:@"Upgrade to see %i more", [self.feed count] - self.max_free_rows] modifier:1.5f];
+	[cell.contentView addSubview:btn];
+	[btn centerx];
+	[btn centery];
+	btn.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+	[btn addTarget:self action:@selector(promoUpgrade:) forControlEvents:UIControlEventTouchUpInside];
+	
+	return cell;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-	static NSString *CellIdentifier = @"Cell";
+	if (self.max_free_rows > 0 && ![PDUtils isPro] && [indexPath row] >= self.max_free_rows) {
+		return [self upgradeCell];
+	}
 	
 	RevealedView *revealedview;
 	UIView *rightBorder;
@@ -287,8 +306,8 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	UILabel *countdown_label;
 	UIImageView *commentsNotifierView;
 	UIImageView *imageNotifierView;
-	ThumbView *imgView;
-    
+
+    static NSString *CellIdentifier = @"Cell";
     ZKRevealingTableViewCell *cell = [self.tableview dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[[ZKRevealingTableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier] autorelease];
@@ -385,12 +404,6 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		[nameLabel sizeToFit];
 		nameLabel.tag = 92;
 		
-		CGFloat imgview_w = 57;
-		imgView = [[ThumbView alloc] initWithFrame:CGRectMake([cell.contentView w] - (imgview_w + 4), [messageLabel y], imgview_w, imgview_w)];//CGRectMake(0, 0, 67, 67)];
-		imgView.tag = 98;
-		imgView.hidden = YES;
-		[cell.contentView addSubview:imgView];
-		
 		// Comments icon
 		commentsNotifierView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_no_comments.png"]];
 		[commentsNotifierView setw:11];
@@ -401,13 +414,13 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		[cell.contentView bringSubviewToFront:commentsNotifierView];
 		
 		// Images icon
-		imageNotifierView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_no_comments.png"]];
+		imageNotifierView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_has_images.png"]];
 		[imageNotifierView setw:11];
 		[imageNotifierView seth:11];
 		[imageNotifierView setx:[commentsNotifierView x] - [imageNotifierView w] - 8];
 		imageNotifierView.tag = 93;
-		[cell.contentView addSubview:commentsNotifierView];
-		[cell.contentView bringSubviewToFront:commentsNotifierView];
+		[cell.contentView addSubview:imageNotifierView];
+		[cell.contentView bringSubviewToFront:imageNotifierView];
 		
 		avatarView.userInteractionEnabled = YES;
 		UITapGestureRecognizer *doubletapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(zoomAvatar:)];
@@ -418,16 +431,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		[avatarView addGestureRecognizer:doubletapgr];
 		[doubletapgr release];
 		
-		ThumbView *imgview = [cell imgView];
-		imgview.userInteractionEnabled = YES;
-		UITapGestureRecognizer *imgview_doubletapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(zoomPostImage:)];
-		imgview_doubletapgr.numberOfTouchesRequired = 1;
-		imgview_doubletapgr.numberOfTapsRequired = 2;
-		imgview_doubletapgr.cancelsTouchesInView = YES;
-		imgview_doubletapgr.delaysTouchesBegan = YES;
-		[imgview addGestureRecognizer:imgview_doubletapgr];
-		[imgview_doubletapgr release];
-
+		
 		int reveal_w = 201;
 		revealedview = [[RevealedView alloc] initWithFrame:CGRectMake(0, -1, reveal_w, 100)];
 		revealedview.tag = 50;
@@ -444,7 +448,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		dateLabel = [cell dateLabel];
 		nameLabel = [cell nameLabel];
 		avatarView = [cell avatarView];
-		imgView = [cell imgView];
+		imageNotifierView = [cell imageNotifierView];
 	}
 	
     Post *post = [self.feed objectAtIndex:[indexPath row]];
@@ -539,17 +543,6 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	nameLabel.text = [user full_name];
 	[nameLabel sizeToFit];
 	
-	/*
-	 [cell setOptions:@{
-	 @"message":		post.message,
-	 @"name":			[NSString stringWithFormat:@"%@ %@", user.first_name, user.last_name],
-	 @"has_comments":	[NSNumber numberWithBool:post.has_comments],
-	 @"time":			post.time,
-	 @"post":			post,
-	 @"user":			user
-	 }];
-	 */
-	
 	//date string
 	NSDate *date = [NSDate dateWithTimeIntervalSince1970:[post.time integerValue]];
 	[df setDateFormat:@"h:mma M/d"];
@@ -573,20 +566,14 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	[nameLabel setw:[messageLabel w]];
 	[nameLabel sizeToFit];
 	
-	[dateLabel sety:[nameLabel bottomEdge] - [dateLabel h]];
+	dateLabel.center = nameLabel.center;
+	//[dateLabel sety:[nameLabel bottomEdge] - [dateLabel h]];
 	[dateLabel setx:[nameLabel rightEdge] + 2];
 	
 	[cell.commentsNotifierView sety:[nameLabel y] + 2];
+	[[cell imageNotifierView] sety:[[cell commentsNotifierView] y]];
 	
-	//post images thumbnail
-	if (post && [post hasImages]) {
-		[cell imageNotifierView].hidden = NO;
-		//imgView.hidden = NO;
-		//imgView.post = [options objectForKey:@"post"];
-	} else {
-		[cell imageNotifierView].hidden = YES;
-		imgView.hidden = YES;
-	}
+	[cell imageNotifierView].hidden = ![post hasImages];
 	
 	//profile pic
 	avatarView.user = user;
@@ -596,6 +583,26 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	[self viewComments:indexPath];
+}
+
+- (void)removeFromTimeline:(User *)user {
+	NSMutableIndexSet *indexes_to_remove = [[NSMutableIndexSet alloc] init];
+	NSMutableArray *index_paths_to_remove = [[NSMutableArray alloc] init];
+	
+	Post *p;
+	for (int i = 0; i < [self.feed count]; i++) {
+		p = (Post *)[self.feed objectAtIndex:i];
+		if ([p user] == user) {
+			[indexes_to_remove addIndex:i];
+			[index_paths_to_remove addObject:[NSIndexPath indexPathForRow:i inSection:0]];
+		}
+	}
+	
+	[tableview beginUpdates];
+	[self.feed removeObjectsAtIndexes:indexes_to_remove];
+	[self.tableview deleteRowsAtIndexPaths:index_paths_to_remove withRowAnimation:UITableViewRowAnimationAutomatic];
+	[tableview endUpdates];
+	
 }
 
 #pragma mark - ZKRevealingTableViewCellDelegate
@@ -630,15 +637,20 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	
 	if (self.currentlyRevealedCell || self.isSnappingBack) {
 		if (!hitview || ![hitview parents:[RevealedView class]]) {
-			if (self.currentlyRevealedCell) {
-				[[self currentlyRevealedCell] snapBack];
-			}
-			
+			[self snapBackRevealedCell];
 			hitview = nil;
 		}
 	}
 	
 	return hitview;
+}
+
+- (void)snapBackRevealedCell {
+	if (self.currentlyRevealedCell) {
+		[[self currentlyRevealedCell] snapBack];
+	}
+	
+	self.currentlyRevealedCell = nil;
 }
 
 - (void)cellWillSnapBack:(ZKRevealingTableViewCell *)cell {
@@ -650,6 +662,11 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 - (void)cellDidSnapBack:(ZKRevealingTableViewCell *)cell {
 	NSLog(@"Did snap back");
 	self.isSnappingBack = NO;
+	
+	User *user = [(RevealedView *)[cell revealedView] user];
+	if (self.removeWhenFiltered && [user is_filtered]) {
+		[self removeFromTimeline:user];
+	}
 }
 
 #pragma mark - ZKRevealing - Accessors

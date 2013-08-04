@@ -18,5 +18,6 @@
 @property (nonatomic, retain) TimelineView *timeline;
 
 - (void) refreshFeed;
+- (void) addUpgradeHeader;
 
 @end

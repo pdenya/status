@@ -45,10 +45,29 @@
 	NSLog(@"Loaded Favorites Data: %@", [self.favorites description]);
 }
 
+- (void) _save {
+	static BOOL is_saving = NO;
+	static BOOL is_dirty = NO;
+	
+	if (!is_saving) {
+		is_saving = YES;
+		NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+		NSData *favoritesData = [NSKeyedArchiver archivedDataWithRootObject:self.favorites];
+		[favoritesData writeToFile:[NSString stringWithFormat:@"%@/favorites",docDir] atomically:YES];
+		is_saving = NO;
+		
+		if (is_dirty) {
+			is_dirty = NO;
+			[self _save];
+		}
+	}
+	else {
+		is_dirty = YES;
+	}
+}
+
 - (void) save {
-    NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    NSData *favoritesData = [NSKeyedArchiver archivedDataWithRootObject:self.favorites];
-	[favoritesData writeToFile:[NSString stringWithFormat:@"%@/favorites",docDir] atomically:YES];
+	[self performSelectorInBackground:@selector(_save) withObject:nil];
 }
 
 @end

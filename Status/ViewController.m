@@ -11,6 +11,7 @@
 #import "LearnMoreView.h"
 #import "PostCreateView.h"
 #import "TimelineView.h"
+#import "IAPHelper.h"
 #import <QuartzCore/QuartzCore.h>
 
 @interface ViewController ()
@@ -38,6 +39,7 @@ const int FAILED_THRESHOLD = 30;
 	
 	if (self) {
 		self.view.frame = [UIScreen mainScreen].bounds;
+		self.is_done_loading = NO;
 	}
 
 	return self;
@@ -58,6 +60,13 @@ const int FAILED_THRESHOLD = 30;
 
 	self.total_failed = 0;
 	
+	//[[FBHelper instance] logout];
+	[self performSelectorInBackground:@selector(loadFeeds) withObject:nil];
+	
+	NSLog(@"viewWillAppear");
+}
+
+- (void) loadFeeds {
 	[self load];
 	//[self loadDemoData];
     
@@ -68,11 +77,13 @@ const int FAILED_THRESHOLD = 30;
 	
 	[self filterFilter];
 	
-	//[[FBHelper instance] logout];
+	self.is_done_loading = YES;
 	
-	[self auth];
+	[self performSelectorOnMainThread:@selector(auth) withObject:nil waitUntilDone:NO];
 	
-	NSLog(@"viewWillAppear");
+	if (![PDUtils isPro]) {
+		[IAPHelper instance];
+	}
 }
 
 - (void)auth {
@@ -237,6 +248,24 @@ const int FAILED_THRESHOLD = 30;
 	PostCreateView *postcreate = [[PostCreateView alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	[self openModal:postcreate];
 	[postcreate addedAsSubview:@{}];
+	[postcreate release];
+}
+
+- (void) upgraded {
+	if (self.favoritesview) {
+		[self.favoritesview addUpgradeHeader];
+		[self.favoritesview.timeline.tableview reloadData];
+	}
+	
+	if (self.filteredview) {
+		[self.filteredview addUpgradeHeader];
+		[self.filteredview.timeline.tableview reloadData];
+	}
+	
+	if (self.unreadview) {
+		[self.unreadview addUpgradeHeader];
+		[self.unreadview.timeline.tableview reloadData];
+	}
 }
 
 - (CGRect) contentFrame {
@@ -308,8 +337,13 @@ const int FAILED_THRESHOLD = 30;
 
 //once called, this method polls fb
 -(void)streamRefreshInterval {
-	[[FeedHelper instance] refresh];
-	[self performSelector:@selector(streamRefreshInterval) withObject:nil afterDelay:30.0f];
+	if (self.is_done_loading) {
+		[[FeedHelper instance] refresh];
+		[self performSelector:@selector(streamRefreshInterval) withObject:nil afterDelay:30.0f];
+	}
+	else {
+		[self performSelector:@selector(streamRefreshInterval) withObject:nil afterDelay:1.0f];
+	}
 }
 
 - (void)filterFilter {

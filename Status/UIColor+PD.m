@@ -22,4 +22,7 @@
 	return [UIColor colorWithHex:0x3e9ed5];
 }
 
++ (UIColor *)brandGreyColor {
+	return [UIColor colorWithHex:0xf7f6f6];
+}
 @end

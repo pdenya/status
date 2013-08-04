@@ -26,6 +26,7 @@
 		
 		self.timeline = [[TimelineView alloc] initWithFrame:self.bounds];
 		self.timeline.feed = self.feed;
+		self.timeline.removeWhenFiltered = YES;
 		[self.timeline.tableview reloadData];
 		/*
 		[self.timeline setUpgradeHeader:@{

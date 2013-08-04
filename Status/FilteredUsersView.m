@@ -7,7 +7,6 @@
 //
 
 #import "FilteredUsersView.h"
-#import "EditFilterView.h"
 #import "ThumbView.h"
 #import "UserAvatarView.h"
 
@@ -32,13 +31,7 @@
 		self.timeline.feed = self.feed;
 		self.timeline.max_free_rows = 5;
 		[self.timeline.tableview reloadData];
-		[self.timeline setUpgradeHeader:@{
-		 @"title": @"Read what you want to read",
-		 @"message": @"Filter your friends so their statuses don't show up in your timeline for a day, a week, or forever. Hide 5 people for free or upgrade to pro to take back your timeline.",
-		 @"message_pro": @"Filter your friends so their statuses don't show up in your timeline for a day, a week or forever. The most recent update from each user you've filtered is listed here.",
-		 @"icon": @"icon_filter_large",
-		 @"icon_label": @"Filtered"
-		}];
+		[self addUpgradeHeader];
 		[self addSubview:self.timeline];
 		
     }
@@ -62,63 +55,14 @@
 	[self.timeline.tableview reloadData];
 }
 
-
-
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
-}
-
-- (int)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	NSLog(@"rows in section: %i", [self.filter count]);
-	return [self.filter count];
-}
-
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-	static NSString *CellIdentifier = @"Cell";
-    
-    UITableViewCell *cell = [self.tableview dequeueReusableCellWithIdentifier:CellIdentifier];
-    if (cell == nil) {
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
-		[cell configureForTimeline];
-		
-		ThumbView *avatarView = [cell avatarView];
-		avatarView.userInteractionEnabled = YES;
-		UITapGestureRecognizer *doubletapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(zoomAvatar:)];
-		doubletapgr.numberOfTouchesRequired = 1;
-		doubletapgr.numberOfTapsRequired = 2;
-		doubletapgr.cancelsTouchesInView = YES;
-		doubletapgr.delaysTouchesBegan = YES;
-		[avatarView addGestureRecognizer:doubletapgr];
-		[doubletapgr release];
-    }
-		
-	NSDictionary *filter_data = [self.filter objectForKey:[self.keys objectAtIndex:[indexPath row]]];
-	User *user = [self.user_data objectForKey:[filter_data objectForKey:@"uid"]];
-	
-	[cell setOptions:@{
-		 @"message":		[FilterHelper stringForState:[filter_data objectForKey:@"state"]],
-		 @"name":			[NSString stringWithFormat:@"%@ %@", user.first_name, user.last_name],
-		 @"user":			user
+- (void) addUpgradeHeader {
+	[self.timeline setUpgradeHeader:@{
+	 @"title": @"Read what you want to read",
+	 @"message": @"Filter your friends so their statuses don't show up in your timeline for a day, a week, or forever. Hide 5 people for free or upgrade to pro to take back your timeline.",
+	 @"message_pro": @"Filter your friends so their statuses don't show up in your timeline for a day, a week or forever. The most recent update from each user you've filtered is listed here.",
+	 @"icon": @"icon_filter_large",
+	 @"icon_label": @"Filtered"
 	 }];
-	
-	return cell;
-}
-
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath	{
-    
-	NSDictionary *filter_data = [self.filter objectForKey:[self.keys objectAtIndex:[indexPath row]]];
-	User *user = [self.user_data objectForKey:[filter_data objectForKey:@"uid"]];
-	
-	NSLog(@"View Filter State for User %@ %@", user.first_name, user.last_name);
-		
-	EditFilterView *filterview = [[EditFilterView alloc] initWithFrame:self.bounds];
-	filterview.user = user;
-	
-	[filterview setFilterStateChanged:^(NSDictionary *filter_update) {
-		self.keys = [NSMutableArray arrayWithArray:[self.filter allKeys]];
-		[self.tableview reloadData];
-	}];
-	[self addSubview:filterview];
 }
 
 - (void)zoomAvatar:(id)sender {

@@ -31,16 +31,20 @@
 		self.timeline.feed = self.feed;
 		self.timeline.max_free_rows = 5;
 		[self.timeline.tableview reloadData];
-		[self.timeline setUpgradeHeader:@{
-			@"title": @"Keep tabs on your favorite people",
-			@"message": @"The last status each of your favorite people has posted.  See 5 favorites at once or upgrade to Pro to see them all.",
-			@"message_pro": @"The last status each of your favorite people has posted.  Keep tabs on your friends.",
-			@"icon": @"icon_favorite_large",
-			@"icon_label": @"Favorites"
-		}];
+		[self addUpgradeHeader];
 		[self addSubview:self.timeline];
     }
     return self;
+}
+
+- (void) addUpgradeHeader {
+	[self.timeline setUpgradeHeader:@{
+	 @"title": @"Keep tabs on your favorite people",
+	 @"message": @"The last status each of your favorite people has posted.  See 5 favorites at once or upgrade to Pro to see them all.",
+	 @"message_pro": @"The last status each of your favorite people has posted.  Keep tabs on your friends.",
+	 @"icon": @"icon_favorite_large",
+	 @"icon_label": @"Favorites"
+	 }];
 }
 
 - (void) refreshFeed {

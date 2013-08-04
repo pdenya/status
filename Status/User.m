@@ -149,6 +149,8 @@ const int max_failed = 30;
 		  @"start": [NSDate date],
 		  @"uid": self.uid
 		} forKey:self.uid];
+		
+		[[FavoritesHelper instance] save];
 	}
 }
 
@@ -156,7 +158,49 @@ const int max_failed = 30;
 	if ([self is_favorite]) {
 		//update user favorites
 		[[FavoritesHelper instance].favorites removeObjectForKey:self.uid];
+		[[FavoritesHelper instance] save];
 	}
+}
+
+- (void) filter:(NSString *)filter_type {
+	NSDictionary *new_filter_state;
+	
+	if([filter_type isEqualToString:FILTER_STATE_FILTERED_DAY]) {
+		new_filter_state = @{
+			@"state": FILTER_STATE_FILTERED_DAY,
+			@"start": [NSDate date],
+			@"uid": self.uid
+		};
+	}
+	else if([filter_type isEqualToString:FILTER_STATE_FILTERED_WEEK]) {
+		new_filter_state = @{
+			@"state": FILTER_STATE_FILTERED_WEEK,
+			@"start": [NSDate date],
+			@"uid": self.uid
+		};
+	}
+	else if([filter_type isEqualToString:FILTER_STATE_FILTERED]) {
+		new_filter_state = @{
+			@"state": FILTER_STATE_FILTERED,
+			@"uid": self.uid
+		};
+	}
+	else { //FILTER_STATE_VISIBLE
+		new_filter_state = @{
+			@"state": FILTER_STATE_VISIBLE,
+			@"start": [NSDate date],
+			@"uid": self.uid
+		};
+	}
+	
+	if ([[new_filter_state objectForKey:@"state"] isEqualToString:FILTER_STATE_VISIBLE]) {
+		[[FilterHelper instance].filter removeObjectForKey:[self uid_string]];
+	}
+	else { //filtered, filtered_day, filtered_week
+		[[FilterHelper instance].filter setObject:new_filter_state forKey:[self uid_string]];
+	}
+	
+	[[FilterHelper instance] save];
 }
 
 - (void)loadPicSquare {

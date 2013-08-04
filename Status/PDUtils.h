@@ -14,5 +14,5 @@
 + (void) upgradeToPro;
 + (void) downgradeFromPro;
 + (BOOL) processCommand:(UITextView *)tf;
-
++ (void) upgradeComplete;
 @end

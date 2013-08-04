@@ -23,7 +23,7 @@
 	self = [super initWithFrame:frame];
 
 	if (self) {
-		self.backgroundColor = [UIColor colorWithHex:0xf7f6f6];
+		self.backgroundColor = [UIColor brandGreyColor];
 	}
 	
 	return self;
@@ -155,7 +155,7 @@
 	
 	// footer
 	UIView *bottomview = [[UIView alloc] initWithFrame:self.bounds];
-	bottomview.backgroundColor = [UIColor colorWithHex:0xf7f6f6];
+	bottomview.backgroundColor = [UIColor brandGreyColor];
 	[bottomview seth:100];
 	[bottomview addTopBorder:[UIColor colorWithHex:0xa7a6a6]];
 	
@@ -170,7 +170,7 @@
 	self.tableview.delegate = self;
 	self.tableview.dataSource = self;
 	self.tableview.tableHeaderView = topView;
-	self.tableview.backgroundColor = [UIColor colorWithHex:0xf7f6f6];
+	self.tableview.backgroundColor = [UIColor brandGreyColor];
 	[self.tableview setTableFooterView:bottomview];
 	[self addSubview:self.tableview];
 		

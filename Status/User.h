@@ -40,5 +40,5 @@
 - (BOOL) is_filtered;
 - (void) favorite;
 - (void) unfavorite;
-
+- (void) filter:(NSString *)filter_type;
 @end

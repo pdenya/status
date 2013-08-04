@@ -35,8 +35,8 @@
 	FBHelper *fb = [FBHelper instance];
 	
 	FBDictionaryBlock completed = ^(NSDictionary *data) {
-		//grab a reference to this for use below
-		Post *first_post = (Post *)[self.feed objectAtIndex:0];
+		//grab a reference to this for use belo
+		Post *first_post = (self.feed && [self.feed count] > 0) ? (Post *)[self.feed objectAtIndex:0] : nil;
 		
 		//add to feed and sort reverse chronologically
 		[self.feed addObjectsFromArray:[data objectForKey:@"feed"]];
@@ -50,7 +50,7 @@
 		[[UsersHelper instance] save];
 		
 		//get an array of the index paths of rows we added
-		int index = [self.feed indexOfObject:first_post];
+		int index = first_post ? [self.feed indexOfObject:first_post] : [self.feed count];
 		NSMutableArray *added_rows = [[NSMutableArray alloc] init];
 		for (int i = 0; i < index; i++) {
 			[added_rows addObject:[NSIndexPath indexPathForRow:i inSection:0]];

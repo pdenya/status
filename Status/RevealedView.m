@@ -18,7 +18,7 @@
 		self.autoresizingMask = UIViewAutoresizingFlexibleHeight;
 		
         // Initialization code
-		self.backgroundColor = [UIColor colorWithHex:0xf7f6f6];
+		self.backgroundColor = [UIColor brandGreyColor];
 		self.autoresizesSubviews = YES;
 		
 		self.favbtn = [self revealedButton:@{
@@ -126,7 +126,7 @@
 
 - (UIButton *)revealedButton:(NSDictionary *)options {
 	UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
-	[btn setBackgroundColor:[UIColor colorWithHex:0xf7f6f6]];
+	[btn setBackgroundColor:[UIColor brandGreyColor]];
 	[btn setw:100];
 	[btn seth:100];
 	[btn setx:0];
@@ -162,73 +162,38 @@
 - (void)toggleFavorite:(id)sender {
 	NSLog(@"ToggleFavorite %@", [self.user full_name]);
 	
-	NSString *favorite_state  = ([[FavoritesHelper instance].favorites objectForKey:self.user.uid]) ? FAVORITE_STATE_FAVORITED : FAVORITE_STATE_NOT_FAVORITED;
-	
-	if ([favorite_state isEqualToString:FAVORITE_STATE_FAVORITED]) {
+	if ([self.user is_favorite]) {
 		//update user favorites
-		[[FavoritesHelper instance].favorites removeObjectForKey:self.user.uid];
+		[self.user unfavorite];
 	}
 	else {
 		//update user favorites
-		[[FavoritesHelper instance].favorites setObject:@{
-		  @"state": FAVORITE_STATE_FAVORITED,
-		  @"start": [NSDate date],
-		  @"uid": self.user.uid
-		} forKey:self.user.uid];
+		[self.user favorite];
 	}
 	
-	favorite_state = ([[FavoritesHelper instance].favorites objectForKey:self.user.uid]) ? FAVORITE_STATE_FAVORITED : FAVORITE_STATE_NOT_FAVORITED;
-	[self updateBtn:self.favbtn forState:favorite_state];
+	[self updateBtn:self.favbtn forState:([self.user is_favorite] ? FAVORITE_STATE_FAVORITED : FAVORITE_STATE_NOT_FAVORITED)];
 }
 
 - (void)toggleFilter:(id)sender {
 	NSLog(@"ToggleFilter %@", [self.user full_name]);
 	
-	NSDictionary *filter_dict = [[FilterHelper instance].filter objectForKey:[NSString stringWithFormat:@"%@", self.user.uid]];
-	NSString *filter_state = filter_dict ? [filter_dict objectForKey:@"state"] : FILTER_STATE_VISIBLE;
-	NSDictionary *new_filter_state;
+	NSString *filter_state = [self.user filter_state];
 	
 	if([filter_state isEqualToString:FILTER_STATE_FILTERED_DAY]) {
 		filter_state = FILTER_STATE_FILTERED_WEEK;
-		new_filter_state = @{
-			 @"state": FILTER_STATE_FILTERED_WEEK,
-			 @"start": [NSDate date],
-			 @"uid": self.user.uid
-		 };
 	}
 	else if([filter_state isEqualToString:FILTER_STATE_FILTERED_WEEK]) {
 		filter_state = FILTER_STATE_FILTERED;
-		new_filter_state = @{
-			 @"state": FILTER_STATE_FILTERED,
-			 @"start": [NSDate date],
-			 @"uid": self.user.uid
-		 };
 	}
 	else if([filter_state isEqualToString:FILTER_STATE_FILTERED]) {
 		filter_state = FILTER_STATE_VISIBLE;
-		new_filter_state = @{
-			 @"state": FILTER_STATE_VISIBLE,
-			 @"uid": self.user.uid
-		 };
 	}
 	else { //FILTER_STATE_VISIBLE
 		filter_state = FILTER_STATE_FILTERED_DAY;
-		new_filter_state = @{
-			 @"state": FILTER_STATE_FILTERED_DAY,
-			 @"start": [NSDate date],
-			 @"uid": self.user.uid
-		 };
 	}
 	
-	//update users filters
-	NSString *uid = [NSString stringWithFormat:@"%@", [new_filter_state objectForKey:@"uid"]];
-	if ([[new_filter_state objectForKey:@"state"] isEqualToString:@"visible"]) {
-		[[FilterHelper instance].filter removeObjectForKey:uid];
-	}
-	else { //filtered, filtered_day, filtered_week
-		[[FilterHelper instance].filter setObject:new_filter_state forKey:uid];
-	}
+	[self.user filter:filter_state];
 	
-	[self updateBtn:self.filterbtn forState:[new_filter_state objectForKey:@"state"]];
+	[self updateBtn:self.filterbtn forState:filter_state];
 }
 @end

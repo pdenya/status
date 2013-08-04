@@ -7,7 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "EditFilterView.h"
 #import "TimelineView.h"
 
 @interface FavoritesView : UIView <TimelineContainer> {
@@ -23,5 +22,6 @@
 @property (nonatomic, retain) NSMutableArray *feed;
 
 - (void) refreshFeed;
+- (void) addUpgradeHeader;
 
 @end

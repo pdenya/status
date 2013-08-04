@@ -38,6 +38,7 @@
 @property (nonatomic, retain) NSMutableDictionary *favorites;
 @property (nonatomic, retain) UIView *headerView;
 @property (readwrite) int total_failed;
+@property (assign) BOOL is_done_loading;
 
 + (ViewController *)instance;
 - (id)init;
@@ -47,5 +48,6 @@
 - (CGRect) contentFrame;
 - (void) showLearnMoreView;
 - (void)refreshFeeds:(NSArray *)added_row_indexes;
+- (void) upgraded;
 
 @end

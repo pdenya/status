@@ -57,7 +57,7 @@
 		
 		
 		UIView *bottomview = [[UIView alloc] initWithFrame:self.bounds];
-		bottomview.backgroundColor = [UIColor colorWithHex:0xf7f6f6];
+		bottomview.backgroundColor = [UIColor brandGreyColor];
 		[self addSubview:bottomview];
 		[bottomview sethp:(SYSTEM_VERSION_LESS_THAN(@"7.0") ? 0.1f : 0.2f)];
 		[bottomview sety:[self h] - [bottomview h]];
@@ -67,9 +67,14 @@
 		[bottomview addSubview:upgradeBtn];
 		[upgradeBtn centerx];
 		[upgradeBtn centery];
+		[upgradeBtn addTarget:self action:@selector(upgradeClicked:) forControlEvents:UIControlEventTouchUpInside];
 		
     }
     return self;
+}
+
+- (void)upgradeClicked:(id)sender {
+	[PDUtils upgradeToPro];
 }
 
 - (UIView *)getSection:(NSDictionary *)options {
