@@ -417,7 +417,6 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		imageNotifierView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_has_images.png"]];
 		[imageNotifierView setw:11];
 		[imageNotifierView seth:11];
-		[imageNotifierView setx:[commentsNotifierView x] - [imageNotifierView w] - 8];
 		imageNotifierView.tag = 93;
 		[cell.contentView addSubview:imageNotifierView];
 		[cell.contentView bringSubviewToFront:imageNotifierView];
@@ -548,16 +547,22 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	[df setDateFormat:@"h:mma M/d"];
 	dateLabel.text = [NSString stringWithFormat:@"at %@", [[df stringFromDate:date] lowercaseString]];
 	
-	//blue bar on the left
+	//lower right coment icon
 	[cell commentsNotifierView].hidden = !post.has_comments;
 	
 	//mark as read
-	if (!cell.commentsNotifierView.hidden) {
+	if (![cell commentsNotifierView].hidden) {
 		BOOL should_mark_as_read = post && post.last_read && post.last_comment_at && [post.last_read compare:post.last_comment_at] == NSOrderedDescending;
-		[cell.commentsNotifierView setImage:[UIImage imageNamed:(should_mark_as_read ? @"icon_has_comments.png" : @"icon_has_unread")]];
+		[[cell commentsNotifierView] setImage:[UIImage imageNamed:(should_mark_as_read ? @"icon_has_comments.png" : @"icon_has_unread")]];
 	}
 	else {
-		[cell.commentsNotifierView setImage:[UIImage imageNamed:@"icon_no_comments.png"]];
+		[[cell commentsNotifierView] setImage:[UIImage imageNamed:@"icon_no_comments.png"]];
+	}
+	
+	//lower right image icon
+	[imageNotifierView setx:[[cell commentsNotifierView] x]];
+	if (![cell commentsNotifierView].hidden) {
+		[imageNotifierView setx:[imageNotifierView x] - [imageNotifierView w] - 8];
 	}
 	
 	[nameLabel setx:[messageLabel x]];
@@ -570,7 +575,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	//[dateLabel sety:[nameLabel bottomEdge] - [dateLabel h]];
 	[dateLabel setx:[nameLabel rightEdge] + 2];
 	
-	[cell.commentsNotifierView sety:[nameLabel y] + 2];
+	[[cell commentsNotifierView] sety:[nameLabel y] + 2];
 	[[cell imageNotifierView] sety:[[cell commentsNotifierView] y]];
 	
 	[cell imageNotifierView].hidden = ![post hasImages];

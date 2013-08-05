@@ -372,6 +372,7 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	[PDUtils parseAndOpenLink:[[self.comments objectAtIndex:indexPath.row] valueForKey:@"text"]];
+	[self.tableview deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 @end
