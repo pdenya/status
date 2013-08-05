@@ -40,7 +40,7 @@
 + (BOOL) processCommand:(UITextView *)tf {
 	
 	if ([tf.text isEqualToString:@"status:upgrade"]) {
-		[PDUtils upgradeToPro];
+		[PDUtils upgradeComplete];
 		tf.text = @"upgraded";
 		return YES;
 	}

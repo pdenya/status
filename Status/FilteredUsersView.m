@@ -18,7 +18,7 @@
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code
-		self.backgroundColor = [UIColor whiteColor];
+		self.backgroundColor = [UIColor whiteColor];	
 		
 		self.filter = [FilterHelper instance].filter;
 		self.keys = [NSMutableArray arrayWithArray:[self.filter allKeys]];
