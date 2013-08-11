@@ -30,6 +30,13 @@
 		self.timeline = [[TimelineView alloc] initWithFrame:self.bounds];
 		self.timeline.feed = self.feed;
 		self.timeline.max_free_rows = 5;
+		
+		[self.timeline createTutorial:@{
+			@"header": @"0 Filtered",
+			@"stepone": @"To hide someone from your stream, swipe left on your timeline. You can toggle the filter options by tapping repeatedly.",
+			@"steptwo": @"After tapping to filter, the last status your friend posted will show up on this list along with the amount of time they’ll be filtered."
+		}];
+		
 		[self.timeline.tableview reloadData];
 		[self addUpgradeHeader];
 		[self addSubview:self.timeline];

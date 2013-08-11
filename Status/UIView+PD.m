@@ -110,6 +110,14 @@
 	self.layer.borderWidth = 1.0f;
 }
 
+-(void)addSubtleShadow {
+	CGFloat c = 0.2f;
+	self.layer.shadowColor = [UIColor colorWithRed:c green:c blue:c alpha:0.5f].CGColor;
+	self.layer.shadowOffset = CGSizeMake(0.0f, 1.0f/[[UIScreen mainScreen] scale]);
+	self.layer.shadowRadius = 1.0f/[[UIScreen mainScreen] scale];
+	self.layer.shadowOpacity = 1;
+}
+
 //relative positioning
 -(void)setyp:(CGFloat)percent {
 	if (self.superview) {

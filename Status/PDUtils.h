@@ -17,4 +17,5 @@
 + (void) upgradeComplete;
 + (void) openURL:(NSURL *)inputURL;
 + (BOOL) parseAndOpenLink:(NSString *)message;
++ (void) markAsPro;
 @end

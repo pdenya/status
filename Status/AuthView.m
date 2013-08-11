@@ -19,13 +19,16 @@
 		
 		UIImageView *imgview = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"auth_header.jpg"]];
 		[self addSubview:imgview];
+		[imgview seth:([self w] / [imgview w]) * [imgview h]];
 		[imgview setw:[self w]];
-		[imgview seth:[self h] / 2];
+		[imgview setx:0];
+		[imgview sety:0];
+		
 		
 		UILabel *header = [UILabel titleLabelWithText:@"Welcome to Status"];
 		[self addSubview:header];
 		[header centerx];
-		[header sety:([self h] / 2) + 30];
+		[header sety:[imgview bottomEdge] + 45];
 		
 		UILabel *subhead = [[UILabel alloc] init];
 		subhead.backgroundColor = [UIColor clearColor];
@@ -35,27 +38,38 @@
 		subhead.textAlignment = UITextAlignmentCenter;
 		[self addSubview:subhead];
 		[subhead setwp:0.9f];
-		[subhead setText:@"Status is a new view for your Facebook timeline. Find out what's happening with the people you care about."];
+		[subhead setText:@"A fresh slice of your Facebook timeline. \nKeep track of your friends."];
 		[subhead sizeToFit];
 		[subhead sety:[header bottomEdge] + 10];
 		[subhead centerx];
 		
+		UIView *bottomView = [[UIView alloc] init];
+		[self addSubview:bottomView];
+		bottomView.backgroundColor = [UIColor brandGreyColor];
+		[bottomView seth:100];
+		[bottomView setw:[self w]];
+		[bottomView setx:0];
+		[bottomView sety:[self h] - [bottomView h]];
+		
 		UIButton *fbButton = [UIButton blueButtonWithText:@"Connect to Facebook"];
 		[fbButton addTarget:self action:@selector(connectToFacebookClicked:) forControlEvents:UIControlEventTouchUpInside];
-		[self addSubview:fbButton];
-		[fbButton sety:[subhead bottomEdge] + 25];
+		[bottomView addSubview:fbButton];
+		[fbButton centery];
 		[fbButton centerx];
 
 		UILabel *buttonhelp = [[UILabel alloc] init];
 		buttonhelp.backgroundColor = [UIColor clearColor];
 		buttonhelp.font = [UIFont systemFontOfSize:10.0f];
-		buttonhelp.textColor = [UIColor colorWithHex:0xAAAAAA];
+		buttonhelp.textColor = [UIColor colorWithHex:0x666666];
 		buttonhelp.textAlignment = UITextAlignmentCenter;
 		buttonhelp.text = @"We never post without your permission";
 		[buttonhelp sizeToFit];
-		[self addSubview:buttonhelp];
+		[bottomView addSubview:buttonhelp];
 		[buttonhelp centerx];
 		[buttonhelp sety:[fbButton bottomEdge] + 1];
+		
+		[bottomView release];
+
     }
 	
     return self;

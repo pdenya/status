@@ -40,6 +40,9 @@ const int FAILED_THRESHOLD = 30;
 	if (self) {
 		self.view.frame = [UIScreen mainScreen].bounds;
 		self.is_done_loading = NO;
+		
+		//Auto Pro
+		[PDUtils markAsPro];
 	}
 
 	return self;

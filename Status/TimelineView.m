@@ -29,7 +29,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		self.tableview.delegate = self;
 		self.tableview.dataSource = self;
 		self.tableview.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
-		self.tableview.separatorColor = [UIColor colorWithHex:0x3e9ed5];
+		self.tableview.separatorColor = [UIColor colorWithHex:0xa7a6a6];
 		self.tableview.backgroundColor = [UIColor whiteColor];
 		self.max_free_rows = 0;
 		self.removeWhenFiltered = NO;
@@ -169,6 +169,48 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	[header release];
 }
 
+- (void) createTutorial:(NSDictionary *)options {
+	
+	UIView *tutorial = [UIView new];
+	tutorial.backgroundColor = [UIColor whiteColor];
+	[tutorial setw:[self w]];
+	
+	UILabel *tutorial_title = [UILabel boldLabel:[options objectForKey:@"header"] modifier:1.2f];
+	[tutorial addSubview:tutorial_title];
+	[tutorial_title centerx];
+	[tutorial_title sety:50];
+	
+	UILabel *stepone = [UILabel label:[options objectForKey:@"stepone"]];
+	[tutorial addSubview:stepone];
+	[stepone sety:[tutorial_title bottomEdge] + 10];
+	[stepone setw:[self w] - 40];
+	[stepone centerx];
+	[stepone seth:100];
+	stepone.textColor = [UIColor colorWithHex:0x555555];
+	[stepone sizeToFit];
+	
+	UIView *example = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"swiped_example.jpg"]];
+	[example addSubtleShadow];
+	[example sizeToFit];
+	[tutorial addSubview:example];
+	[example centerx];
+	[example sety:[stepone bottomEdge] + 20];
+	
+	UILabel *steptwo = [UILabel label:[options objectForKey:@"steptwo"]];
+	[tutorial addSubview:steptwo];
+	[steptwo sety:[example bottomEdge] + 20];
+	[steptwo setw:[self w] - 40];
+	[steptwo centerx];
+	[steptwo seth:100];
+	steptwo.textColor = [UIColor colorWithHex:0x555555];
+	[steptwo sizeToFit];
+
+	
+	[tutorial seth:[steptwo bottomEdge] + 20];
+	
+	self.tutorial = tutorial;
+}
+
 #pragma mark - Event Handlers
 
 -(void)didClickFilterButton {
@@ -271,7 +313,16 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 
 - (int)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 	BOOL limit = self.max_free_rows > 0 && self.max_free_rows < [self.feed count] && ![PDUtils isPro];
-	return limit ? self.max_free_rows + 1 : [self.feed count];
+	int count = limit ? self.max_free_rows + 1 : [self.feed count];
+
+	if (count == 0 && self.tutorial && [self.tableview tableFooterView] != self.tutorial) {
+		[self.tableview setTableFooterView:self.tutorial];
+	}
+	else if (count > 0 && self.tutorial && [self.tableview tableFooterView] == self.tutorial) {
+		[self.tableview setTableFooterView:[UIView new]];
+	}
+	
+	return count;
 }
 
 - (UITableViewCell *)upgradeCell {
@@ -478,6 +529,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 			[cell countdown_label].hidden = NO;
 			
 			//print date to countdown_label
+			//TODO: put this somewhere else
 			
 			static dispatch_once_t onceMark;
 			static NSCalendar *calendar = nil;
@@ -571,9 +623,9 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	[nameLabel setw:[messageLabel w]];
 	[nameLabel sizeToFit];
 	
-	dateLabel.center = nameLabel.center;
 	//[dateLabel sety:[nameLabel bottomEdge] - [dateLabel h]];
 	[dateLabel setx:[nameLabel rightEdge] + 2];
+	[dateLabel sety:[nameLabel y] + 2.0f];
 	
 	[[cell commentsNotifierView] sety:[nameLabel y] + 2];
 	[[cell imageNotifierView] sety:[[cell commentsNotifierView] y]];

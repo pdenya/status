@@ -226,8 +226,10 @@
 	NSLog(@"zoomAvatar");
 	
 	UITapGestureRecognizer *gr = (UITapGestureRecognizer *)sender;
-	UITableViewCell *cell = (UITableViewCell *)gr.view.superview.superview;
+	UITableViewCell *cell = (UITableViewCell *)[gr.view parents:[UITableViewCell class]];
 	NSIndexPath *index_path = [self.tableview indexPathForCell:cell];
+	
+	NSLog(@"index_path %i", [index_path row]);
 	
 	User *comment_user = (User *)[self.user_data objectForKey:[[self.comments objectAtIndex:index_path.row] valueForKey:@"fromid"]];
 	

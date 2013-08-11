@@ -30,6 +30,13 @@
 		self.timeline = [[TimelineView alloc] initWithFrame:self.bounds];
 		self.timeline.feed = self.feed;
 		self.timeline.max_free_rows = 5;
+		
+		[self.timeline createTutorial:@{
+			@"header": @"0 Favorites",
+			@"stepone": @"To mark someone as a favorite, swipe left on your timeline.",
+			@"steptwo": @"After tapping to favorite, the last status your friend posted will show up on this list."
+		}];
+		
 		[self.timeline.tableview reloadData];
 		[self addUpgradeHeader];
 		[self addSubview:self.timeline];

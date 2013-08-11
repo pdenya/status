@@ -15,7 +15,7 @@
 	UILabel *label = [[UILabel alloc] init];
 	label.backgroundColor = [UIColor clearColor];
 	label.font = [UIFont systemFontOfSize:24.0f];
-	label.textColor = [UIColor colorWithHex:0x0090FF];
+	label.textColor = [UIColor brandBlueColor];
 //	label.shadowColor = [UIColor colorWithHex:0x89FFFD];
 //	label.shadowOffset = CGSizeMake(0,-1);
 	[label setText:labelText];
@@ -31,8 +31,12 @@
 }
 
 + (UILabel *)boldLabel:(NSString *)text {
+	return [UILabel boldLabel:text modifier:1.0f];
+}
+
++ (UILabel *)boldLabel:(NSString *)text modifier:(CGFloat)modifier {
 	UILabel *title = [[UILabel alloc] init];
-	title.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:13.0f];
+	title.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:13.0f * modifier];
 	title.textColor = [UIColor colorWithHex:0x444444];
 	title.text = text;
 	[title sizeToFit];

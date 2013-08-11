@@ -21,8 +21,12 @@
 	[[IAPHelper instance] buyProduct];
 }
 
-+ (void) upgradeComplete {
++ (void) markAsPro {
 	[[NSUserDefaults standardUserDefaults] setObject:@"pro" forKey:@"is_pro"];
+}
+
++ (void) upgradeComplete {
+	[PDUtils markAsPro];
 	
 	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Upgrade complete!"
 													message:@"All Status features are fully unlocked. Thanks for upgrading."
@@ -40,7 +44,7 @@
 + (BOOL) processCommand:(UITextView *)tf {
 	
 	if ([tf.text isEqualToString:@"status:upgrade"]) {
-		[PDUtils upgradeComplete];
+		[PDUtils markAsPro];
 		tf.text = @"upgraded";
 		return YES;
 	}

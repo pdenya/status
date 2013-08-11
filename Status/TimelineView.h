@@ -28,6 +28,7 @@
 @property (nonatomic, retain) NSMutableArray *feed;
 @property (nonatomic, retain) UITableView *tableview;
 @property (nonatomic, retain) NSMutableDictionary *filter;
+@property (nonatomic, retain) UIView *tutorial;
 @property (readwrite, copy) PDBlock filterButtonClicked;
 @property (readwrite, copy) PDBlock favoriteButtonClicked;
 @property (nonatomic, strong) ZKRevealingTableViewCell *currentlyRevealedCell;
@@ -36,5 +37,6 @@
 @property (assign) int max_free_rows;
 
 - (void) setUpgradeHeader:(NSDictionary *)options;
+- (void) createTutorial:(NSDictionary *)options;
 
 @end

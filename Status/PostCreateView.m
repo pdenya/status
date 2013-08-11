@@ -30,7 +30,7 @@
 		[self.messageTextField sety:SYSTEM_VERSION_LESS_THAN(@"7.0") ? padding : 20];
 		[self.messageTextField setx:padding];
 		self.messageTextField.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:15.0f];
-		self.messageTextField.textColor = [UIColor colorWithHex:0x333333];
+		self.messageTextField.textColor = [UIColor colorWithHex:0x999999];
     }
     return self;
 }

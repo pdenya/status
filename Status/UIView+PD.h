@@ -20,6 +20,7 @@ typedef void (^PDObjectBlock)(id);
 -(UIView *)parents:(Class)class_name;
 
 -(void)addRedBorder;
+-(void)addSubtleShadow;
 - (void)addTopBorder:(UIColor *)borderColor;
 - (void)addBottomBorder:(UIColor *)borderColor;
 - (void) addFlexibleBottomBorder:(UIColor *)borderColor;
@@ -36,6 +37,7 @@ typedef void (^PDObjectBlock)(id);
 
 - (void)centerx;
 - (void)centery;
+
 
 -(CGFloat)w;
 -(CGFloat)h;
