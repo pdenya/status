@@ -1,0 +1,138 @@
+body {
+  padding-top: 10px;
+  padding-bottom: 200px;
+}
+
+.center {
+	text-align: center;
+}
+
+#app_tophalf {
+	height: 320px;
+}
+
+#app_tophalf img {
+	margin-top: -23px;
+}
+
+.blue-band {
+	background: #f7f6f6;
+	padding-bottom: 70px;
+}
+
+#placehold img {
+	padding: 6px;
+	border: 1px solid #444;
+	border-radius: 3px;
+}
+
+.voffset  { margin-top: 2px; }
+.voffset1 { margin-top: 5px; }
+.voffset2 { margin-top: 10px; }
+.voffset3 { margin-top: 15px; }
+.voffset4 { margin-top: 30px; }
+.voffset5 { margin-top: 40px; }
+.voffset6 { margin-top: 60px; }
+.voffset7 { margin-top: 80px; }
+.voffset8 { margin-top: 100px; }
+.voffset9 { margin-top: 150px; }
+
+#header_row {
+	height: 250px;
+}
+
+#iphone_angled {
+	position:absolute;
+	left: 0px;
+}
+
+.btn-orange {
+	color: #ffffff;
+	background-color: #d56c3e;
+	border-color: #d56c3e;
+	font-weight: normal;
+}
+
+.btn-orange:hover,
+.btn-orange:focus,
+.btn-orange:active,
+.btn-orange.active {
+	background-color: #cc5a28;
+	border-color: #cc5a28;
+}
+
+.btn-orange.disabled,
+.btn-orange[disabled],
+fieldset[disabled] .btn-orange,
+.btn-orange.disabled:hover,
+.btn-orange[disabled]:hover,
+fieldset[disabled] .btn-orange:hover,
+.btn-orange.disabled:focus,
+.btn-orange[disabled]:focus,
+fieldset[disabled] .btn-orange:focus,
+.btn-orange.disabled:active,
+.btn-orange[disabled]:active,
+fieldset[disabled] .btn-orange:active,
+.btn-orange.disabled.active,
+.btn-orange[disabled].active,
+fieldset[disabled] .btn-orange.active {
+	background-color: #e4c1b2;
+	border-color: #e4c1b2;
+}
+
+
+.btn-primary {
+	color: #ffffff;
+	background-color: #3e9ed5;
+	border-color: #3e9ed5;
+	font-weight: normal;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active {
+	background-color: #cc5a28;
+	border-color: #cc5a28;
+}
+
+.btn-primary.disabled,
+.btn-primary[disabled],
+fieldset[disabled] .btn-primary,
+.btn-primary.disabled:hover,
+.btn-primary[disabled]:hover,
+fieldset[disabled] .btn-primary:hover,
+.btn-primary.disabled:focus,
+.btn-primary[disabled]:focus,
+fieldset[disabled] .btn-primary:focus,
+.btn-primary.disabled:active,
+.btn-primary[disabled]:active,
+fieldset[disabled] .btn-primary:active,
+.btn-primary.disabled.active,
+.btn-primary[disabled].active,
+fieldset[disabled] .btn-primary.active {
+	background-color: #3e9ed5;
+	border-color: #e4c1b2;
+}
+
+#mc-embedded-subscribe-form input[type="submit"] {
+	margin-left: -20px;
+	border: none;
+	margin-top: 1px;
+}
+
+.btn-lg {
+	border-radius: 3px;
+}
+
+.input-lg {
+	border-radius: 3px;
+}
+
+.well {
+	padding: 30px 50px;
+}
+
+.well h3 {
+	margin-top: 0px;
+}
