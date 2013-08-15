@@ -35,8 +35,12 @@
 }
 
 + (UILabel *)boldLabel:(NSString *)text modifier:(CGFloat)modifier {
+	return [UILabel boldLabel:text size:round(13.0f * modifier)];
+}
+
++ (UILabel *)boldLabel:(NSString *)text size:(CGFloat)size {
 	UILabel *title = [[UILabel alloc] init];
-	title.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:13.0f * modifier];
+	title.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:size];
 	title.textColor = [UIColor colorWithHex:0x444444];
 	title.text = text;
 	[title sizeToFit];
@@ -48,8 +52,12 @@
 }
 
 + (UILabel *)label:(NSString *)text modifier:(CGFloat)modifier {
+	return [self label:text size:round(12.0f * modifier)];
+}
+
++ (UILabel *)label:(NSString *)text size:(CGFloat)size {
 	UILabel *title = [[UILabel alloc] init];
-	title.font = [UIFont fontWithName:@"HelveticaNeue" size:round(12.0f * modifier)];
+	title.font = [UIFont fontWithName:@"HelveticaNeue" size:size];
 	title.textColor = [UIColor colorWithHex:0x444444];
 	title.text = text;
 	title.numberOfLines = 0;
@@ -57,5 +65,6 @@
 	[title sizeToFit];
 	return title;
 }
+
 
 @end

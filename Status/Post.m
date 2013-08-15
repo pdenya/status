@@ -99,7 +99,7 @@
 }
 
 - (CGFloat)messageLabelWidth {
-	return round([UIScreen mainScreen].bounds.size.width * ([self hasImages] ? 0.58 : .75));
+	return round([UIScreen mainScreen].bounds.size.width * ([self hasImages] ? 0.58 : .77));
 }
 
 - (NSDate *)date {

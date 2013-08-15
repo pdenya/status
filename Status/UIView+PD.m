@@ -56,53 +56,29 @@
 //styling
 - (void) addBottomBorder:(UIColor *)borderColor {
 	CALayer *border = [CALayer layer];
-	border.frame = CGRectMake(0, [self h] - 0.5f, [self w], 0.5f);
+	border.frame = CGRectMake(0, [self h] - (1/[[UIScreen mainScreen] scale]), [self w], 1/[[UIScreen mainScreen] scale]);
 	border.backgroundColor = borderColor.CGColor;
 	[self.layer addSublayer:border];
 }
 
 - (void) addFlexibleBottomBorder:(UIColor *)borderColor {
 	UIView *border = [[UIView alloc] init];
+	border.tag = 101;
+	border.frame = CGRectMake(0, [self h] - (1/[[UIScreen mainScreen] scale]), [self w], 1/[[UIScreen mainScreen] scale]);
 	NSLog(@"content view frame %@", NSStringFromCGRect(self.frame));
-	border.frame = CGRectMake(0, 10, [self w], 1/[[UIScreen mainScreen] scale]);
-	NSLog(@"content view frame %@", NSStringFromCGRect(border.frame));
+	NSLog(@"border frame %@", NSStringFromCGRect(border.frame));
 	border.backgroundColor = borderColor;
-	border.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;// | UIViewAutoresizingFlexibleWidth;
 	[self addSubview:border];
 	[self bringSubviewToFront:border];
+	
+	//border.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
 }
 
 - (void) addTopBorder:(UIColor *)borderColor {
 	CALayer *border = [CALayer layer];
-	border.frame = CGRectMake(0, 0, [self w], 0.5f);
+	border.frame = CGRectMake(0, 0, [self w], 1.0f/[[UIScreen mainScreen] scale]);
 	border.backgroundColor = borderColor.CGColor;
 	[self.layer addSublayer:border];
-}
-
--(void)addBlueBackground {
-	self.backgroundColor = [UIColor blackColor];
- 	
-	UIImageView *bgview = [[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"bg_blue.png"] stretchableImageWithLeftCapWidth:8 topCapHeight:240]];
-	bgview.frame = CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height);
-	if (![self respondsToSelector:@selector(setBackgroundView:)]) {
-		[self addSubview:bgview];
-		[self sendSubviewToBack:bgview];
-	}
-	else {
-		[self performSelector:@selector(setBackgroundView:) withObject:bgview];
-	}
-	
-	[bgview release];
-}
-
--(void)addBlueTableCellBackground {
-	self.backgroundColor = [UIColor clearColor];
- 	
-	UIImageView *bgview = [[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"bg_tablecell.png"] stretchableImageWithLeftCapWidth:10 topCapHeight:28]];
-	bgview.frame = CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height);
-	[self addSubview:bgview];
-	[self sendSubviewToBack:bgview];
-	[bgview release];
 }
 
 -(void)addRedBorder {
@@ -121,7 +97,7 @@
 //relative positioning
 -(void)setyp:(CGFloat)percent {
 	if (self.superview) {
-		CGRect frame = CGRectIntegral(self.frame);
+		CGRect frame = [self roundedFrame];
 		frame.origin.y = round((self.superview.frame.size.height * percent) - (frame.size.height / 2));
 		self.frame = frame;
 	}
@@ -132,7 +108,7 @@
 
 -(void)setxp:(CGFloat)percent {
 	if (self.superview) {
-		CGRect frame = CGRectIntegral(self.frame);
+		CGRect frame = [self roundedFrame];
 		frame.origin.x = round((self.superview.frame.size.width * percent) - (frame.size.width / 2));
 		self.frame = frame;
 	}
@@ -143,7 +119,7 @@
 
 -(void)setwp:(CGFloat)percent {
 	if (self.superview) {
-		CGRect frame = CGRectIntegral(self.frame);
+		CGRect frame = [self roundedFrame];
 		frame.size.width = round(self.superview.frame.size.width * percent);
 		self.frame = frame;
 	}
@@ -154,7 +130,7 @@
 
 -(void)sethp:(CGFloat)percent {
 	if (self.superview) {
-		CGRect frame = CGRectIntegral(self.frame);
+		CGRect frame = [self roundedFrame];
 		frame.size.height = round(self.superview.frame.size.height * percent);
 		self.frame = frame;
 	}
@@ -165,34 +141,33 @@
 
 
 //positioning
-- (void)sety:(int)y {
-	CGRect frame = CGRectIntegral(self.frame);
+- (void)sety:(CGFloat)y {
+	CGRect frame = [self roundedFrame];
 	frame.origin.y = y;
 	self.frame = frame;
 }
 
-- (void)setx:(int)x {
-	CGRect frame = CGRectIntegral(self.frame);
+- (void)setx:(CGFloat)x {
+	CGRect frame = [self roundedFrame];
 	frame.origin.x = x;
 	self.frame = frame;
 }
 
-
-- (void)setw:(int)width {
-	CGRect frame = CGRectIntegral(self.frame);
+- (void)setw:(CGFloat)width {
+	CGRect frame = [self roundedFrame];
 	frame.size.width = width;
 	self.frame = frame;
 }
 
-- (void)seth:(int)height {
-	CGRect frame = CGRectIntegral(self.frame);
+- (void)seth:(CGFloat)height {
+	CGRect frame = [self roundedFrame];
 	frame.size.height = height;
 	self.frame = frame;
 }
 
 - (void)centerx {
 	if (self.superview) {
-		CGRect frame = CGRectIntegral(self.frame);
+		CGRect frame = [self roundedFrame];
 		frame.origin.x = round((self.superview.frame.size.width * 0.5f) - (frame.size.width / 2));
 		self.frame = frame;
 	}
@@ -202,7 +177,7 @@
 }
 - (void)centery {
 	if (self.superview) {
-		CGRect frame = CGRectIntegral(self.frame);
+		CGRect frame = [self roundedFrame];
 		frame.origin.y = round((self.superview.frame.size.height * 0.5f) - (frame.size.height / 2));
 		self.frame = frame;
 	}
@@ -211,10 +186,19 @@
 	}
 }
 
+- (CGRect) roundedFrame {
+	return CGRectMake(
+		  round(self.frame.origin.x * [[UIScreen mainScreen] scale]) / [[UIScreen mainScreen] scale],
+		  round(self.frame.origin.y * [[UIScreen mainScreen] scale]) / [[UIScreen mainScreen] scale],
+		  round(self.frame.size.width * [[UIScreen mainScreen] scale]) / [[UIScreen mainScreen] scale],
+		  round(self.frame.size.height * [[UIScreen mainScreen] scale]) / [[UIScreen mainScreen] scale]
+	  );
+}
+
 + (UIView *) horizontalRule {
 	UIView *hr = [[UIView alloc] init];
 	[hr setw:200];
-	[hr seth:1];
+	[hr seth:(1/[[UIScreen mainScreen] scale])];
 	hr.backgroundColor = [UIColor colorWithHex:0x317ca7];
 	
 	return hr;
@@ -247,7 +231,7 @@
 	view.transform = CGAffineTransformMakeScale(0.95, 0.95);
 	view.alpha = 0.4f;
 	[self addSubview:view];
-
+	
 	[UIView animateWithDuration:0.1f
 						  delay:0.0f
 						options:UIViewAnimationOptionCurveEaseOut

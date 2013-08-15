@@ -17,11 +17,15 @@
 	
 	if (!fbhelper) {
 		fbhelper = [[FBHelper alloc] init];
+		fbhelper.isGettingStream = NO;
 	}
 	
 	return fbhelper;
 }
 
+- (BOOL) hasSession {
+	return FBSession.activeSession.isOpen;
+}
 
 - (void)openSession:(FBVoidBlock)opened_callback allowLoginUI:(BOOL)allowLoginUI onFail:(FBVoidBlock)failed_callback {
 	NSArray *permissions = @[ @"publish_stream" ];
@@ -114,6 +118,13 @@
 - (void) getStream:(FBDictionaryBlock)completed options:(NSDictionary *)options {
 	NSLog(@"getStream");
 	
+	if (self.isGettingStream) {
+		NSLog(@"returning because we're already getting the stream");
+		return;
+	}
+	
+	self.isGettingStream = YES;
+	
 	NSString *latest_stream_time = @"0";
 	if ([options objectForKey:@"max_time"]) {
 		latest_stream_time = [[options objectForKey:@"max_time"] stringValue];
@@ -167,6 +178,7 @@
 			 //NSLog(@"Error: %@", [[error userInfo] description]);
 			 NSLog(@"Error getting stream");
 			 completed(nil);
+			 self.isGettingStream = NO;
 		 } else {
 			 // Get the friend data to display
 			 NSArray *results = (NSArray *) [result objectForKey:@"data"];
@@ -282,6 +294,8 @@
 			 NSLog(@"Stream Results: %@", [response_container description]);
 			 
 			 completed(response_container);
+			 
+			 self.isGettingStream = NO;
 		 }
 	 }];
 }

@@ -17,6 +17,8 @@ typedef void (^PDObjectBlock)(id);
 -(CGFloat)rightEdge;
 -(CGFloat)bottomEdge;
 
+- (CGRect) roundedFrame;
+
 -(UIView *)parents:(Class)class_name;
 
 -(void)addRedBorder;
@@ -30,10 +32,10 @@ typedef void (^PDObjectBlock)(id);
 -(void)setwp:(CGFloat)percent;
 -(void)sethp:(CGFloat)percent;
 
-- (void)setw:(int)width;
-- (void)seth:(int)height;
-- (void)setx:(int)x;
-- (void)sety:(int)y;
+- (void)setw:(CGFloat)width;
+- (void)seth:(CGFloat)height;
+- (void)setx:(CGFloat)x;
+- (void)sety:(CGFloat)y;
 
 - (void)centerx;
 - (void)centery;
@@ -54,8 +56,5 @@ typedef void (^PDObjectBlock)(id);
 
 //app specific
 + (UIView *) starView:(CGFloat)height;
-
--(void)addBlueBackground;
--(void)addBlueTableCellBackground;
 
 @end

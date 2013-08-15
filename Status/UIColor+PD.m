@@ -25,4 +25,13 @@
 + (UIColor *)brandGreyColor {
 	return [UIColor colorWithHex:0xf7f6f6];
 }
+
++ (UIColor *)brandMediumGrey {
+	return [UIColor colorWithHex:0x787878];
+}
+
++ (UIColor *)brandDarkGrey {
+	return [UIColor colorWithHex:0x444444];
+}
+
 @end

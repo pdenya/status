@@ -28,7 +28,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		self.tableview = [[UITableView alloc] initWithFrame:self.bounds style:UITableViewStylePlain];
 		self.tableview.delegate = self;
 		self.tableview.dataSource = self;
-		self.tableview.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+		self.tableview.separatorStyle = UITableViewCellSeparatorStyleNone;
 		self.tableview.separatorColor = [UIColor colorWithHex:0xa7a6a6];
 		self.tableview.backgroundColor = [UIColor whiteColor];
 		self.max_free_rows = 0;
@@ -370,8 +370,10 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		cell.detailTextLabel.hidden = YES;
 		[cell setSelectionStyle:UITableViewCellSelectionStyleNone];
 		
+		[cell.contentView addFlexibleBottomBorder:[UIColor colorWithHex:0xa7a6a6]]; 
+		
 		cell.selectedBackgroundView = [[UIView alloc] init];
-		[cell.contentView setBackgroundColor:[UIColor whiteColor]];
+		[cell.contentView setBackgroundColor:[UIColor colorWithHex:0xFAFAFA]];
 		
 		// right border
 		rightBorder = [[UIView alloc] init];
@@ -425,7 +427,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		messageLabel.numberOfLines = 0;
 		messageLabel.textColor = [UIColor colorWithHex:0x333333];
 		//messageLabel setw ignored here.  It's in setOptions
-		[messageLabel setx:[avatarView rightEdge] + 7];
+		[messageLabel setx:[avatarView rightEdge] + 8];
 		[messageLabel sety:[avatarView y] - 3];
 		[messageLabel seth:60]; //sizeToFit called in setOptions, this is ignored
 		[messageLabel setwp:0.77f]; //sizeToFit called in setOptions, this is ignored
@@ -513,6 +515,9 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		NSLog(@"Post has images %@", [post.images description]);
 	}
 
+	
+	UIView *bottom_border = [cell.contentView viewWithTag:101];
+	[bottom_border sety:[post rowHeight] - [bottom_border h]];
 	
 
 	NSDateFormatter *df = [NSDateFormatter instance];
@@ -623,9 +628,8 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	[nameLabel setw:[messageLabel w]];
 	[nameLabel sizeToFit];
 	
-	//[dateLabel sety:[nameLabel bottomEdge] - [dateLabel h]];
-	[dateLabel setx:[nameLabel rightEdge] + 2];
-	[dateLabel sety:[nameLabel y] + 2.0f];
+	[dateLabel setx:[nameLabel rightEdge] + 2.5f];
+	[dateLabel sety:[nameLabel y] + 1.5f];
 	
 	[[cell commentsNotifierView] sety:[nameLabel y] + 2];
 	[[cell imageNotifierView] sety:[[cell commentsNotifierView] y]];

@@ -15,6 +15,8 @@ typedef void (^FBVoidBlock)();
 
 @interface FBHelper : NSObject
 
+@property (assign) BOOL isGettingStream;
+
 + (FBHelper *) instance;
 - (void) logout;
 - (void)openSession:(FBVoidBlock)opened_callback allowLoginUI:(BOOL)allowLoginUI onFail:(FBVoidBlock)failed_callback;
@@ -22,5 +24,6 @@ typedef void (^FBVoidBlock)();
 - (void) postStatus:(NSString *)message completed:(FBArrayBlock)completed;
 - (void) getComments:(NSString *)post_id completed:(FBDictionaryBlock)completed;
 - (void) postComment:(NSString *)message onStatus:(NSString *)status_id completed:(FBArrayBlock)completed;
+- (BOOL) hasSession;
 
 @end
