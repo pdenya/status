@@ -272,7 +272,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	NSLog(@"view comments");
 	
 	NSIndexPath *index_path = (NSIndexPath *)sender;
-	PostDetailsView *details = [[PostDetailsView alloc] initWithFrame:self.bounds];
+	PostDetailsView *details = [[PostDetailsView alloc] init];
 	details.post = [self.feed objectAtIndex:index_path.row];
 	details.user = [self.user_data objectForKey:details.post.uid];
 	

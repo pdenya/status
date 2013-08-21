@@ -49,6 +49,9 @@
 		[self.filterbtn setx:101];
 		[self addSubview:self.filterbtn];
 		self.filterbtn.tag = 61;
+		
+		[self addFlexibleBottomBorder:[UIColor colorWithHex:0xc7c6c6]];
+		
     }
     return self;
 }
@@ -75,6 +78,11 @@
 
 	UIImageView *filtericon = (UIImageView *)[self.filterbtn viewWithTag:62];
 	filtericon.frame = favicon.frame;
+	
+	UIView *bottom_border = [self viewWithTag:101];
+	[bottom_border sety:[self h] - [bottom_border h]];
+	[bottom_border setx:0];
+	[bottom_border setw:[self w]];
 }
 
 - (void)updateBtn:(UIButton *)btn forState:(NSString *)filter_state {

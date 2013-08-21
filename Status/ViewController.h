@@ -14,6 +14,7 @@
 #import "FavoritesView.h"
 #import "UnreadPostsView.h"
 
+@class PostCreateView;
 
 @interface ViewController : UIViewController {
 	NewsFeedView *newsfeed;
@@ -37,6 +38,7 @@
 @property (nonatomic, retain) NSMutableDictionary *filter;
 @property (nonatomic, retain) NSMutableDictionary *favorites;
 @property (nonatomic, retain) UIView *headerView;
+@property (nonatomic, retain) PostCreateView *postcreate;
 @property (readwrite) int total_failed;
 @property (assign) BOOL is_done_loading;
 

@@ -30,7 +30,7 @@
 		[self.messageTextField sety:SYSTEM_VERSION_LESS_THAN(@"7.0") ? padding : 20];
 		[self.messageTextField setx:padding];
 		self.messageTextField.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:15.0f];
-		self.messageTextField.textColor = [UIColor colorWithHex:0x999999];
+		self.messageTextField.textColor = [UIColor brandDarkGrey];
     }
     return self;
 }
@@ -44,7 +44,13 @@
 - (void)addControls {
 	int padding = 4;
 	
-	UIButton *postButton = [UIButton flatBlueButton:@"Post to Facebook" modifier:1.2];
+	UIButton *postButton = (UIButton *)[self viewWithTag:60];
+	if (postButton) {
+		//already initialized
+		return;
+	}
+	
+	postButton = [UIButton flatBlueButton:@"Post to Facebook" modifier:1.2];
 	postButton.hidden = YES;
 	postButton.alpha = 0;
 	[self addSubview:postButton];
@@ -74,6 +80,10 @@
 	[close_btn setw:[close_btn w] + 10];
 	[close_btn sety:[postButton y] - 14];
 	
+	if (self.post) {
+		[self switchToComment:self.post];
+	}
+	
 	[UIView animateWithDuration:0.2f animations:^{
 		postButton.alpha = 1;
 		postButton.hidden = NO;
@@ -92,12 +102,26 @@
 - (void) switchToComment:(Post *)p {
 	self.post = p;
 	UIButton *postbtn = (UIButton *)[self viewWithTag:60];
-	postbtn.titleLabel.text = @"Post comment";
+	[postbtn setTitle:@"Post comment" forState:UIControlStateNormal];
 	[postbtn removeTarget:nil action:NULL forControlEvents:UIControlEventTouchUpInside];
 	[postbtn addTarget:self action:@selector(postCommentClicked:) forControlEvents:UIControlEventTouchUpInside];
 	
 	//todo: build post display view and add to the top
 	
+	UIView *responding_to = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [self w], 50)];
+	responding_to.backgroundColor = [UIColor brandGreyColor];
+	[responding_to addFlexibleBottomBorder:[UIColor brandMediumGrey]];
+	[self addSubview:responding_to];
+	
+	UILabel *r_message = [UILabel label:self.post.message];
+	[r_message setw:[self w] - 20];
+	[r_message seth:[responding_to h] - 10];
+	[r_message setx:10];
+	[r_message sety:5];
+	r_message.backgroundColor = responding_to.backgroundColor;
+	[responding_to addSubview:r_message];
+	
+	[self.messageTextField sety:[responding_to bottomEdge]];
 }
 
 - (void)postCommentClicked:(id)sender {

@@ -248,10 +248,13 @@ const int FAILED_THRESHOLD = 30;
 }
 
 - (void) showNewPost {
-	PostCreateView *postcreate = [[PostCreateView alloc] initWithFrame:[UIScreen mainScreen].bounds];
-	[self openModal:postcreate];
-	[postcreate addedAsSubview:@{}];
-	[postcreate release];
+	if (!self.postcreate) {
+		self.postcreate = [[PostCreateView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+	}
+	
+	[self openModal:self.postcreate];
+	[self.postcreate addedAsSubview:@{}];
+	//[self.postcreate release];
 }
 
 - (void) upgraded {
@@ -410,10 +413,10 @@ const int FAILED_THRESHOLD = 30;
 }
 
 - (void)load {
+	[[UsersHelper   instance] load];
+    [[FilterHelper  instance] load];
 	[[FeedHelper    instance] load];
     [[FavoritesHelper instance] load];
-    [[UsersHelper   instance] load];
-    [[FilterHelper  instance] load];
 }
 
 @end

@@ -17,14 +17,27 @@
 @implementation PostDetailsView
 @synthesize post, user, tableview, comments, user_data;
 
-- (PostDetailsView *)initWithFrame:(CGRect)frame {
-	self = [super initWithFrame:frame];
+- (PostDetailsView *)init {
+	self = [super initWithFrame:[[UIScreen mainScreen] bounds]];
 
 	if (self) {
 		self.backgroundColor = [UIColor brandGreyColor];
 	}
 	
 	return self;
+}
+
+- (void) dealloc {
+	[self.postcreate release];
+	[self.tableview release];
+	
+	[self.comments removeAllObjects];
+	[self.comments release];
+	
+	[self.user_data removeAllObjects];
+	[self.user_data release];
+	
+	[super dealloc];
 }
 
 - (void)addedAsSubview {
@@ -197,18 +210,21 @@
 
 
 - (void)addCommentClicked {
+	//TODO fix this
+	if (!self.postcreate) {
+		self.postcreate = [[PostCreateView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+		self.postcreate.postClicked = ^{
+			NSLog(@"post postclicked");
+			[self getFBComments];
+		};
+		
+		self.postcreate.messageTextField.text = @"";
+	}
 	
-	PostCreateView *postcreate = [[PostCreateView alloc] initWithFrame:[UIScreen mainScreen].bounds];
-	[postcreate switchToComment:self.post];
+	self.postcreate.post = self.post;
 	
-	postcreate.postClicked = ^{
-		NSLog(@"post postclicked");
-		[self getFBComments];
-	};
-	
-	[[ViewController instance] openModal:postcreate];
-	[postcreate addedAsSubview:@{}];
-	postcreate.messageTextField.text = @"";
+	[[ViewController instance] openModal:self.postcreate];
+	[self.postcreate addedAsSubview:@{}];
 }
 
 - (void)getFBComments {

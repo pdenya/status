@@ -18,7 +18,7 @@ typedef void (^PCBlock)(void);
 }
 
 @property (nonatomic, retain) UITextView *messageTextField;
-@property (nonatomic, retain) Post *post;
+@property (assign) Post *post;
 @property (readwrite, copy) PCBlock postClicked;
 @property (readwrite, copy) PCBlock focused;
 
