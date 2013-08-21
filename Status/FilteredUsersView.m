@@ -46,19 +46,26 @@
 }
 
 - (void) refreshFeed {
-	[self.keys removeAllObjects];
-	[self.keys addObjectsFromArray:[self.filter allKeys]];
+    NSArray *new_keys = [self.filter allKeys];
+    NSMutableArray *new_feed = [[NSMutableArray alloc] init];
 	
-	[self.feed removeAllObjects];
-	
-	for (NSString *key in self.keys) {
+	for (NSString *key in new_keys) {
 		NSDictionary *filter_data = [self.filter objectForKey:key];
 		User *user = [self.user_data objectForKey:[filter_data objectForKey:@"uid"]];
 		Post *post = [user most_recent_post];
-		post.row_height = 0;
-		[self.feed addObject:post];
+        
+        if (post) {
+            post.row_height = 0;
+            [new_feed addObject:post];
+        }
 	}
 	
+    [self.keys removeAllObjects];
+    [self.keys addObjectsFromArray:new_keys];
+    
+    [self.feed removeAllObjects];
+    [self.feed addObjectsFromArray:new_feed];
+    
 	[self.timeline.tableview reloadData];
 }
 

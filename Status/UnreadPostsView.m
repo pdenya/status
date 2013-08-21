@@ -43,15 +43,21 @@
 }
 
 - (void) refreshFeed {
-	[self.feed removeAllObjects];
-	
+    NSMutableArray *new_feed = [[NSMutableArray alloc] init];
+    
 	for (Post *post in [FeedHelper instance].feed) {
 		if ([post has_unread_comments] && ![[post user] is_filtered]) {
-			[self.feed addObject:post];
+			[new_feed addObject:post];
 		}
 	}
 	
+    [self.feed removeAllObjects];
+    [self.feed addObjectsFromArray:new_feed];
+    [new_feed release];
+    
+    
 	[self.timeline.tableview reloadData];
+    
 }
 
 - (Post *) postFromUser:(User *)user {

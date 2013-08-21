@@ -91,7 +91,7 @@ const int max_failed = 30;
 }
 
 - (Post *)most_recent_post {
-	Post *post;
+	Post *post = nil;
 	NSString *user_uid = [NSString stringWithFormat:@"%@", self.uid];
 	
 	for (Post *p in [FeedHelper instance].feed) {

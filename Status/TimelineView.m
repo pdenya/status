@@ -35,6 +35,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		self.removeWhenFiltered = NO;
 		[self.tableview setTableFooterView:[UIView new]];
 		[self addSubview:self.tableview];
+        
 		
 		self.feed = [FeedHelper instance].feed;
 		self.user_data = [UsersHelper instance].users;

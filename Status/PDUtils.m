@@ -13,7 +13,6 @@
 @implementation PDUtils
 
 + (BOOL) isPro {
-	NSLog(@"keys: %@", [[[NSUserDefaults standardUserDefaults] dictionaryRepresentation] allKeys]);
 	return [[NSUserDefaults standardUserDefaults] objectForKey:@"is_pro"] ? YES : NO;
 }
 
