@@ -286,7 +286,7 @@ const int FAILED_THRESHOLD = 30;
 	
 	CALayer *bottomBorder = [CALayer layer];
 	bottomBorder.frame = CGRectMake(0.0f, [header_view h] - 0.5f, [header_view w], 0.5f);
-	bottomBorder.backgroundColor = [UIColor colorWithHex:0x5d5c5c].CGColor;
+	bottomBorder.backgroundColor = [UIColor brandMediumGrey].CGColor;
 	[header_view.layer addSublayer:bottomBorder];
 	
 	return header_view;
@@ -297,7 +297,7 @@ const int FAILED_THRESHOLD = 30;
 	
 	int btn_height = 42;
 
-	int header_adjust = SYSTEM_VERSION_LESS_THAN(@"7.0") ? 0 : 20;
+	int header_adjust = SYSTEM_VERSION_LESS_THAN(@"7.0") ? 0 : 19;
 	int btn_y = ((([header_view h] - header_adjust) / 2)  - (btn_height / 2)) + header_adjust;
 	int btn_offset = 0;
 	int btn_inset = 1;
@@ -327,14 +327,14 @@ const int FAILED_THRESHOLD = 30;
 	UIButton *unreadButton = [UIButton buttonWithType:UIButtonTypeCustom];
 	[unreadButton setImageEdgeInsets:insets];
 	[header_view addSubview:unreadButton];
-	unreadButton.frame = CGRectMake([filterButton rightEdge] + btn_offset, btn_y, btn_height, btn_height);
+	unreadButton.frame = CGRectMake([filterButton rightEdge] + btn_offset, btn_y + (1.0f/[[UIScreen mainScreen] scale]), btn_height, btn_height);
 	[unreadButton addTarget:self action:@selector(showUnread) forControlEvents:UIControlEventTouchUpInside];
 	unreadButton.tag = 73;
 	
 	UIButton *newPostButton = [UIButton buttonWithType:UIButtonTypeCustom];
 	[newPostButton setImageEdgeInsets:insets];
 	[header_view addSubview:newPostButton];
-	newPostButton.frame = CGRectMake([header_view w] - (btn_height + btn_offset), btn_y, btn_height, btn_height);
+	newPostButton.frame = CGRectMake([header_view w] - (btn_height + btn_offset), btn_y + (1.0f/[[UIScreen mainScreen] scale]), btn_height, btn_height);
 	[newPostButton addTarget:self action:@selector(showNewPost) forControlEvents:UIControlEventTouchUpInside];
 	newPostButton.tag = 74;
 	

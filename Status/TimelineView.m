@@ -14,6 +14,7 @@
 #import "ViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "UpgradeHeader.h"
+#import "UserProfileView.h"
 
 @implementation TimelineView
 @synthesize feed, user_data, tableview, filter, filterButtonClicked, favoriteButtonClicked;
@@ -236,10 +237,9 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	Post *post = [self.feed objectAtIndex:[index_path row]];
 	User *user = [self.user_data objectForKey:post.uid];
 	
-	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:[UIScreen mainScreen].bounds];
-	[avatarzoom setUser:user];
-	[[ViewController instance] openModal:avatarzoom];
-	[avatarzoom release];
+	UserProfileView *profileview = [[UserProfileView alloc] initWithUser:user];
+	[[ViewController instance] openModal:profileview];
+	[profileview release];
 }
 
 - (void) zoomPostImage:(id)sender {

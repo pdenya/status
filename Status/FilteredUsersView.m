@@ -67,6 +67,9 @@
     [self.feed addObjectsFromArray:new_feed];
     
 	[self.timeline.tableview reloadData];
+	
+	[new_keys release];
+	[new_feed release];
 }
 
 - (void) addUpgradeHeader {

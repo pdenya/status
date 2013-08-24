@@ -119,6 +119,7 @@
 		61F243B6179D136700787D03 /* icon_unread_large@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 61F243B3179D136700787D03 /* icon_unread_large@2x.png */; };
 		61FAA7F017B6D388006F99B7 /* swiped_example@2x.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 61FAA7EF17B6D388006F99B7 /* swiped_example@2x.jpg */; };
 		61FDBD1416E1112A003CC66F /* UITableViewCell+PD.m in Sources */ = {isa = PBXBuildFile; fileRef = 61FDBD1316E1112A003CC66F /* UITableViewCell+PD.m */; };
+		61FE401B17C59F5A0040F8E2 /* UserProfileView.m in Sources */ = {isa = PBXBuildFile; fileRef = 61FE401A17C59F5A0040F8E2 /* UserProfileView.m */; };
 		61FEB05F17A0BC340022D78A /* NewsFeedView.m in Sources */ = {isa = PBXBuildFile; fileRef = 61FEB05E17A0BC340022D78A /* NewsFeedView.m */; };
 		78210F6A16FF7F0F005CAF53 /* FeedHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 78210F6916FF7F0F005CAF53 /* FeedHelper.m */; };
 		78210F6D16FF7F3E005CAF53 /* FavoritesHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 78210F6C16FF7F3E005CAF53 /* FavoritesHelper.m */; };
@@ -272,6 +273,8 @@
 		61FAA7EF17B6D388006F99B7 /* swiped_example@2x.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "swiped_example@2x.jpg"; sourceTree = "<group>"; };
 		61FDBD1216E1112A003CC66F /* UITableViewCell+PD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UITableViewCell+PD.h"; sourceTree = "<group>"; };
 		61FDBD1316E1112A003CC66F /* UITableViewCell+PD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UITableViewCell+PD.m"; sourceTree = "<group>"; };
+		61FE401917C59F5A0040F8E2 /* UserProfileView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserProfileView.h; sourceTree = "<group>"; };
+		61FE401A17C59F5A0040F8E2 /* UserProfileView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserProfileView.m; sourceTree = "<group>"; };
 		61FEB05D17A0BC340022D78A /* NewsFeedView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewsFeedView.h; sourceTree = "<group>"; };
 		61FEB05E17A0BC340022D78A /* NewsFeedView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NewsFeedView.m; sourceTree = "<group>"; };
 		78210F6816FF7F0F005CAF53 /* FeedHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FeedHelper.h; sourceTree = "<group>"; };
@@ -592,6 +595,7 @@
 				78210F741702C5CC005CAF53 /* - Favorite Users List */,
 				61C29C9A16F1599A00331B6D /* - Filtered Users List */,
 				61C29CA716F2419F00331B6D /* UserAvatarView */,
+				61FE401817C59F280040F8E2 /* UserProfileView */,
 				61BE8F2C17962DF9007D8FB3 /* HeaderView */,
 				61BE8F2817962AF9007D8FB3 /* Learn More */,
 			);
@@ -653,6 +657,15 @@
 				61E5AA4016CDDC880068C613 /* PostCreateView.m */,
 			);
 			name = PostCreateView;
+			sourceTree = "<group>";
+		};
+		61FE401817C59F280040F8E2 /* UserProfileView */ = {
+			isa = PBXGroup;
+			children = (
+				61FE401917C59F5A0040F8E2 /* UserProfileView.h */,
+				61FE401A17C59F5A0040F8E2 /* UserProfileView.m */,
+			);
+			name = UserProfileView;
 			sourceTree = "<group>";
 		};
 		61FEB05C17A0BC190022D78A /* NewsFeed */ = {
@@ -839,6 +852,7 @@
 				61896A5F17A812E600585F1C /* PDUtils.m in Sources */,
 				6184934917AB3F3C00D35F27 /* NSDateFormatter+PD.m in Sources */,
 				6181648D17ADAEA5005E1992 /* IAPHelper.m in Sources */,
+				61FE401B17C59F5A0040F8E2 /* UserProfileView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

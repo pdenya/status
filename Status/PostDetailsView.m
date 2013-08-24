@@ -12,6 +12,7 @@
 #import "ThumbView.h"
 #import "ViewController.h"
 #import "HeaderView.h"
+#import "UserProfileView.h"
 #import <QuartzCore/QuartzCore.h>
 
 @implementation PostDetailsView
@@ -249,20 +250,15 @@
 	
 	User *comment_user = (User *)[self.user_data objectForKey:[[self.comments objectAtIndex:index_path.row] valueForKey:@"fromid"]];
 	
-	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:[UIScreen mainScreen].bounds];
-	[avatarzoom setUser:comment_user];
-	
-	[[ViewController instance] openModal:avatarzoom];
-	[avatarzoom release];
+	UserProfileView *profileview = [[UserProfileView alloc] initWithUser:comment_user];
+	[[ViewController instance] openModal:profileview];
+	[profileview release];
 }
 
 - (void)zoomUserAvatar:(id)sender {
-	UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:[UIScreen mainScreen].bounds];
-	[avatarzoom setUser:self.user];
-	
-	[[ViewController instance] openModal:avatarzoom];
-	
-	[avatarzoom release];
+	UserProfileView *profileview = [[UserProfileView alloc] initWithUser:self.user];
+	[[ViewController instance] openModal:profileview];
+	[profileview release];
 }
 
 - (void)toggleFavorite:(id)sender {
@@ -283,7 +279,9 @@
 #pragma mark - UITableView Delegate
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-	CGFloat height = [[[self.comments objectAtIndex:indexPath.row] valueForKey:@"text"] sizeWithFont:[UIFont systemFontOfSize:15.0f] constrainedToSize:CGSizeMake(round([self w] * .75), FLT_MAX) lineBreakMode:UILineBreakModeWordWrap].height;
+	CGFloat height = [[[self.comments objectAtIndex:indexPath.row] valueForKey:@"text"] sizeWithFont:[UIFont systemFontOfSize:15.0f]
+																				   constrainedToSize:CGSizeMake(round([self w] * .75), FLT_MAX)
+																					   lineBreakMode:UILineBreakModeWordWrap].height;
 	return MAX(height, 50) + 30;
 }
 

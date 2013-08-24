@@ -76,7 +76,18 @@
 }
 
 - (void) setUser:(User *)new_user {
-	[self.avatarView setImageWithURL:[NSURL URLWithString:[new_user picBigUrl]] placeholderImage:[[SDImageCache sharedImageCache] imageFromMemoryCacheForKey:[new_user picSquareUrl]]];
+	[self.avatarView setImageWithURL:[NSURL URLWithString:[new_user picBigUrl]]
+					placeholderImage:[[SDImageCache sharedImageCache] imageFromMemoryCacheForKey:[new_user picSquareUrl]]
+						   completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
+							   if (self.should_resize && image) {
+								   //Multiply the original image size by the given scale, and you'll get your actual displayed image size.
+								   CGFloat sx = [self.avatarView w] / image.size.width;
+								   CGFloat sy = [self.avatarView h] / image.size.height;
+								   CGFloat s = fminf(sx, sy);
+								   [self resizeTo:(s * image.size.height)];
+							   }
+							}];
+	
 	if (self.headerLabel) [self.headerLabel setText:[new_user full_name]];
 }
 

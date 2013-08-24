@@ -57,7 +57,6 @@
     
     
 	[self.timeline.tableview reloadData];
-    
 }
 
 - (Post *) postFromUser:(User *)user {
