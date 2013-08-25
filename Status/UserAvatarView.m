@@ -79,6 +79,10 @@
 	[self.avatarView setImageWithURL:[NSURL URLWithString:[new_user picBigUrl]]
 					placeholderImage:[[SDImageCache sharedImageCache] imageFromMemoryCacheForKey:[new_user picSquareUrl]]
 						   completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
+							   if (!image) {
+								   image = self.avatarView.image;
+							   }
+							   
 							   if (self.should_resize && image) {
 								   //Multiply the original image size by the given scale, and you'll get your actual displayed image size.
 								   CGFloat sx = [self.avatarView w] / image.size.width;
@@ -97,7 +101,11 @@
 		[self.avatarView setImageWithURL:[NSURL URLWithString:[new_post image:0 size:@"o"]]
 						placeholderImage:[[SDImageCache sharedImageCache] imageFromMemoryCacheForKey:[new_post image:0 size:@"s"]]
 							   completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
-								   if (self.should_resize) {
+								   if (!image) {
+									   image = self.avatarView.image;
+								   }
+								   
+								   if (self.should_resize && image) {
 									   //Multiply the original image size by the given scale, and you'll get your actual displayed image size.
 									   CGFloat sx = [self.avatarView w] / image.size.width;
 									   CGFloat sy = [self.avatarView h] / image.size.height;
