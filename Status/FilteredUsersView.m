@@ -68,7 +68,6 @@
     
 	[self.timeline.tableview reloadData];
 	
-	[new_keys release];
 	[new_feed release];
 }
 

@@ -96,7 +96,7 @@ static NSString * encodeByAddingPercentEscapes(NSString *input) {
 	NSString *scheme = inputURL.scheme;
 	
 	// Chrome with callback
-	if ([scheme isEqualToString:@"http"] ||[scheme isEqualToString:@"https"]) {
+	if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"googlechrome://"]] && ([scheme isEqualToString:@"http"] ||[scheme isEqualToString:@"https"])) {
 		NSLog(@"Chrome with callback");
 		NSString *chromeURLString = [NSString stringWithFormat:
 									 @"googlechrome-x-callback://x-callback-url/open/?x-source=%@&x-success=%@&url=%@",
@@ -115,7 +115,7 @@ static NSString * encodeByAddingPercentEscapes(NSString *input) {
 		NSString *scheme = inputURL.scheme;
 		NSString *chromeScheme = nil;
 		
-		if ([scheme isEqualToString:@"http"]) {
+		if ([scheme isEqualToString:@"http"]) {     
 			chromeScheme = @"googlechrome";
 		} else if ([scheme isEqualToString:@"https"]) {
 			chromeScheme = @"googlechromes";

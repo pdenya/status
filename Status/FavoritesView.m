@@ -63,7 +63,7 @@
 		NSDictionary *fav_data = [self.favorites objectForKey:key];
 		User *user = [[UsersHelper instance].users objectForKey:[fav_data objectForKey:@"uid"]];
 		Post *post = [user most_recent_post];
-		[self.feed addObject:post];
+		[new_feed addObject:post];
 	}
 	
 	[self.feed removeAllObjects];
@@ -72,7 +72,6 @@
 	[self.keys removeAllObjects];
 	[self.keys addObjectsFromArray:new_keys];
 	
-	[new_keys release];
 	[new_feed release];
 	
 	[self.timeline.tableview reloadData];

@@ -43,14 +43,18 @@
 
 - (void) refreshFeed {
 	[self.feed removeAllObjects];
-
+    NSMutableArray *new_feed = [[NSMutableArray alloc] init];
 	
 	for (Post *p in [FeedHelper instance].feed) {
 		if (![[p user] is_filtered]) {
-			[self.feed addObject:p];
+			[new_feed addObject:p];
 		}
 	}
 	
+    [self.feed removeAllObjects];
+    [self.feed addObjectsFromArray:new_feed];
+    [new_feed release];
+        
 	[self.timeline.tableview reloadData];
 }
 

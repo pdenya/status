@@ -106,8 +106,9 @@
 	
 	if (!is_saving) {
 		is_saving = YES;
+        NSArray *save_feed = [self.feed copy];
 		NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-		NSData *feedData = [NSKeyedArchiver archivedDataWithRootObject:self.feed];
+		NSData *feedData = [NSKeyedArchiver archivedDataWithRootObject:save_feed];
 		[feedData writeToFile:[NSString stringWithFormat:@"%@/feed",docDir] atomically:YES];
 		is_saving = NO;
 		
