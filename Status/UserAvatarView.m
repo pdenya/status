@@ -47,7 +47,8 @@
 
 - (void) hideHeader {
 	self.headerView.hidden = YES;
-	[self.avatarView.superview sety:0];
+    self.avatarView.superview.frame = self.bounds;
+    self.avatarView.frame = self.bounds;
 }
 
 - (void) resizeTo:(CGFloat)new_h {

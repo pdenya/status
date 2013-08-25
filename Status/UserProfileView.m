@@ -38,23 +38,30 @@
 		
 		UIView *topview = [[UIView alloc] initWithFrame:self.frame];
 		
-		//embed image view
+        [self refreshFeed];
+        
+        //embed image view
 		UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:[[ViewController instance] contentFrame]];
-		avatarzoom.should_resize = YES;
+		avatarzoom.should_resize = [self.feed count] > 0 ? YES : NO;
 		[avatarzoom hideHeader];
 		[avatarzoom setUser:self.user];
-		[avatarzoom sety:0];
-		[topview addSubview:avatarzoom];
+		
+        if ([self.feed count] > 0) {
+            [avatarzoom sety:0];
+            [topview seth:[avatarzoom h]];
+            [topview addSubview:avatarzoom];
+            
+            self.timeline = [[TimelineView alloc] initWithFrame:[[ViewController instance] contentFrame]];
+            [self.timeline.tableview setTableHeaderView:topview];
+            self.timeline.feed = self.feed;
+            [self.timeline.tableview reloadData];
+            [self addSubview:self.timeline];
+        } else {
+            [avatarzoom sety:[header_view h]];
+            [self addSubview:avatarzoom];
+        }
+        
 		[avatarzoom release];
-		
-		[topview seth:[avatarzoom h]];
-		
-		self.timeline = [[TimelineView alloc] initWithFrame:[[ViewController instance] contentFrame]];
-		[self refreshFeed];
-		[self.timeline.tableview setTableHeaderView:topview];
-		self.timeline.feed = self.feed;
-		[self.timeline.tableview reloadData];
-		[self addSubview:self.timeline];
 	}
 	
 	return self;
