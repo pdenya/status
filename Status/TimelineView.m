@@ -365,7 +365,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
     if (cell == nil) {
         cell = [[[ZKRevealingTableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier] autorelease];
 		cell.delegate = self;
-		cell.direction = ZKRevealingTableViewCellDirectionLeft;
+		cell.direction = ZKRevealingTableViewCellDirectionBoth;
 		
 		//hide defaults
 		cell.textLabel.hidden = YES;
