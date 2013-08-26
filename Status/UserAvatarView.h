@@ -27,5 +27,6 @@
 
 - (void) setUser:(User *)new_user;
 - (void) setPost:(Post *)new_post;
+- (void) setPost:(Post *)new_post index:(int)index;
 - (void) hideHeader;
 @end

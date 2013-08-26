@@ -15,6 +15,10 @@
 @implementation UserAvatarView
 @synthesize avatarView, urls, photos, headerView, headerLabel, should_resize;
 
+- (id)init {
+	return [self initWithFrame:[[UIScreen mainScreen] bounds]];
+}
+
 - (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
@@ -97,10 +101,14 @@
 }
 
 - (void) setPost:(Post *)new_post {
+	[self setPost:new_post index:0];
+}
+
+- (void) setPost:(Post *)new_post index:(int)index {
 	if ([new_post hasImages]) {
 		NSLog(@"Setting Image to %@", [new_post image:0 size:@"o"]);
-		[self.avatarView setImageWithURL:[NSURL URLWithString:[new_post image:0 size:@"o"]]
-						placeholderImage:[[SDImageCache sharedImageCache] imageFromMemoryCacheForKey:[new_post image:0 size:@"s"]]
+		[self.avatarView setImageWithURL:[NSURL URLWithString:[new_post image:index size:@"o"]]
+						placeholderImage:[[SDImageCache sharedImageCache] imageFromMemoryCacheForKey:[new_post image:index size:@"s"]]
 							   completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
 								   if (!image) {
 									   image = self.avatarView.image;

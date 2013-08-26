@@ -14,8 +14,9 @@
 @property (nonatomic, retain) User *user;
 @property (nonatomic, retain) Post *post;
 @property (nonatomic, retain) UIImageView *imgview;
+@property (assign) int index;
 
 - (void)setPost:(Post *)new_post index:(int)index;
-
+- (void) makeTappable;
 
 @end

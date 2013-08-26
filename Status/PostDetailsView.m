@@ -125,22 +125,31 @@
     if ([post hasImages] && [post.images count] > 1) {
         //multiple images, show thumbnails
         
-        int index = 0;
         CGFloat thumby = [topView h];
         CGFloat padding = [avatarView x];
         CGFloat thumbx = padding;
-        ThumbView *imgthumb = ({
-            ThumbView *imgthumb = [[ThumbView alloc] initWithFrame:CGRectMake(thumbx, thumby, 50, 50)];
-            [imgthumb setPost:post index:index];
-            [topView addSubview:imgthumb];
-            thumbx = [imgthumb rightEdge] + padding;
-            
-            index++;
-            imgthumb;
-        });
-
-        [topView seth:[imgthumb bottomEdge] + padding];
-        [imgthumb release];
+		CGFloat thumbw = 55;
+		int row_limit = 5;
+		
+		for (int index = 0; index < [post.images count]; index++) {
+			ThumbView *imgthumb = ({
+				ThumbView *imgthumb = [[ThumbView alloc] initWithFrame:CGRectMake(thumbx, thumby, thumbw, thumbw)];
+				[imgthumb setPost:post index:index];
+				[imgthumb makeTappable];
+				[topView addSubview:imgthumb];
+				thumbx = [imgthumb rightEdge] + padding;
+				
+				if (index % row_limit == row_limit - 1) {
+					thumbx = padding;
+					thumby = [imgthumb bottomEdge] + padding;
+				}
+				
+				imgthumb;
+			});
+			
+			[topView seth:[imgthumb bottomEdge] + padding];
+			[imgthumb release];
+		}
     }
 	else if ([post hasImages]) {
         //1 image, embed it here
