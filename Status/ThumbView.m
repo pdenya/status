@@ -43,9 +43,13 @@
 }
 
 - (void)setPost:(Post *)new_post {
-	post = new_post;
-	
-	[self.imgview setImageWithURL:[NSURL URLWithString:[[post.images objectAtIndex:0] objectForKey:@"src"]] placeholderImage:nil];
+    [self setPost:new_post index:0];
+}
+
+- (void)setPost:(Post *)new_post index:(int)index {
+    post = new_post;
+    
+    [self.imgview setImageWithURL:[NSURL URLWithString:[[post.images objectAtIndex:index] objectForKey:@"src"]] placeholderImage:nil];
 }
 
 /*

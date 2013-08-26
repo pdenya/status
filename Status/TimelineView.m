@@ -358,6 +358,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	UILabel *countdown_label;
 	UIImageView *commentsNotifierView;
 	UIImageView *imageNotifierView;
+    
 
     static NSString *CellIdentifier = @"Cell";
     ZKRevealingTableViewCell *cell = [self.tableview dequeueReusableCellWithIdentifier:CellIdentifier];

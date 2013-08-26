@@ -119,10 +119,32 @@
 	[postLabel setx:[avatarView rightEdge] + 10];
 	[topView addSubview:postLabel];
 	
-	[topView seth:MAX(130, [postLabel h] + 40)];
+	[topView seth:MAX(110, [postLabel h] + 20)];
 
 	
-	if ([post hasImages]) {
+    if ([post hasImages] && [post.images count] > 1) {
+        //multiple images, show thumbnails
+        
+        int index = 0;
+        CGFloat thumby = [topView h];
+        CGFloat padding = [avatarView x];
+        CGFloat thumbx = padding;
+        ThumbView *imgthumb = ({
+            ThumbView *imgthumb = [[ThumbView alloc] initWithFrame:CGRectMake(thumbx, thumby, 50, 50)];
+            [imgthumb setPost:post index:index];
+            [topView addSubview:imgthumb];
+            thumbx = [imgthumb rightEdge] + padding;
+            
+            index++;
+            imgthumb;
+        });
+
+        [topView seth:[imgthumb bottomEdge] + padding];
+        [imgthumb release];
+    }
+	else if ([post hasImages]) {
+        //1 image, embed it here
+        
 		//create hr
 		UIView *hr = [self hrWithText:@"Images"];
 		[topView addSubview:hr];
@@ -143,9 +165,12 @@
 	
 	//post/comment separator
 	UIView *hr = [self hrWithText:@"Comments"];
+    [topView seth:[topView h] + [hr h]];
+    [hr sety:[topView h] - [hr h]];
 	hr.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
 	[topView addSubview:hr];
-	[hr sety:[topView h] - [hr h]];
+	
+    
 	
 	// footer
 	UIView *bottomview = [[UIView alloc] initWithFrame:self.bounds];
