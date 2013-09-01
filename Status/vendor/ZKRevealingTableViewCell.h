@@ -54,7 +54,8 @@ typedef enum {
 @property (nonatomic, assign) ZKRevealingTableViewCellDirection direction;
 @property (nonatomic, assign) BOOL shouldBounce;
 @property (nonatomic, assign) BOOL shouldAutoSnapBack;
-@property (nonatomic, assign) CGFloat pixelsToReveal;
+@property (nonatomic, assign) CGFloat pixelsToRevealRight;
+@property (nonatomic, assign) CGFloat pixelsToRevealLeft;
 @property (nonatomic, assign, readonly) CGFloat pannedAmount;
 
 - (void) snapBack;

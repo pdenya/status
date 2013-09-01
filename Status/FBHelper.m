@@ -293,6 +293,11 @@
 			 
 			 NSLog(@"Stream Results: %@", [response_container description]);
 			 
+			 NSUserDefaults *userdefaults = [NSUserDefaults standardUserDefaults];
+			 NSDateFormatter *df = [NSDateFormatter instance];
+			 [df setDateFormat:@"'Last check at 'h:mma' on 'M/d"];
+			 [userdefaults setObject:[df stringFromDate:[NSDate date]] forKey:@"fb_last_successful_update"];
+			 
 			 completed(response_container);
 			 
 			 self.isGettingStream = NO;
@@ -313,6 +318,31 @@
 		completed();
 	}
 
+}
+
+- (void)like:(NSString *)status_id completed:(FBBoolBlock)completed {
+	FBVoidBlock success = ^{
+		[FBRequestConnection startWithGraphPath:[NSString stringWithFormat:@"/%@/like", status_id] parameters:nil HTTPMethod:@"POST" completionHandler:
+		 ^(FBRequestConnection *connection, id result, NSError *error) {
+			 if (error) {
+				 NSLog(@"Error: %@", [error localizedDescription]);
+				 NSLog(@"Error: %@", [error description]);
+				 NSLog(@"Error: %@", [[error userInfo] description]);
+				 completed(NO);
+			 } else {
+				 NSLog(@"Result: %@", [result description]);
+				 // Get the friend data to display
+				 completed(YES);
+			 }
+		 }
+		];
+	};
+	
+	[self reauthorizeWithWritePermissions:success];
+}
+
+- (void)unlike:(NSString *)post_id completed:(FBBoolBlock)completed {
+	
 }
 
 - (void)postStatus:(NSString *)message completed:(FBArrayBlock)completed {

@@ -60,6 +60,9 @@
 			//if we added any rows notify the tableviews
 			[[ViewController instance] refreshFeeds:added_rows];
 		}
+		else {
+			[[ViewController instance] refreshFeeds:nil];
+		}
 	};
 	
 	/*

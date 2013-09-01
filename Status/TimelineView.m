@@ -213,6 +213,69 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	self.tutorial = tutorial;
 }
 
+- (void) beginRefreshing {
+	if (!self.refreshingview) {
+		self.refreshingview = ({
+			UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [self w], 30.0f)];
+			view.backgroundColor = [UIColor whiteColor];
+			[view addBottomBorder:self.tableview.separatorColor];
+			
+			UIActivityIndicatorView *activityIndicator = [[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 25, 25)];
+			[activityIndicator setActivityIndicatorViewStyle:UIActivityIndicatorViewStyleGray];
+			[activityIndicator startAnimating];
+			
+			[view addSubview:activityIndicator];
+			[activityIndicator centerx];
+			[activityIndicator centery];
+			activityIndicator.tag = 53;
+			[activityIndicator release];
+			
+			UILabel *lbl = [UILabel label:[[NSUserDefaults standardUserDefaults] objectForKey:@"fb_last_successful_update"] size:10.0f];
+			lbl.textAlignment = UITextAlignmentCenter;
+			[view addSubview:lbl];
+			[lbl centerx];
+			[lbl centery];
+			lbl.hidden = YES;
+			lbl.tag = 54;
+			
+			view;
+		});
+		
+		if (self.tableview.contentOffset.y == 0) {
+			self.tableview.contentOffset = CGPointMake(0, [self.refreshingview h]);
+		}
+	}
+	else {
+		if (self.tableview.contentOffset.y == [self.refreshingview h]) {
+			[self.tableview setContentOffset:CGPointMake(0, 0) animated:YES];
+		}
+		
+		UIActivityIndicatorView *activityIndicator = (UIActivityIndicatorView *)[self.refreshingview viewWithTag:53];
+		activityIndicator.hidden = NO;
+		
+		UILabel *lbl = (UILabel *)[self.refreshingview viewWithTag:54];
+		lbl.hidden = YES;
+	}
+	
+	if (!self.refreshingview.superview) {
+		[self.tableview setTableHeaderView:self.refreshingview];
+	}
+}
+
+- (void) endRefreshing {
+	if (self.tableview.contentOffset.y == 0) {
+		[self.tableview setContentOffset:CGPointMake(0, [self.refreshingview h]) animated:YES];
+	}
+	
+	//[self.tableview setTableHeaderView:nil];
+	UIActivityIndicatorView *activityIndicator = (UIActivityIndicatorView *)[self.refreshingview viewWithTag:53];
+	activityIndicator.hidden = YES;
+	
+	UILabel *lbl = (UILabel *)[self.refreshingview viewWithTag:54];
+	lbl.text = [[NSUserDefaults standardUserDefaults] objectForKey:@"fb_last_successful_update"];
+	lbl.hidden = NO;
+}
+
 #pragma mark - Event Handlers
 
 -(void)didClickFilterButton {
@@ -350,6 +413,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	
 	RevealedView *revealedview;
 	UIView *rightBorder;
+	UIView *leftBorder;
 	UILabel *messageLabel;
 	UILabel *dateLabel;
 	UILabel *nameLabel;
@@ -383,6 +447,13 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		rightBorder.backgroundColor = [UIColor colorWithHex:0xDDDDDD]; //grey - c3c2c2
 		[cell.contentView addSubview:rightBorder];
 		rightBorder.tag = 51;
+		
+		// left border
+		leftBorder = [[UIView alloc] init];
+		leftBorder.frame = CGRectMake(0.0f, 0.0f, 0.5f, [cell h]);
+		leftBorder.backgroundColor = [UIColor colorWithHex:0xDDDDDD]; //grey - c3c2c2
+		[cell.contentView addSubview:leftBorder];
+		leftBorder.tag = 52;
 		
 		// Avatar View
 		avatarView = [[ThumbView alloc] initWithFrame:CGRectMake(10, 10, 50, 50)];
@@ -485,11 +556,10 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		[avatarView addGestureRecognizer:doubletapgr];
 		[doubletapgr release];
 		
-		
-		int reveal_w = 201;
-		revealedview = [[RevealedView alloc] initWithFrame:CGRectMake(0, -1, reveal_w, 100)];
+		revealedview = [[RevealedView alloc] initWithFrame:CGRectMake(0, -1, [self w], 100)];
 		revealedview.tag = 50;
-		cell.pixelsToReveal = reveal_w;
+		cell.pixelsToRevealRight = 201;
+		cell.pixelsToRevealLeft = 100;
 		[cell addSubview:revealedview];
 		[cell sendSubviewToBack:revealedview];
 		cell.revealedView = revealedview;
@@ -497,6 +567,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	else {
 		revealedview = (RevealedView *)[cell viewWithTag:50];
 		rightBorder = (UIView *)[cell viewWithTag:51];
+		leftBorder = (UIView *)[cell viewWithTag:52];
 		
 		messageLabel = [cell messageLabel];
 		dateLabel = [cell dateLabel];
@@ -512,6 +583,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	revealedview.post = post;
 	
 	[rightBorder seth:[revealedview h]];
+	[leftBorder seth:[revealedview h]];
 	
 	if ([post hasImages]) {
 		NSLog(@"Post has images %@", [post.images description]);

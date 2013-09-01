@@ -65,13 +65,9 @@
 	UIView *border = [[UIView alloc] init];
 	border.tag = 101;
 	border.frame = CGRectMake(0, [self h] - (1/[[UIScreen mainScreen] scale]), [self w], 1/[[UIScreen mainScreen] scale]);
-	NSLog(@"content view frame %@", NSStringFromCGRect(self.frame));
-	NSLog(@"border frame %@", NSStringFromCGRect(border.frame));
 	border.backgroundColor = borderColor;
 	[self addSubview:border];
 	[self bringSubviewToFront:border];
-	
-	//border.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
 }
 
 - (void) addTopBorder:(UIColor *)borderColor {

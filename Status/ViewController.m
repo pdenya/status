@@ -183,6 +183,9 @@ const int FAILED_THRESHOLD = 30;
 	
 	if (!self.newsfeed.superview) {
 		[self.view addSubview:self.newsfeed];
+		
+		//this is a fix because uiactivityindicatorview.hidden seems to get set to NO everytime we add this subview
+		[self.newsfeed.timeline endRefreshing];
 	}
 	
 	[self updateNav];
@@ -344,10 +347,20 @@ const int FAILED_THRESHOLD = 30;
 //once called, this method polls fb
 -(void)streamRefreshInterval {
 	if (self.is_done_loading) {
+		if (self.newsfeed) {
+			[self.newsfeed.timeline beginRefreshing];
+		}
+		else {
+			//every second until there's a newsfeed to call beginRefreshing on
+			[self performSelector:@selector(streamRefreshInterval) withObject:nil afterDelay:1.0f];
+		}
+		
+		
 		[[FeedHelper instance] refresh];
 		[self performSelector:@selector(streamRefreshInterval) withObject:nil afterDelay:30.0f];
 	}
 	else {
+		//every second until we're done loading
 		[self performSelector:@selector(streamRefreshInterval) withObject:nil afterDelay:1.0f];
 	}
 }
@@ -379,12 +392,15 @@ const int FAILED_THRESHOLD = 30;
 }
 
 - (void)refreshFeeds:(NSArray *)added_row_indexes {
+	[self.newsfeed.timeline endRefreshing];
+	
 	//TODO: pass added_row_index to the tableviews for better handling
 	//[self.timelineview.tableview beginUpdates];
 	//[self.timelineview.tableview insertRowsAtIndexPaths:added_rows withRowAnimation:UITableViewRowAnimationAutomatic];
 	//[self.timelineview.tableview endUpdates];
-	
-	[[self activeView] refreshFeed];
+	if (added_row_indexes) {
+		[[self activeView] refreshFeed];
+	}
 }
 
 - (void) openModal:(UIView *)view {

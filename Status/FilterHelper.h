@@ -16,6 +16,9 @@
 #define FAVORITE_STATE_FAVORITED @"favorited"
 #define FAVORITE_STATE_NOT_FAVORITED @"not_favorited"
 
+#define LIKE_STATE_LIKED @"liked"
+#define LIKE_STATE_NOT_LIKED @"not_liked"
+
 @interface FilterHelper : NSObject {
     
 }

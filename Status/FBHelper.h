@@ -12,6 +12,7 @@
 typedef void (^FBArrayBlock)(NSArray *response);
 typedef void (^FBDictionaryBlock)(NSDictionary *response);
 typedef void (^FBVoidBlock)();
+typedef void (^FBBoolBlock)(BOOL success);
 
 @interface FBHelper : NSObject
 
@@ -25,5 +26,8 @@ typedef void (^FBVoidBlock)();
 - (void) getComments:(NSString *)post_id completed:(FBDictionaryBlock)completed;
 - (void) postComment:(NSString *)message onStatus:(NSString *)status_id completed:(FBArrayBlock)completed;
 - (BOOL) hasSession;
+
+- (void)like:(NSString *)status_id completed:(FBBoolBlock)completed;
+- (void)unlike:(NSString *)status_id completed:(FBBoolBlock)completed;
 
 @end

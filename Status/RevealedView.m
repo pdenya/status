@@ -20,18 +20,20 @@
         // Initialization code
 		self.backgroundColor = [UIColor brandGreyColor];
 		self.autoresizesSubviews = YES;
-		
-		self.favbtn = [self revealedButton:@{
-		   @"icon": @"icon_edit_favorite.png",
-		   @"text": @"Tap to favorite"
+
+		self.filterbtn = [self revealedButton:@{
+		  @"icon": @"icon_edit_filter.png",
+		  @"text": @"Tap to filter"
 		}];
 		
-		[self.favbtn addTarget:self action:@selector(toggleFavorite:) forControlEvents:UIControlEventTouchUpInside];
-		[self addSubview:self.favbtn];
-		self.favbtn.tag = 60;
+		[self.filterbtn addTarget:self action:@selector(toggleFilter:) forControlEvents:UIControlEventTouchUpInside];
+		[self.filterbtn setx:[self w] - [self.filterbtn w]];
+		[self addSubview:self.filterbtn];
+		self.filterbtn.tag = 61;
+		
 		
 		UIView *hr = [[UIView alloc] init];
-		[hr setx:[self.favbtn rightEdge]];
+		[hr setx:[self.filterbtn x] - 1];
 		[hr sety:0];
 		[hr seth:[self h]];
 		[hr setw:1];
@@ -40,18 +42,30 @@
 		hr.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin;
 		[hr release];
 		
-		self.filterbtn = [self revealedButton:@{
-		 @"icon": @"icon_edit_filter.png",
-		 @"text": @"Tap to filter"
+		self.favbtn = [self revealedButton:@{
+		   @"icon": @"icon_edit_favorite.png",
+		   @"text": @"Tap to favorite"
 		}];
 		
-		[self.filterbtn addTarget:self action:@selector(toggleFilter:) forControlEvents:UIControlEventTouchUpInside];
-		[self.filterbtn setx:101];
-		[self addSubview:self.filterbtn];
-		self.filterbtn.tag = 61;
+		[self.favbtn addTarget:self action:@selector(toggleFavorite:) forControlEvents:UIControlEventTouchUpInside];
+		[self.favbtn setx:[self.filterbtn x] - (1 + [self.favbtn w])];
+		[self addSubview:self.favbtn];
+		self.favbtn.tag = 60;
+
+		self.likebtn = ({
+			UIButton *btn = [self revealedButton:@{
+			 @"icon": @"icon_edit_like.png",
+			 @"text": @"Tap to like"
+			}];
+			
+			[btn addTarget:self action:@selector(toggleLike:) forControlEvents:UIControlEventTouchUpInside];
+			[btn setx:0];
+			[self addSubview:btn];
+			
+			btn;
+		});
 		
 		[self addFlexibleBottomBorder:[UIColor colorWithHex:0xc7c6c6]];
-		
     }
     return self;
 }
@@ -78,6 +92,9 @@
 
 	UIImageView *filtericon = (UIImageView *)[self.filterbtn viewWithTag:62];
 	filtericon.frame = favicon.frame;
+	
+	UIImageView *likeicon = (UIImageView *)[self.likebtn viewWithTag:62];
+	likeicon.frame = favicon.frame;
 	
 	UIView *bottom_border = [self viewWithTag:101];
 	[bottom_border sety:[self h] - [bottom_border h]];
@@ -112,6 +129,14 @@
 	else if([filter_state isEqualToString:FAVORITE_STATE_NOT_FAVORITED]) {
 		labelText = @"Tap to favorite";
 		icon = @"icon_edit_favorite.png";
+	}
+	else if([filter_state isEqualToString:LIKE_STATE_LIKED]) {
+		labelText = @"Liked";
+		icon = @"icon_edit_like_active.png";
+	}
+	else if([filter_state isEqualToString:LIKE_STATE_NOT_LIKED]) {
+		labelText = @"Tap to like";
+		icon = @"icon_edit_like.png";
 	}
 	
 	
@@ -160,6 +185,7 @@
 	lbl.backgroundColor = btn.backgroundColor;
 	[btn addSubview:lbl];
 	[lbl centerx];
+	NSLog(@"label y %f", [iconview bottomEdge] + 1);
 	[lbl sety:[iconview bottomEdge] + 1];
 	lbl.tag = 63;
 	lbl.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
@@ -204,4 +230,15 @@
 	
 	[self updateBtn:self.filterbtn forState:filter_state];
 }
+
+- (void)toggleLike:(id)sender {
+	if ([self.post has_liked]) {
+		[self.post unlike];
+		[self updateBtn:self.likebtn forState:LIKE_STATE_NOT_LIKED];
+	} else {
+		[self.post like];
+		[self updateBtn:self.likebtn forState:LIKE_STATE_LIKED];
+	}
+}
+
 @end

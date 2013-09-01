@@ -217,7 +217,15 @@ const int max_failed = 30;
 		}
 		return;
 	}
-	if (total_failed > max_failed) return;
+	
+	if (total_failed > max_failed) {
+		total_failed++;
+		if (total_failed != max_failed && total_failed % max_failed == 0) {
+			total_failed = max_failed - 1; //give it 1 shot every once in a while
+		}
+		return;
+	}
+	
 	if (self.image_square != nil) {
 		if (completed) completed();
 		return;
@@ -272,10 +280,11 @@ const int max_failed = 30;
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		// do your background tasks here
 		NSString *url_string = [NSString stringWithFormat:@"http://graph.facebook.com/%@/picture?width=640", self.uid];
-		NSLog(@"URL STRIN %@", url_string);
+		NSLog(@"URL STRING %@", url_string);
 		UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:url_string]]];
 		
 		if (image != nil) {
+			total_failed = 0;
 			self.image_big = image;
 			loaded();
 		} else {

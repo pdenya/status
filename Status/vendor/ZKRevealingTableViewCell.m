@@ -56,7 +56,8 @@
 {
     self.direction = ZKRevealingTableViewCellDirectionBoth;
     self.shouldBounce = YES;
-    self.pixelsToReveal = 0;
+    self.pixelsToRevealRight = 0;
+	self.pixelsToRevealLeft = 0;
 
     self._panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(_pan:)];
     self._panGesture.delegate = self;
@@ -170,8 +171,8 @@
     CGFloat dx = center.x - self._originalCenter;
 
     CGFloat totalWidth = self.frame.size.width;
-    if (self.pixelsToReveal != 0) {
-        totalWidth = self.pixelsToReveal;
+    if (self.pixelsToRevealRight != 0) {
+        totalWidth = self.pixelsToRevealRight;
     }
 
     CGFloat amount = dx / totalWidth;
@@ -238,13 +239,13 @@
 		if ((newCenterPosition < originalCenter && !self._shouldDragLeft) || (newCenterPosition > originalCenter && !self._shouldDragRight))
 			newCenterPosition = originalCenter;
 		
-		if (self.pixelsToReveal != 0) {
+		if (self.pixelsToRevealRight != 0) {
 			// Let's not go waaay out of bounds
-            if (newCenterPosition >= originalCenter + self.pixelsToReveal) {
-				newCenterPosition = originalCenter + self.pixelsToReveal;
+            if (newCenterPosition >= originalCenter + self.pixelsToRevealLeft) {
+				newCenterPosition = originalCenter + self.pixelsToRevealLeft;
             }
-            else if (newCenterPosition <= originalCenter - self.pixelsToReveal) {
-				newCenterPosition = originalCenter - self.pixelsToReveal;
+            else if (newCenterPosition <= originalCenter - self.pixelsToRevealRight) {
+				newCenterPosition = originalCenter - self.pixelsToRevealRight;
             }
         } else {
 			// Let's not go waaay out of bounds
@@ -404,13 +405,13 @@
 - (void)_slideOutContentViewInDirection:(ZKRevealingTableViewCellDirection)direction;
 {
 	CGFloat x;
-	if (self.pixelsToReveal != 0) {
+	if (self.pixelsToRevealRight != 0) {
 		switch (direction) {
 			case ZKRevealingTableViewCellDirectionLeft:
-				x = self._originalCenter - self.pixelsToReveal;
+				x = self._originalCenter - self.pixelsToRevealRight;
 				break;
 			case ZKRevealingTableViewCellDirectionRight:
-				x = self._originalCenter + self.pixelsToReveal;
+				x = self._originalCenter + self.pixelsToRevealLeft;
 				break;
 			default:
 				@throw [NSException exceptionWithName:NSInternalInconsistencyException reason:@"Unhandled gesture direction" userInfo:[NSDictionary dictionaryWithObject:[NSNumber numberWithInteger:direction] forKey:@"direction"]];

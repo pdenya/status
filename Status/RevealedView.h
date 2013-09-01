@@ -19,6 +19,7 @@
 @property (nonatomic, retain) User *user;
 @property (nonatomic, retain) UIButton *filterbtn;
 @property (nonatomic, retain) UIButton *favbtn;
+@property (nonatomic, retain) UIButton *likebtn;
 
 - (void) refresh;
 

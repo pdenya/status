@@ -19,6 +19,7 @@
 	post.time = [post_data objectForKey:@"time"];
 	post.uid = [post_data objectForKey:@"uid"];
 	post.has_comments = NO;
+	post.has_liked = NO;
 	
 	if ([post_data valueForKey:@"images"]) {
 		post.images = [NSMutableArray arrayWithArray:[post_data valueForKey:@"images"]];
@@ -106,6 +107,25 @@
 	return [NSDate dateWithTimeIntervalSince1970:[self.time integerValue]];
 }
 
+#pragma mark - actions
+- (void)unlike {
+	[[FBHelper instance] unlike:[self status_id] completed:^(BOOL success) {
+		if (success) {
+			self.has_liked = YES;
+			[[FeedHelper instance] save];
+		}
+	}];
+}
+
+- (void)like {
+	[[FBHelper instance] like:[self status_id] completed:^(BOOL success) {
+		if (success) {
+			self.has_liked = YES;
+			[[FeedHelper instance] save];
+		}
+	}];
+}
+
 //NSCoding
 	- (id)initWithCoder:(NSCoder *)coder {
 		self = [super init];
@@ -115,7 +135,8 @@
 			self.status_id = [coder decodeObjectForKey:@"status_id"];
 			self.time = [coder decodeObjectForKey:@"time"];
 			self.uid = [coder decodeObjectForKey:@"uid"];
-			self.has_comments = [coder decodeBoolForKey:@"has_comments"];
+			self.has_comments = [coder decodeBoolForKey:@"has_comments"] ? [coder decodeBoolForKey:@"has_comments"] : NO;
+			self.has_liked = [coder decodeBoolForKey:@"has_liked"] ? [coder decodeBoolForKey:@"has_comments"] : NO;
 			self.images = [NSMutableArray arrayWithArray:[coder decodeObjectForKey:@"images"]];
 			
 			if ([coder decodeObjectForKey:@"last_comment_at"]) {
@@ -135,7 +156,16 @@
 		[coder encodeObject:self.status_id forKey:@"status_id"];
 		[coder encodeObject:self.time forKey:@"time"];
 		[coder encodeObject:self.uid forKey:@"uid"];
-		[coder encodeBool:self.has_comments forKey:@"has_comments"];
+		
+		if (self.has_comments) {
+			[coder encodeBool:self.has_comments forKey:@"has_comments"];
+		}
+		
+		
+		if (self.has_liked) {
+			[coder encodeBool:self.has_liked forKey:@"has_liked"];
+		}
+		
 		[coder encodeObject:self.images forKey:@"images"];
 		
 		if (self.last_comment_at) {

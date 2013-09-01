@@ -19,16 +19,22 @@
 @property (nonatomic, retain) NSDate *last_comment_at;
 @property (assign) CGFloat row_height;
 @property (readwrite) BOOL has_comments;
+@property (readwrite) BOOL has_liked;
 
-+(Post *)postFromDictionary:(NSDictionary *)post_data;
++ (Post *)postFromDictionary:(NSDictionary *)post_data;
++ (UIFont *)getPostFont;
+
 - (BOOL)hasImages;
+- (BOOL)has_unread_comments;
 - (CGFloat)rowHeight;
+- (CGFloat)minRowHeight;
 - (CGFloat)messageLabelWidth;
 - (NSString *)image:(NSInteger)index size:(NSString *)size;
-+ (UIFont *)getPostFont;
-- (CGFloat) minRowHeight;
-- (BOOL)has_unread_comments;
-- (User *)user;
 - (NSString *)combined_id;
+- (User *)user;
 - (NSDate *) date;
+
+- (void)unlike;
+- (void)like;
+
 @end
