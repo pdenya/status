@@ -295,7 +295,7 @@
 			 
 			 NSUserDefaults *userdefaults = [NSUserDefaults standardUserDefaults];
 			 NSDateFormatter *df = [NSDateFormatter instance];
-			 [df setDateFormat:@"'Last check at 'h:mma' on 'M/d"];
+			 [df setDateFormat:@"'Last checked at 'h:mma' on 'M/d"];
 			 [userdefaults setObject:[df stringFromDate:[NSDate date]] forKey:@"fb_last_successful_update"];
 			 
 			 completed(response_container);

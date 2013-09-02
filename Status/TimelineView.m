@@ -233,6 +233,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 			UILabel *lbl = [UILabel label:[[NSUserDefaults standardUserDefaults] objectForKey:@"fb_last_successful_update"] size:10.0f];
 			lbl.textAlignment = UITextAlignmentCenter;
 			[view addSubview:lbl];
+            [lbl setw:[self w]];
 			[lbl centerx];
 			[lbl centery];
 			lbl.hidden = YES;
