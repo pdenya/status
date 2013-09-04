@@ -321,8 +321,9 @@
 }
 
 - (void)like:(NSString *)status_id completed:(FBBoolBlock)completed {
+    NSLog(@"Path: %@", [NSString stringWithFormat:@"/%@/likes", status_id]);
 	FBVoidBlock success = ^{
-		[FBRequestConnection startWithGraphPath:[NSString stringWithFormat:@"/%@/like", status_id] parameters:nil HTTPMethod:@"POST" completionHandler:
+		[FBRequestConnection startWithGraphPath:[NSString stringWithFormat:@"/%@/likes", status_id] parameters:nil HTTPMethod:@"POST" completionHandler:
 		 ^(FBRequestConnection *connection, id result, NSError *error) {
 			 if (error) {
 				 NSLog(@"Error: %@", [error localizedDescription]);
@@ -341,8 +342,26 @@
 	[self reauthorizeWithWritePermissions:success];
 }
 
-- (void)unlike:(NSString *)post_id completed:(FBBoolBlock)completed {
+- (void)unlike:(NSString *)status_id completed:(FBBoolBlock)completed {
+    NSLog(@"Path: %@", [NSString stringWithFormat:@"/%@/likes", status_id]);
+	FBVoidBlock success = ^{
+		[FBRequestConnection startWithGraphPath:[NSString stringWithFormat:@"/%@/likes", status_id] parameters:nil HTTPMethod:@"DELETE" completionHandler:
+		 ^(FBRequestConnection *connection, id result, NSError *error) {
+			 if (error) {
+				 NSLog(@"Error: %@", [error localizedDescription]);
+				 NSLog(@"Error: %@", [error description]);
+				 NSLog(@"Error: %@", [[error userInfo] description]);
+				 completed(NO);
+			 } else {
+				 NSLog(@"Result: %@", [result description]);
+				 // Get the friend data to display
+				 completed(YES);
+			 }
+		 }
+         ];
+	};
 	
+	[self reauthorizeWithWritePermissions:success];
 }
 
 - (void)postStatus:(NSString *)message completed:(FBArrayBlock)completed {

@@ -111,7 +111,7 @@
 - (void)unlike {
 	[[FBHelper instance] unlike:[self status_id] completed:^(BOOL success) {
 		if (success) {
-			self.has_liked = YES;
+			self.has_liked = NO;
 			[[FeedHelper instance] save];
 		}
 	}];
