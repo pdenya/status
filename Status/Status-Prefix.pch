@@ -18,6 +18,7 @@
 	#import "UIButton+PD.h"
 	#import "UITableViewCell+PD.h"
 	#import "NSDateFormatter+PD.h"
+    #import "UIImage+PD.h"
 
 	#import "User.h"
 	#import "Post.h"

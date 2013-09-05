@@ -40,36 +40,40 @@
 			[header centery];
 		}
 		
-		UILabel *subhead = [UILabel label:@"A fresh slice of your Facebook timeline." size:13.0f];
+		UILabel *subhead = [UILabel italicLabel:@"A fresh slice of your Facebook timeline." size:12.0f];
 		subhead.backgroundColor = [UIColor brandBlueColor];
 		subhead.textColor = [UIColor whiteColor];
 		[bluebg addSubview:subhead];
 		[subhead sety:[header bottomEdge] + 3];
 		[subhead centerx];
 		
+        CGFloat imgview_padding = 19.0f;
 
 		UIView *focusview = ({
 			UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [self w], 100)];
 			
 			UIImageView *imgview = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_friends.png"]];
-			[imgview setx:5];
+			[imgview setx:imgview_padding];
+            [imgview sety:8];
 			[view addSubview:imgview];
 			
 			UILabel *focus = [UILabel boldLabel:@"Focus on friends" size:13.0f];
+            focus.backgroundColor = self.backgroundColor;
 			focus.textColor = [UIColor brandDarkGrey];
 			[view addSubview:focus];
-			[focus setx:[imgview rightEdge] + 5.0f];
+			[focus setx:[imgview rightEdge] + imgview_padding];
 			[focus sety:0.0f];
 			
 			UILabel *focus_description = [UILabel label:@"Status updates from friends. No links. No checkins. No brands." size:13.0f];
+            focus_description.backgroundColor = self.backgroundColor;
 			focus_description.textColor = [UIColor brandMediumGrey];
 			[view addSubview:focus_description];
 			[focus_description sety:[focus bottomEdge] + 0.0f];
 			[focus_description setx:[focus x]];
-			[focus_description setw:[view w] - ([focus x] + 5.0f)];
+			[focus_description setw:[view w] - ([focus x] + imgview_padding)];
 			[focus_description seth:40.0f];
 			
-			[view seth:[focus_description bottomEdge]];
+			[view seth:MAX([focus_description bottomEdge], [imgview bottomEdge])];
 			[view sety:[bluebg bottomEdge] + 20.0f];
 			
 			view;
@@ -81,25 +85,28 @@
 		UIView *trackview = ({
 			UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [self w], 100)];
 			
-			UIImageView *imgview = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_friends.png"]];
-			[imgview setx:5];
+			UIImageView *imgview = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_conversation.png"]];
+			[imgview setx:imgview_padding];
+            [imgview sety:8];
 			[view addSubview:imgview];
 			
 			UILabel *track = [UILabel boldLabel:@"Track conversations" size:13.0f];
+            track.backgroundColor = self.backgroundColor;
 			track.textColor = [UIColor brandDarkGrey];
 			[view addSubview:track];
-			[track setx:[imgview rightEdge] + 5.0f];
+			[track setx:[imgview rightEdge] + imgview_padding];
 			[track sety:0.0f];
 			
 			UILabel *track_description = [UILabel label:@"If there are unread comments on a status, we help you find them." size:13.0f];
+            track_description.backgroundColor = self.backgroundColor;
 			track_description.textColor = [UIColor brandMediumGrey];
 			[view addSubview:track_description];
 			[track_description sety:[track bottomEdge] + 0.0f];
 			[track_description setx:[track x]];
-			[track_description setw:[view w] - ([track x] + 5.0f)];
+			[track_description setw:[view w] - ([track x] + imgview_padding)];
 			[track_description seth:40.0f];
 			
-			[view seth:[track_description bottomEdge]];
+			[view seth:MAX([track_description bottomEdge], [imgview bottomEdge])];
 			[view sety:[focusview bottomEdge] + 20.0f];
 			
 			view;
@@ -141,7 +148,39 @@
 			[scrollview seth:[bottomView y] - [scrollview y]];
 
 			scrollview.backgroundColor = [UIColor brandMediumGrey];
+            
+            CGFloat ss_padding = 7.0f;
+            CGFloat new_height = ([scrollview h] - (ss_padding * 2));
+            
+            UIImage *ss_img = [UIImage imageNamed:@"screenshot_fav.png"];
+            UIImageView *ss_fav = [[UIImageView alloc] initWithImage:[ss_img resizeImageToHeight:new_height]];
+            ss_fav.frame = CGRectMake(ss_padding, ss_padding, (ss_img.size.width/ss_img.size.height) * new_height, new_height);
+            [scrollview addSubview:ss_fav];
 			
+            
+            UIImageView *ss_timeline = [[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"screenshot_timeline.png"] resizeImageToHeight:new_height]];
+            ss_timeline.frame = ss_fav.frame;
+            [ss_timeline setx:[ss_fav rightEdge] + ss_padding];
+            [scrollview addSubview:ss_timeline];
+            
+            
+            UIImageView *ss_3 = [[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"screenshot_conversation.png"] resizeImageToHeight:new_height]];
+            ss_3.frame = ss_fav.frame;
+            [ss_3 setx:[ss_timeline rightEdge] + ss_padding];
+            [scrollview addSubview:ss_3];
+            
+            UIImageView *ss_4 = [[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"screenshot_post.png"] resizeImageToHeight:new_height]];
+            ss_4.frame = ss_fav.frame;
+            [ss_4 setx:[ss_3 rightEdge] + ss_padding];
+            [scrollview addSubview:ss_4];
+            
+            
+            
+            [ss_fav release];
+            [ss_timeline release];
+            
+            scrollview.contentSize = CGSizeMake([ss_4 rightEdge] + ss_padding, [scrollview h]);
+            
 			scrollview;
 		});
 		

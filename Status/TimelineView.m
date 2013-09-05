@@ -217,7 +217,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	if (!self.refreshingview) {
 		self.refreshingview = ({
 			UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [self w], 30.0f)];
-			view.backgroundColor = [UIColor whiteColor];
+			view.backgroundColor = [UIColor colorWithHex:0xFCFCFC];
 			[view addBottomBorder:self.tableview.separatorColor];
 			
 			UIActivityIndicatorView *activityIndicator = [[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 25, 25)];
@@ -232,8 +232,10 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 			
 			UILabel *lbl = [UILabel label:[[NSUserDefaults standardUserDefaults] objectForKey:@"fb_last_successful_update"] size:10.0f];
 			lbl.textAlignment = UITextAlignmentCenter;
+            lbl.backgroundColor = view.backgroundColor;
 			[view addSubview:lbl];
             [lbl setw:[self w]];
+            [lbl seth:20.0f];
 			[lbl centerx];
 			[lbl centery];
 			lbl.hidden = YES;
