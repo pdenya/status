@@ -14,63 +14,99 @@
 - (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
+		BOOL isios7 = [self h] < 500;
         // Initialization code
-		self.backgroundColor = [UIColor whiteColor];
+		self.backgroundColor = [UIColor brandGreyColor];
 		
-		UIImageView *imgview = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"auth_header.jpg"]];
-		[self addSubview:imgview];
-		[imgview seth:([self w] / [imgview w]) * [imgview h]];
-		[imgview setw:[self w]];
-		[imgview setx:0];
-		[imgview sety:0];
-		imgview.contentMode = UIViewContentModeScaleAspectFill;
-		imgview.clipsToBounds = YES;
+		UIView *bluebg = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [self w], 120)];
+		bluebg.backgroundColor = [UIColor brandBlueColor];
+		[self addSubview:bluebg];
 		
-		if ([self h] < 500) {
-			[imgview seth:100];
+		if (isios7) {
+			[bluebg seth:100];
 		}
 		
-		[imgview addBottomBorder:[UIColor brandMediumGrey]];
+		[bluebg addBottomBorder:[UIColor brandMediumGrey]];
 		
-		UILabel *header = [UILabel titleLabelWithText:@"Welcome to Status"];
-		[self addSubview:header];
-		[header setx:20];
-		[header sety:[imgview bottomEdge] + 20];
+		UILabel *header = [UILabel label:@"Welcome to Status" size:28.0f];
+		header.backgroundColor = [UIColor brandBlueColor];
+		header.textColor = [UIColor whiteColor];
+		[bluebg addSubview:header];
+		[header centerx];
+		[header centery];
+		[header sety:[header y] - ([header h] / 3)];
 		
-		UILabel *subhead = [UILabel label:@"A fresh slice of your Facebook timeline." size:15.0f];
-		subhead.textColor = [UIColor brandMediumGrey];
-		[self addSubview:subhead];
+		if (isios7) {
+			[header centery];
+		}
+		
+		UILabel *subhead = [UILabel label:@"A fresh slice of your Facebook timeline." size:13.0f];
+		subhead.backgroundColor = [UIColor brandBlueColor];
+		subhead.textColor = [UIColor whiteColor];
+		[bluebg addSubview:subhead];
 		[subhead sety:[header bottomEdge] + 3];
-		[subhead setx:[header x]];
+		[subhead centerx];
 		
-		UILabel *focus = [UILabel boldLabel:@"Focus on friends" size:13.0f];
-		focus.textColor = [UIColor brandDarkGrey];
-		[self addSubview:focus];
-		[focus setx:[header x]];
-		[focus sety:[subhead bottomEdge] + 20.0f];
+
+		UIView *focusview = ({
+			UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [self w], 100)];
+			
+			UIImageView *imgview = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_friends.png"]];
+			[imgview setx:5];
+			[view addSubview:imgview];
+			
+			UILabel *focus = [UILabel boldLabel:@"Focus on friends" size:13.0f];
+			focus.textColor = [UIColor brandDarkGrey];
+			[view addSubview:focus];
+			[focus setx:[imgview rightEdge] + 5.0f];
+			[focus sety:0.0f];
+			
+			UILabel *focus_description = [UILabel label:@"Status updates from friends. No links. No checkins. No brands." size:13.0f];
+			focus_description.textColor = [UIColor brandMediumGrey];
+			[view addSubview:focus_description];
+			[focus_description sety:[focus bottomEdge] + 0.0f];
+			[focus_description setx:[focus x]];
+			[focus_description setw:[view w] - ([focus x] + 5.0f)];
+			[focus_description seth:40.0f];
+			
+			[view seth:[focus_description bottomEdge]];
+			[view sety:[bluebg bottomEdge] + 20.0f];
+			
+			view;
+		});
 		
-		UILabel *focus_description = [UILabel label:@"Status updates from friends. No links. No checkins. No brands." size:13.0f];
-		focus_description.textColor = [UIColor brandMediumGrey];
-		[self addSubview:focus_description];
-		[focus_description sety:[focus bottomEdge] + 5.0f];
-		[focus_description setx:[header x]];
-		[focus_description setw:[self w] - ([header x] * 2)];
-		[focus_description seth:30.0f];
+		[self addSubview:focusview];
 		
-		UILabel *conversations = [UILabel boldLabel:@"Track conversations" size:13.0f];
-		conversations.textColor = [UIColor brandDarkGrey];
-		[self addSubview:conversations];
-		[conversations setx:[header x]];
-		[conversations sety:[focus_description bottomEdge] + 20.0f];
 		
-		UILabel *conversations_description = [UILabel label:@"If there are unread comments on a status, we help you find them." size:13.0f];
-		conversations_description.textColor = [UIColor brandMediumGrey];
-		[self addSubview:conversations_description];
-		[conversations_description sety:[conversations bottomEdge] + 5.0f];
-		[conversations_description setx:[header x]];
-		[conversations_description setw:[self w] - ([header x] * 2)];
-		[conversations_description seth:30.0f];
+		UIView *trackview = ({
+			UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [self w], 100)];
+			
+			UIImageView *imgview = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_friends.png"]];
+			[imgview setx:5];
+			[view addSubview:imgview];
+			
+			UILabel *track = [UILabel boldLabel:@"Track conversations" size:13.0f];
+			track.textColor = [UIColor brandDarkGrey];
+			[view addSubview:track];
+			[track setx:[imgview rightEdge] + 5.0f];
+			[track sety:0.0f];
+			
+			UILabel *track_description = [UILabel label:@"If there are unread comments on a status, we help you find them." size:13.0f];
+			track_description.textColor = [UIColor brandMediumGrey];
+			[view addSubview:track_description];
+			[track_description sety:[track bottomEdge] + 0.0f];
+			[track_description setx:[track x]];
+			[track_description setw:[view w] - ([track x] + 5.0f)];
+			[track_description seth:40.0f];
+			
+			[view seth:[track_description bottomEdge]];
+			[view sety:[focusview bottomEdge] + 20.0f];
+			
+			view;
+		});
 		
+		
+		[self addSubview:trackview];
 		
 		UIView *bottomView = [[UIView alloc] init];
 		[self addSubview:bottomView];
@@ -86,7 +122,7 @@
 		[bottomView addSubview:fbButton];
 		[fbButton centery];
 		[fbButton centerx];
-
+		
 		UILabel *buttonhelp = [[UILabel alloc] init];
 		buttonhelp.backgroundColor = [UIColor clearColor];
 		buttonhelp.font = [UIFont systemFontOfSize:10.0f];
@@ -97,6 +133,22 @@
 		[bottomView addSubview:buttonhelp];
 		[buttonhelp centerx];
 		[buttonhelp sety:[fbButton bottomEdge] + 1];
+		
+		
+		//this is visually above bottom view but it's easier to have the height while initing it and h is dependent on bottomView sort of
+		UIScrollView *tourview = ({
+			UIScrollView *scrollview = [[UIScrollView alloc] initWithFrame:CGRectMake(0, [trackview bottomEdge] + 20.0f, [self w], 100)];
+			[scrollview seth:[bottomView y] - [scrollview y]];
+
+			scrollview.backgroundColor = [UIColor brandMediumGrey];
+			
+			scrollview;
+		});
+		
+		[self addSubview:tourview];
+		
+		
+		
 		
 		[bottomView release];
 

@@ -11,18 +11,6 @@
 
 @implementation UILabel (PD)
 
-+ (UILabel *)titleLabelWithText:(NSString *)labelText {
-	UILabel *label = [[UILabel alloc] init];
-	label.backgroundColor = [UIColor clearColor];
-	label.font = [UIFont systemFontOfSize:24.0f];
-	label.textColor = [UIColor brandBlueColor];
-//	label.shadowColor = [UIColor colorWithHex:0x89FFFD];
-//	label.shadowOffset = CGSizeMake(0,-1);
-	[label setText:labelText];
-	[label sizeToFit];
-	return label;
-}
-
 - (void) underline {
 	CALayer *underline = [CALayer layer];
 	underline.frame = CGRectMake(0, [self h] - 0.5f, [self w], 0.5f);
@@ -62,6 +50,19 @@
 	title.text = text;
 	title.numberOfLines = 0;
 	
+	[title sizeToFit];
+	return title;
+}
+
++ (UILabel *)italicLabel:(NSString *)text {
+	return [self italicLabel:text size:12.0f];
+}
+
++ (UILabel *)italicLabel:(NSString *)text size:(CGFloat)size {
+	UILabel *title = [[UILabel alloc] init];
+	title.font = [UIFont fontWithName:@"HelveticaNeue-Italic" size:size];
+	title.textColor = [UIColor colorWithHex:0x444444];
+	title.text = text;
 	[title sizeToFit];
 	return title;
 }

@@ -10,13 +10,14 @@
 
 @interface UILabel (PD)
 
-+ (UILabel *)titleLabelWithText:(NSString *)labelText;
 + (UILabel *)boldLabel:(NSString *)text;
 + (UILabel *)boldLabel:(NSString *)text modifier:(CGFloat)modifier;
 + (UILabel *)boldLabel:(NSString *)text size:(CGFloat)size;
 + (UILabel *)label:(NSString *)text;
 + (UILabel *)label:(NSString *)text modifier:(CGFloat)modifier;
 + (UILabel *)label:(NSString *)text size:(CGFloat)size;
++ (UILabel *)italicLabel:(NSString *)text;
++ (UILabel *)italicLabel:(NSString *)text size:(CGFloat)size;
 - (void) underline;
 
 
