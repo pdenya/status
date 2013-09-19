@@ -15,6 +15,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "UpgradeHeader.h"
 #import "UserProfileView.h"
+#import "CellScrollView.h"
 
 @implementation TimelineView
 @synthesize feed, user_data, tableview, filter, filterButtonClicked, favoriteButtonClicked;
@@ -298,13 +299,15 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	NSLog(@"zoomAvatar");
 	
 	UITapGestureRecognizer *gr = (UITapGestureRecognizer *)sender;
+	
 	UITableViewCell *cell = (UITableViewCell *)[gr.view parents:[UITableViewCell class]];
 	NSIndexPath *index_path = [self.tableview indexPathForCell:cell];
 	Post *post = [self.feed objectAtIndex:[index_path row]];
 	User *user = [self.user_data objectForKey:post.uid];
 	
 	UserProfileView *profileview = [[UserProfileView alloc] initWithUser:user];
-	[[ViewController instance] openModal:profileview];
+	CGPoint p = [gr locationOfTouch:0 inView:[ViewController instance].view];
+	[[ViewController instance] openModal:profileview fromPoint:p];
 	[profileview release];
 }
 
@@ -336,14 +339,18 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 }
 
 - (void)viewComments:(id)sender {
+	NSIndexPath *index_path = (NSIndexPath *)sender;
+	[self viewComments:index_path fromPoint:self.center];
+}
+
+- (void)viewComments:(NSIndexPath *)index_path fromPoint:(CGPoint)touch_point {
 	NSLog(@"view comments");
 	
-	NSIndexPath *index_path = (NSIndexPath *)sender;
 	PostDetailsView *details = [[PostDetailsView alloc] init];
 	details.post = [self.feed objectAtIndex:index_path.row];
 	details.user = [self.user_data objectForKey:details.post.uid];
 	
-	[[ViewController instance] openModal:details];
+	[[ViewController instance] openModal:details fromPoint:touch_point];
 	[details addedAsSubview];
 }
 
@@ -425,44 +432,58 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	UILabel *countdown_label;
 	UIImageView *commentsNotifierView;
 	UIImageView *imageNotifierView;
-    
+	CellScrollView *scrollview;
+    UIView *contentview;
 
     static NSString *CellIdentifier = @"Cell";
-    ZKRevealingTableViewCell *cell = [self.tableview dequeueReusableCellWithIdentifier:CellIdentifier];
+    UITableViewCell *cell = [self.tableview dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell = [[[ZKRevealingTableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier] autorelease];
-		cell.delegate = self;
-		cell.direction = ZKRevealingTableViewCellDirectionBoth;
+        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier] autorelease];
+		//cell.delegate = self;
+		//cell.direction = ZKRevealingTableViewCellDirectionBoth;
+		
+		scrollview = [[CellScrollView alloc] initWithFrame:cell.bounds];
+		[cell.contentView addSubview:scrollview];
+		scrollview.tag = 55;
+		scrollview.delegate = self;
+		scrollview.showsHorizontalScrollIndicator = NO;
+		scrollview.showsVerticalScrollIndicator = NO;
+		
+		contentview = [[UIView alloc] initWithFrame:cell.bounds];
+		[scrollview addSubview:contentview];
+		contentview.tag = 56;
 		
 		//hide defaults
 		cell.textLabel.hidden = YES;
 		cell.detailTextLabel.hidden = YES;
 		[cell setSelectionStyle:UITableViewCellSelectionStyleNone];
 		
-		[cell.contentView addFlexibleBottomBorder:[UIColor colorWithHex:0xa7a6a6]]; 
+		[contentview addBottomBorder:[UIColor colorWithHex:0xa7a6a6]];
 		
 		cell.selectedBackgroundView = [[UIView alloc] init];
-		[cell.contentView setBackgroundColor:[UIColor colorWithHex:0xFAFAFA]];
+		[contentview setBackgroundColor:[UIColor colorWithHex:0xFAFAFA]];
 		
 		// right border
+		//NOTE: these are not visible when white, just hiding them in case it's convenient to add them back soon
 		rightBorder = [[UIView alloc] init];
 		rightBorder.frame = CGRectMake([cell.contentView w], 0.0f, 0.5f, [cell h]);
-		rightBorder.backgroundColor = [UIColor colorWithHex:0xDDDDDD]; //grey - c3c2c2
-		[cell.contentView addSubview:rightBorder];
+		rightBorder.backgroundColor = contentview.backgroundColor; //grey - DDDDDD
+		[contentview addSubview:rightBorder];
 		rightBorder.tag = 51;
+		rightBorder.hidden = YES;
 		
 		// left border
 		leftBorder = [[UIView alloc] init];
 		leftBorder.frame = CGRectMake(0.0f, 0.0f, 0.5f, [cell h]);
-		leftBorder.backgroundColor = [UIColor colorWithHex:0xDDDDDD]; //grey - c3c2c2
-		[cell.contentView addSubview:leftBorder];
+		leftBorder.backgroundColor = contentview.backgroundColor; //grey - DDDDDD
+		[contentview addSubview:leftBorder];
 		leftBorder.tag = 52;
+		leftBorder.hidden = YES;
 		
 		// Avatar View
 		avatarView = [[ThumbView alloc] initWithFrame:CGRectMake(10, 10, 50, 50)];
 		avatarView.tag = 96;
-		[cell.contentView addSubview:avatarView];
-		
+		[contentview addSubview:avatarView];
 		
 		// Filter Countdown
 		filter_countdown = [[UIView alloc] initWithFrame:CGRectMake(10, [avatarView bottomEdge] + 2, [avatarView w], 14)];
@@ -492,13 +513,13 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		countdown_label.textAlignment = NSTextAlignmentCenter;
 		countdown_label.tag = 95;
 		
-		[cell.contentView addSubview:filter_countdown];
+		[contentview addSubview:filter_countdown];
 		
 		
 		// Main Post
 		messageLabel = [[[UILabel alloc] init] autorelease];
 		messageLabel.backgroundColor = [UIColor clearColor];
-		[cell.contentView addSubview:messageLabel];
+		[contentview addSubview:messageLabel];
 		messageLabel.font = [Post getPostFont];
 		messageLabel.numberOfLines = 0;
 		messageLabel.textColor = [UIColor colorWithHex:0x333333];
@@ -508,12 +529,12 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		[messageLabel seth:60]; //sizeToFit called in setOptions, this is ignored
 		[messageLabel setwp:0.77f]; //sizeToFit called in setOptions, this is ignored
 		messageLabel.tag = 90;
-		[cell bringSubviewToFront:messageLabel];
+		[contentview bringSubviewToFront:messageLabel];
 		
 		// Time stamp
 		dateLabel = [[[UILabel alloc] init] autorelease];
 		dateLabel.backgroundColor = [UIColor clearColor];
-		[cell.contentView addSubview:dateLabel];
+		[contentview addSubview:dateLabel];
 		dateLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:9.0f];
 		dateLabel.textColor = [UIColor colorWithHex:0x5b5c5c];
 		dateLabel.numberOfLines = 1;
@@ -525,7 +546,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		// User's Name
 		nameLabel = [[[UILabel alloc] init] autorelease];
 		nameLabel.backgroundColor = [UIColor clearColor];
-		[cell.contentView addSubview:nameLabel];
+		[contentview addSubview:nameLabel];
 		nameLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:11.0f];
 		nameLabel.textColor = [UIColor colorWithHex:0x3e9ed5];
 		nameLabel.numberOfLines = 1;
@@ -539,38 +560,49 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		[commentsNotifierView seth:11];
 		[commentsNotifierView setx:[cell w] - [commentsNotifierView w] - 8];
 		commentsNotifierView.tag = 97;
-		[cell.contentView addSubview:commentsNotifierView];
-		[cell.contentView bringSubviewToFront:commentsNotifierView];
+		[contentview addSubview:commentsNotifierView];
+		[contentview bringSubviewToFront:commentsNotifierView];
 		
 		// Images icon
 		imageNotifierView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_has_images.png"]];
 		[imageNotifierView setw:11];
 		[imageNotifierView seth:11];
 		imageNotifierView.tag = 93;
-		[cell.contentView addSubview:imageNotifierView];
-		[cell.contentView bringSubviewToFront:imageNotifierView];
+		[contentview addSubview:imageNotifierView];
+		[contentview bringSubviewToFront:imageNotifierView];
+
+		UITapGestureRecognizer *tapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didSelectScrollview:)];
+		tapgr.numberOfTapsRequired = 1;
+		[contentview addGestureRecognizer:tapgr];
 		
 		avatarView.userInteractionEnabled = YES;
 		UITapGestureRecognizer *doubletapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(zoomAvatar:)];
-		doubletapgr.numberOfTouchesRequired = 1;
+		doubletapgr.numberOfTouchesRequired = 2;
 		doubletapgr.numberOfTapsRequired = 2;
 		doubletapgr.cancelsTouchesInView = YES;
 		doubletapgr.delaysTouchesBegan = YES;
 		[avatarView addGestureRecognizer:doubletapgr];
+		
+		[tapgr release];
 		[doubletapgr release];
 		
-		revealedview = [[RevealedView alloc] initWithFrame:CGRectMake(0, -1, [self w], 100)];
+		revealedview = [[RevealedView alloc] initWithFrame:CGRectMake(0, 0, [self w], 100)];
 		revealedview.tag = 50;
-		cell.pixelsToRevealRight = 201;
-		cell.pixelsToRevealLeft = 100;
-		[cell addSubview:revealedview];
-		[cell sendSubviewToBack:revealedview];
-		cell.revealedView = revealedview;
+		
+		scrollview.contentSize = CGSizeMake([self w] + 100 + 201, [cell h]);
+		[contentview setx:100];
+		scrollview.contentOffset = CGPointMake(100, 0);
+		
+		[cell.contentView addSubview:revealedview];
+		[cell.contentView sendSubviewToBack:revealedview];
+		//cell.revealedView = revealedview;
     }
 	else {
 		revealedview = (RevealedView *)[cell viewWithTag:50];
 		rightBorder = (UIView *)[cell viewWithTag:51];
 		leftBorder = (UIView *)[cell viewWithTag:52];
+		scrollview = (CellScrollView *)[cell viewWithTag:55];
+		contentview = (UIView *)[cell viewWithTag:56];
 		
 		messageLabel = [cell messageLabel];
 		dateLabel = [cell dateLabel];
@@ -582,21 +614,31 @@ const int NUM_LINES_BEFORE_CLIP = 5;
     Post *post = [self.feed objectAtIndex:[indexPath row]];
 	User *user = [self.user_data objectForKey:post.uid];
 	
+	if (![self.user_data objectForKey:post.uid]) {
+		// FOR DEBUGGING
+		//[self.user_data enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) { NSLog(@"%@ != %@", ((User *)obj).uid, post.uid); }];
+		
+		[[FBHelper instance] refreshUser:post.uid completed:^(BOOL success) {
+			if (success) {
+				[self.tableview reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+			}
+		}];
+	}
+	
 	[revealedview seth:[post rowHeight]];
 	revealedview.post = post;
 	
-	[rightBorder seth:[revealedview h]];
-	[leftBorder seth:[revealedview h]];
-	
-	if ([post hasImages]) {
-		NSLog(@"Post has images %@", [post.images description]);
-	}
+	[rightBorder seth:[post rowHeight]];
+	[leftBorder seth:[rightBorder h]];
 
+	[scrollview seth:[rightBorder h]];
+	scrollview.contentSize = CGSizeMake(scrollview.contentSize.width, [scrollview h]);
+	[contentview seth:[scrollview h]];
 	
-	UIView *bottom_border = [cell.contentView viewWithTag:101];
+	UIView *bottom_border = [cell.contentView viewWithTag:102];
 	[bottom_border sety:[post rowHeight] - [bottom_border h]];
-	
 
+	
 	NSDateFormatter *df = [NSDateFormatter instance];
 	
 	if ([user is_filtered]) {
@@ -723,6 +765,25 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	[self viewComments:indexPath];
 }
 
+- (void)didSelectScrollview:(UITapGestureRecognizer *)gr {
+	if (self.currentlyRevealedCell) {
+		[self snapCellBack:self.currentlyRevealedCell];
+	}
+	else {
+		CGPoint point = [gr locationInView:gr.view];
+		UIView *viewTouched = [gr.view hitTest:point withEvent:nil];
+		
+		if ([viewTouched isKindOfClass:[ThumbView class]] || [viewTouched parents:[ThumbView class]]) {
+			[self zoomAvatar:gr];
+		}
+		else {
+			UIView *contentview = gr.view;
+			UITableViewCell *cell = (UITableViewCell *)[contentview parents:[UITableViewCell class]];
+			[self viewComments:[self.tableview indexPathForCell:cell] fromPoint:[gr locationOfTouch:0 inView:[ViewController instance].view]];
+		}
+	}
+}
+
 - (void)removeFromTimeline:(User *)user {
 	NSMutableIndexSet *indexes_to_remove = [[NSMutableIndexSet alloc] init];
 	NSMutableArray *index_paths_to_remove = [[NSMutableArray alloc] init];
@@ -738,91 +799,113 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	
 	[tableview beginUpdates];
 	[self.feed removeObjectsAtIndexes:indexes_to_remove];
-	[self.tableview deleteRowsAtIndexPaths:index_paths_to_remove withRowAnimation:UITableViewRowAnimationAutomatic];
+	[self.tableview deleteRowsAtIndexPaths:index_paths_to_remove withRowAnimation:UITableViewRowAnimationTop];
 	[tableview endUpdates];
 	
 }
 
-#pragma mark - ZKRevealingTableViewCellDelegate
-
-- (BOOL)cellShouldReveal:(ZKRevealingTableViewCell *)cell {
-	return YES;
-}
-
-- (void)cellDidReveal:(ZKRevealingTableViewCell *)cell {
-	self.currentlyRevealedCell = cell;
+- (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollview {
+	//skip for tableview
+	if ([scrollview isMemberOfClass:[UITableView class]]) return;
 	
-	[self.tableview scrollToRowAtIndexPath:[self.tableview indexPathForCell:cell] atScrollPosition:UITableViewScrollPositionNone animated:YES];
+	[self scrollViewDidEndDecelerating:scrollview];
 }
 
-- (void)cellDidBeginPan:(ZKRevealingTableViewCell *)cell {
-	if (cell != self.currentlyRevealedCell) {
-		[((RevealedView *)cell.revealedView) refresh];
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollview {
+	//skip for tableview
+	if ([scrollview isMemberOfClass:[UITableView class]]) return;
+	
+	UIView *contentview = (UIView *)[scrollview viewWithTag:56];
+	
+	//right action view visible
+	if (scrollview.contentOffset.x == 0 && [contentview x] == 100) {
+		//disable left action view
+		scrollview.contentSize = CGSizeMake([scrollview w] + 100, [scrollview h]);
+		//self.currentlyRevealedCell = (UITableViewCell *)[scrollview parents:[UITableViewCell class]];
+	}
+	//centered on content
+	else if (scrollview.contentOffset.x == [contentview x]) {
+		//enable both action views
+		scrollview.contentSize = CGSizeMake([scrollview w] + 100 + 201, [scrollview h]);
+		scrollview.contentOffset = CGPointMake(100, 0);
+		[contentview setx:100];
+		[self cellDidSnapBack:((UITableViewCell *)[scrollview parents:[UITableViewCell class]])];
+	}
+	//left action view visible
+	else if (scrollview.contentOffset.x == 100 + 201) {
+		//disable right action view
+		scrollview.contentSize = CGSizeMake([scrollview w] + 201, [scrollview h]);
+		[contentview setx:0];
+		//self.currentlyRevealedCell = (UITableViewCell *)[scrollview parents:[UITableViewCell class]];
+	}
+	else {
+		[self snapCellBack:(UITableViewCell *)[scrollview parents:[UITableViewCell class]]];
+	}
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollview willDecelerate:(BOOL)decelerate {
+	//skip for tableview
+	if ([scrollview isMemberOfClass:[UITableView class]]) return;
+	
+	if (!decelerate) {
+		[self scrollViewDidEndDecelerating:scrollview];
+	}
+}
+
+- (void)scrollViewWillEndDragging:(UIScrollView *)scrollview withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)offset {
+	
+}
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollview {
+	
+	//skip for tableview
+	if ([scrollview isMemberOfClass:[UITableView class]]) {
+		if (self.currentlyRevealedCell) {
+			[self snapCellBack:self.currentlyRevealedCell];
+		}
+		
+		return;
+	}
+
+	//do as little scrolling as possible to get the cell fully into view (in most cases no scrolling)
+	UITableViewCell *cell = (UITableViewCell *)[scrollview parents:[UITableViewCell class]];
+	[self.tableview scrollToRowAtIndexPath:[self.tableview indexPathForCell:cell] atScrollPosition:UITableViewScrollPositionNone animated:YES];
+	
+	if (self.currentlyRevealedCell && self.currentlyRevealedCell != cell) {
+		[self snapCellBack:self.currentlyRevealedCell];
+	}
+	
+	//update view we're revealing
+	[(RevealedView *)[cell viewWithTag:50] refresh];
+	
+	self.currentlyRevealedCell = cell;
+}
+
+
+
+- (void)snapCellBack:(UITableViewCell *)cell {
+	NSLog(@"snapCellBack");
+	UIScrollView *scrollview = (UIScrollView *)[cell viewWithTag:55];
+	UIView *contentview = (UIView *)[scrollview viewWithTag:56];
+	[scrollview scrollRectToVisible:contentview.frame animated:YES];
+	
+	if (self.currentlyRevealedCell == cell) {
 		self.currentlyRevealedCell = nil;
 	}
 }
 
-- (void)cellDidPan:(ZKRevealingTableViewCell *)cell {
-    //UILabel *starLabel = (UILabel *)cell.revealedView.subviews[0];
-    if (cell.pannedAmount == 1) {
-     
-    }
-}
+
+#pragma mark - ZKRevealingTableViewCellDelegate
 
 
--(UIView*) hitTest:(CGPoint)point withEvent:(UIEvent*)event {
-	UIView *hitview = [super hitTest:point withEvent:event];
-	
-	if (self.currentlyRevealedCell || self.isSnappingBack) {
-		if (!hitview || ![hitview parents:[RevealedView class]]) {
-			[self snapBackRevealedCell];
-			hitview = nil;
-		}
-	}
-	
-	return hitview;
-}
-
-- (void)snapBackRevealedCell {
-	if (self.currentlyRevealedCell) {
-		[[self currentlyRevealedCell] snapBack];
-	}
-	
-	self.currentlyRevealedCell = nil;
-}
-
-- (void)cellWillSnapBack:(ZKRevealingTableViewCell *)cell {
-    NSLog(@"Will snap back");
-    self.currentlyRevealedCell = nil;
-	self.isSnappingBack = YES;
-}
-
-- (void)cellDidSnapBack:(ZKRevealingTableViewCell *)cell {
+- (void)cellDidSnapBack:(UITableViewCell *)cell {
 	NSLog(@"Did snap back");
 	self.isSnappingBack = NO;
 	
-	User *user = [(RevealedView *)[cell revealedView] user];
+	User *user = [(RevealedView *)[cell viewWithTag:50] user];
 	if (self.removeWhenFiltered && [user is_filtered]) {
 		[self removeFromTimeline:user];
 	}
-}
-
-#pragma mark - ZKRevealing - Accessors
-
-- (void)setCurrentlyRevealedCell:(ZKRevealingTableViewCell *)currentlyRevealedCell {
-	if (_currentlyRevealedCell == currentlyRevealedCell)
-		return;
-	
-	[_currentlyRevealedCell setRevealing:NO];
-	
-    //UILabel *starLabel = (UILabel *)_currentlyRevealedCell.revealedView.subviews[0];
-    //starLabel.textColor = [UIColor whiteColor];
-	
-	_currentlyRevealedCell = currentlyRevealedCell;
-}
-
-- (void)updateButtonsForPost:(Post *)post {
-	
 }
 
 @end

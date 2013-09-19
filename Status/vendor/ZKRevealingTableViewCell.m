@@ -350,9 +350,11 @@
 {
 	CGFloat bounceDistance;
 
-	if (self.contentView.center.x == self._originalCenter)
+	if (self.contentView.center.x == self._originalCenter || self.isSliding)
 		return;
 
+	self.isSliding = YES;
+	
     if (emitSnapBack) {
         if ([self.delegate respondsToSelector:@selector(cellWillSnapBack:)]) {
             [self.delegate cellWillSnapBack:self];
@@ -367,10 +369,13 @@
 			bounceDistance = -kBOUNCE_DISTANCE * multiplier;
 			break;
 		default:
+			self.isSliding = NO;
 			@throw [NSException exceptionWithName:NSInternalInconsistencyException reason:@"Unhandled gesture direction" userInfo:[NSDictionary dictionaryWithObject:[NSNumber numberWithInteger:direction] forKey:@"direction"]];
 			break;
 	}
 
+	
+	
 	[UIView animateWithDuration:0.1
 						  delay:0 
 						options:UIViewAnimationOptionCurveEaseOut 
@@ -379,26 +384,13 @@
                          [self syncBackgroundViewWithContentView];
                      }
 					 completion:^(BOOL f) {
-						 [UIView animateWithDuration:0.1 delay:0
-											 options:UIViewAnimationCurveEaseOut
-										  animations:^{
-                                              self.contentView.frame = CGRectOffset(self.contentView.frame, bounceDistance, 0);
-                                              [self syncBackgroundViewWithContentView];
-                                          }
-										  completion:^(BOOL f) {                     
-												  [UIView animateWithDuration:0.1 delay:0
-																	  options:UIViewAnimationCurveEaseIn
-																   animations:^{
-                                                                       self.contentView.frame = CGRectOffset(self.contentView.frame, -bounceDistance, 0);
-                                                                       [self syncBackgroundViewWithContentView];
-                                                                   }
-																   completion:^(BOOL completed) {
-																	   if ([self.delegate respondsToSelector:@selector(cellDidSnapBack:)]) {
-																		   [self.delegate cellDidSnapBack:self];
-																	   }
-																   }];
-										  }
-						  ]; 
+						 self.isSliding = NO;
+						 if ([self.delegate respondsToSelector:@selector(cellDidSnapBack:)]) {
+							 [self.delegate cellDidSnapBack:self];
+						 }
+						 
+						 
+						  
 					 }];
 }
 
@@ -480,96 +472,6 @@
 		return ((fabs(translation.x) / fabs(translation.y) > 1) ? YES : NO);
 	}
 	return NO;
-}
-
-#pragma mark - Shadow drawing and view handling
-
-- (void)addShadowViews
-{
-    if (self.horizontalShadowView == nil) {
-        self.horizontalShadowView = [self makeHorizontalShadowView];
-    }
-    self.horizontalShadowView.frame = (CGRect){ CGPointZero, self.revealedView.frame.size };
-    [self.revealedView addSubview:self.horizontalShadowView];
-
-    if (self.verticalShadowView == nil) {
-        self.verticalShadowView = [self makeVerticalShadowView];
-    }
-    self.verticalShadowView.frame = (CGRect){ CGPointZero, self.revealedView.frame.size };
-    [self.revealedView addSubview:self.verticalShadowView];
-}
-
-- (UIColor *)shadowColor
-{
-    return [UIColor blackColor];
-}
-
-#define kShadowLineWidth 2
-#define kShadowRadius 1
-
-- (UIView *)makeHorizontalShadowView
-{
-    CGRect rect = CGRectMake(0, 0, 5, 17);
-
-    UIGraphicsBeginImageContextWithOptions(rect.size, NO, 0);
-
-    CGContextRef ctx = UIGraphicsGetCurrentContext();
-
-    // Draw a rect that is slightly larger than the target so the actual lines aren't included,
-    // just their shadows.
-    CGContextAddRect(ctx, CGRectMake(-kShadowLineWidth / 2 - 10, -kShadowLineWidth / 2,
-                                     rect.size.width + kShadowLineWidth + 2*10, rect.size.height + kShadowLineWidth * 1));
-
-    CGContextSetLineWidth(ctx, kShadowLineWidth);
-    CGContextSetStrokeColorWithColor(ctx, [[self shadowColor] CGColor]);
-    CGContextSetShadowWithColor(ctx, CGSizeZero, kShadowRadius, [[self shadowColor] CGColor]);
-    CGContextStrokePath(ctx);
-
-    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-
-    CGFloat verticalInset = (rect.size.height - 1) / 2;
-    CGFloat horizontalInset = (rect.size.width - 1) / 2;
-    image = [image resizableImageWithCapInsets:UIEdgeInsetsMake(verticalInset, horizontalInset, verticalInset, horizontalInset)];
-    UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
-    imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-
-    return imageView;
-}
-
-- (UIView *)makeVerticalShadowView
-{
-    CGRect rect = CGRectMake(0, 0, 17, 5);
-
-    UIGraphicsBeginImageContextWithOptions(rect.size, NO, 0);
-
-    CGContextRef ctx = UIGraphicsGetCurrentContext();
-
-    // The width of one of the side shadows.
-    CGFloat shadowWidth = (rect.size.width - 1) / 2;
-
-    // Draw the actual lines just outside the target and only leave the shadows.
-    CGContextMoveToPoint(ctx, shadowWidth - kShadowLineWidth / 2, 0);
-    CGContextAddLineToPoint(ctx, shadowWidth - kShadowLineWidth / 2, rect.size.height);
-
-    CGContextMoveToPoint(ctx, rect.size.width - shadowWidth + kShadowLineWidth / 2, 0);
-    CGContextAddLineToPoint(ctx, rect.size.width - shadowWidth + kShadowLineWidth / 2, rect.size.height);
-
-    CGContextSetLineWidth(ctx, kShadowLineWidth);
-    CGContextSetStrokeColorWithColor(ctx, [[self shadowColor] CGColor]);
-    CGContextSetShadowWithColor(ctx, CGSizeMake(0, 0), kShadowRadius, [[self shadowColor] CGColor]);
-    CGContextStrokePath(ctx);
-
-    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-
-    CGFloat verticalInset = (rect.size.height - 1) / 2;
-    CGFloat horizontalInset = (rect.size.width - 1) / 2;
-    image = [image resizableImageWithCapInsets:UIEdgeInsetsMake(verticalInset, horizontalInset, verticalInset, horizontalInset)];
-    UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
-    imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
-    
-    return imageView;
 }
 
 @end

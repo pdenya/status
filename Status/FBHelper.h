@@ -30,4 +30,6 @@ typedef void (^FBBoolBlock)(BOOL success);
 - (void)like:(NSString *)status_id completed:(FBBoolBlock)completed;
 - (void)unlike:(NSString *)status_id completed:(FBBoolBlock)completed;
 
+- (void)refreshUser:(NSString *)uid completed:(FBBoolBlock)completed;
+
 @end

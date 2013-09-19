@@ -54,7 +54,7 @@
     post = new_post;
 	self.index = index;
     
-    [self.imgview setImageWithURL:[NSURL URLWithString:[post image:index size:@"s"]] placeholderImage:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
+    [self.imgview setImageWithURL:[NSURL URLWithString:[post image:index size:@"n"]] placeholderImage:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
 		self.imgview.frame = self.bounds;
 	}];
 }
@@ -71,10 +71,10 @@
 	[doubletapgr release];
 }
 
-- (void)zoomAvatar:(id)sender {
+- (void)zoomAvatar:(UITapGestureRecognizer *)gr {
 	UserAvatarView *imgzoom = [[UserAvatarView alloc] init];
 	[imgzoom setPost:self.post index:self.index];
-	[[ViewController instance] openModal:imgzoom];
+	[[ViewController instance] openModal:imgzoom fromPoint:[gr locationOfTouch:0 inView:[ViewController instance].view]];
 	[imgzoom release];
 }
 

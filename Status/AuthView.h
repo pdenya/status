@@ -13,5 +13,6 @@
 }
 
 @property (nonatomic, copy) void (^success)(void);
+@property (nonatomic, retain) UIScrollView *tourview;
 
 @end

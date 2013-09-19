@@ -115,6 +115,38 @@
 	[[FBSession activeSession] closeAndClearTokenInformation];
 }
 
+- (void)refreshUser:(NSString *)uid completed:(FBBoolBlock)completed {
+	NSString *query = [NSString stringWithFormat:@"{ 'friend_info_query': 'SELECT uid,first_name, last_name, pic_square, pic_big FROM user WHERE uid=\"%@\"' }", uid];
+	NSDictionary *queryParam = @{ @"q": query };
+	
+	[FBRequestConnection startWithGraphPath:@"/fql" parameters:queryParam HTTPMethod:@"GET" completionHandler:
+	 ^(FBRequestConnection *connection, id result, NSError *error) {
+		 if (error) {
+			 NSLog(@"Error refreshing user %@", uid);
+			 completed(NO);
+			 self.isGettingStream = NO;
+		 } else {
+			 // Get the friend data to display
+			 NSArray *results = (NSArray *) [result objectForKey:@"data"];
+			 
+			 for (int i = 0; i < [results count]; i++) {
+				 if ([[[results objectAtIndex:i] valueForKey:@"name"] isEqualToString:@"friend_info_query"]) {
+					 NSArray *fql_result_set = [[results objectAtIndex:i] valueForKey:@"fql_result_set"];
+					 
+					 //set user data
+					 for (int j = 0; j < [fql_result_set count]; j++) {
+						 User *user = [User userFromDictionary:[fql_result_set objectAtIndex:j]];
+						 [[UsersHelper instance].users setValue:user forKey:user.uid];
+					 }
+					 
+				 }
+			 }
+			 
+			 completed(YES);
+		 }
+	 }];
+}
+
 - (void) getStream:(FBDictionaryBlock)completed options:(NSDictionary *)options {
 	NSLog(@"getStream");
 	
@@ -130,38 +162,33 @@
 		latest_stream_time = [[options objectForKey:@"max_time"] stringValue];
 	}
 	
-	//select app_data, attachment, post_id from stream where post_id IN ('1315663027_10200756640981133') AND app_data.images != ''
 	//post_id is ${uid}_${status_id}
 	NSString *query = @"{"
-		@"'status_query': 'SELECT uid,status_id,message,time,concat(uid,\"_\",status_id) FROM status WHERE (uid IN (SELECT uid2 FROM friend WHERE uid1= me()) OR uid=me()) AND message != \"\" AND time > \"%@\" %@ LIMIT 100', "
-		@"'friend_info_query': 'SELECT uid,first_name, last_name, pic_square, pic_big FROM user WHERE uid IN (SELECT uid FROM #status_query)', "
-		@"'comment_count_query': 'SELECT object_id, time FROM comment WHERE object_id IN (SELECT status_id FROM #status_query) %@', "
-		@"'photo_query': 'SELECT attachment.media, post_id FROM stream WHERE post_id IN (SELECT anon FROM #status_query ) AND app_data.images != \"\"' "
+		@"'status_query': 'SELECT uid,status_id,message,time,concat(uid,\"_\",status_id) FROM status "
+						@" WHERE (uid IN (SELECT uid2 FROM friend WHERE uid1= me()) OR uid=me()) AND message != \"\" AND time > \"%1$@\" LIMIT 100', "
+		@"'stream_query': 'SELECT attachment.media, attachment.name, attachment.fb_checkin, actor_id, post_id, message, created_time FROM stream "
+						@" WHERE (attachment.media.alt!=\"\" OR message!=\"\") AND actor_id=source_id AND created_time > \"%1$@\" AND attachment.media.type!=\"link\" AND (source_id IN (SELECT uid2 FROM friend WHERE uid1= me()) OR source_id=me()) LIMIT 50', "
+		@"'friend_info_query': 'SELECT uid,first_name, last_name, pic_square, pic_big FROM user WHERE uid IN (SELECT uid FROM #status_query) OR (uid IN (SELECT actor_id FROM #stream_query))', "
+		@"'comment_count_query': 'SELECT object_id, time FROM comment WHERE (object_id IN (SELECT status_id FROM #status_query) OR (object_id IN (SELECT post_id FROM #stream_query))) %2$@', "
+		@"'photo_query': 'SELECT attachment.media, post_id FROM stream WHERE post_id IN (SELECT anon FROM #status_query ) AND app_data.images != \"\" AND NOT (post_id IN (SELECT post_id FROM #stream_query))' "
     @"}";
-	
-	//apply filter if available
-	NSString *condition = @"";
-	if ([options objectForKey:@"filtered_uids"]) {
-		NSMutableArray *filter = [options objectForKey:@"filtered_uids"];
-		
-		if ([filter count] > 0) {
-			condition = [NSString stringWithFormat:@"AND NOT (uid IN (%@))", [filter componentsJoinedByString:@","]];
-		}
-	}
 	
 	NSString *comment_condition = @"";
 	if ([[FeedHelper instance].feed count] > 0) {
 		NSMutableArray *status_ids = [[NSMutableArray alloc] init];
 		
+		//TODO: add some more sensible limits here (time based maybe?)
 		for (int i = 0; i < [[FeedHelper instance].feed count]; i++) {
 			Post *post = (Post *)[[FeedHelper instance].feed objectAtIndex:i];
 			[status_ids addObject:post.status_id];
+			
+			if (i > 200) break;
 		}
 		
-		comment_condition = [NSString stringWithFormat:@"OR object_id IN (%@)", [status_ids componentsJoinedByString:@","]];
+		comment_condition = [NSString stringWithFormat:@"OR object_id IN (\"%@\")", [status_ids componentsJoinedByString:@"\",\""]];
 	}
 	
-	query = [NSString stringWithFormat:query, latest_stream_time, condition, comment_condition];
+	query = [NSString stringWithFormat:query, latest_stream_time, comment_condition];
 	
 	
 	NSLog(@"query: \n %@", query);
@@ -204,7 +231,100 @@
 					 
 					 [statuses sortUsingComparator:[User timeComparator]];
 				 
+				 }
+				 //handle stream, another source of statuses
+				 else if ([[query_result valueForKey:@"name"] isEqualToString:@"stream_query"]) {
+					 NSArray *stream_results = [query_result valueForKey:@"fql_result_set"];
+					 NSLog(@"handle stream. %i rows", [stream_results count]);
 					 
+					 for (int j = 0; j < [stream_results count]; j++) {
+						 //first identify the type of status so we know which info to pull out of it
+						 NSDictionary *stream_result = [stream_results objectAtIndex:j];
+						 NSArray *media = [stream_result valueForKeyPath:@"attachment.media"];
+						 BOOL is_facebook_being_an_asshole = NO;
+						 
+						 //handle status_id, it'll either be an NSDecimalNumber or a string like uid_statusid
+						 NSString *status_id;
+						 if ([[stream_result valueForKey:@"post_id"] isKindOfClass:[NSNumber class]]) {
+							 status_id = [[stream_result valueForKey:@"post_id"] stringValue];
+						 } else {
+							 status_id = [[[stream_result valueForKey:@"post_id"] componentsSeparatedByString:@"_"] lastObject];
+						 }
+						 
+						 
+						 NSLog(@"a");
+						 // Find an existing post already handled by status_query
+						 // i wonder if this is efficient enough, might be better to just de-dupe later
+						 NSUInteger matching_post_index = [statuses indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+							 stop = [((Post *)obj).status_id isEqualToString:status_id];
+							 return stop;
+						 }];
+						 
+						 Post *post;
+						 
+						 if (matching_post_index == NSNotFound) {
+							 post = [[Post alloc] init];
+							 post.status_id = status_id;
+							 post.time = [stream_result objectForKey:@"created_time"];
+							 post.uid = [stream_result objectForKey:@"actor_id"];
+							 post.has_comments = NO;
+							 post.has_liked = NO;
+							 post.images = [[NSMutableArray alloc] init];
+						 }
+						 else {
+							 post = (Post *)[statuses objectAtIndex:matching_post_index];
+						 }
+						 
+						 
+						 BOOL is_photo = media && [media count] > 0 && [[media objectAtIndex:0] valueForKey:@"type"] && [[[media objectAtIndex:0] valueForKey:@"type"] isEqualToString:@"photo"];
+						 BOOL is_location = !is_photo && [stream_result valueForKeyPath:@"attachment.fb_checkin"];
+						 
+						 NSLog(@"%@", [[stream_results objectAtIndex:j] description]);
+						 
+						 if (is_photo) {
+							 //should always have either message or media[0].alt
+							 post.message = [stream_result valueForKey:@"message"] && [[stream_result valueForKey:@"message"] length] > 0 ? [stream_result valueForKey:@"message"] : [[media objectAtIndex:0] valueForKey:@"alt"];
+							 //post.message = [NSString stringWithFormat:@"=IP= %@", post.message];
+							 
+							 //add images
+							 for (int k = 0; k < [media count]; k++) {
+								[post.images addObject:@{
+									 @"alt": [[media objectAtIndex:k] valueForKey:@"alt"],
+									 @"src": [[media objectAtIndex:k] valueForKey:@"src"]
+								}];
+							 }
+							 
+							 //TODO: maybe handle location data that comes with photos?
+						 }
+						 else if (is_location) {
+							 //should always have either message or media[0].alt
+							 //post.message = [NSString stringWithFormat:@"=LL= %@", [stream_result valueForKey:@"message"]];
+							 post.message = [stream_result valueForKey:@"message"];
+							 post.images = [[NSMutableArray alloc] init];
+							 post.location = [stream_result valueForKeyPath:@"attachment.name"];
+						 }
+						 //check for link
+						 else if (media && [[[media objectAtIndex:0] objectForKey:@"type"] isEqualToString:@"link"]) {
+							 //fuckin facebook, are you kidding me? I specifically told you not to get these.
+							 is_facebook_being_an_asshole = YES;
+						 }
+						 //just a status
+						 else {
+							 //post.message = [NSString stringWithFormat:@"=FS= %@", [stream_result valueForKey:@"message"]];
+							 post.message = [stream_result valueForKey:@"message"];
+							 post.images = [[NSMutableArray alloc] init];
+						 }
+						 
+						 if (matching_post_index == NSNotFound && !is_facebook_being_an_asshole) {
+							[statuses addObject:post];
+						 }
+						 else if (is_facebook_being_an_asshole) {
+							 [post release];
+						 }
+					 }
+					 
+					 [statuses sortUsingComparator:[User timeComparator]];
+					
 				 }	//Handle user data
 				 else if ([[query_result valueForKey:@"name"] isEqualToString:@"friend_info_query"]) {
 					 NSArray *fql_result_set = [query_result valueForKey:@"fql_result_set"];
@@ -215,8 +335,7 @@
 						 User *user = [User userFromDictionary:[fql_result_set objectAtIndex:j]];
 						 [user_data setValue:user forKey:user.uid];
 					 }
-				 
-				 
+
 				 } //Handle comments list
 				 else if ([[query_result valueForKey:@"name"] isEqualToString:@"comment_count_query"]) {
 					 NSArray *comment_results = [query_result valueForKey:@"fql_result_set"];
@@ -259,7 +378,7 @@
 					 NSLog(@"User images %i", [images_map count]);
 				 }
 			 }
-			 
+
 			 for (int i = 0; i < [statuses count]; i++) {
 				 Post *post = (Post *)[statuses objectAtIndex:i];
 				 

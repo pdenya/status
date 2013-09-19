@@ -15,16 +15,28 @@
 	Post *post = [[[Post alloc] init] autorelease];
 	
 	post.message = [post_data valueForKey:@"message"];
-	post.status_id = [post_data valueForKey:@"status_id"];
+	post.status_id = [[post_data valueForKey:@"status_id"] isKindOfClass:[NSString class]] ? [post_data valueForKey:@"status_id"] : [[post_data valueForKey:@"status_id"] stringValue];
 	post.time = [post_data objectForKey:@"time"];
-	post.uid = [post_data objectForKey:@"uid"];
-	post.has_comments = NO;
-	post.has_liked = NO;
+	post.uid = [[post_data valueForKey:@"uid"] isKindOfClass:[NSString class]] ? [post_data valueForKey:@"uid"] : [[post_data valueForKey:@"uid"] stringValue];
+	post.has_comments = [post_data valueForKey:@"has_comments"] ? [(NSNumber *)[post_data valueForKey:@"has_comments"] boolValue] : NO;
+	post.has_liked = [post_data valueForKey:@"has_liked"] ? [(NSNumber *)[post_data valueForKey:@"has_liked"] boolValue] : NO;
 	
 	if ([post_data valueForKey:@"images"]) {
 		post.images = [NSMutableArray arrayWithArray:[post_data valueForKey:@"images"]];
 	} else {
 		post.images = [[NSMutableArray alloc] init];
+	}
+	
+	if ([post_data valueForKey:@"location"]) {
+		post.location = [post_data valueForKey:@"location"];
+	}
+	
+	if ([post_data valueForKey:@"last_comment_at"]) {
+		post.last_comment_at = [post_data valueForKey:@"last_comment_at"];
+	}
+	
+	if ([post_data valueForKey:@"last_read"]) {
+		post.last_read = [post_data valueForKey:@"last_read"];
 	}
 	
 	return post;
@@ -137,7 +149,10 @@
 			self.uid = [coder decodeObjectForKey:@"uid"];
 			self.has_comments = [coder decodeBoolForKey:@"has_comments"] ? [coder decodeBoolForKey:@"has_comments"] : NO;
 			self.has_liked = [coder decodeBoolForKey:@"has_liked"] ? [coder decodeBoolForKey:@"has_comments"] : NO;
-			self.images = [NSMutableArray arrayWithArray:[coder decodeObjectForKey:@"images"]];
+			
+			if ([coder decodeObjectForKey:@"images"]) {
+				self.images = [NSMutableArray arrayWithArray:[coder decodeObjectForKey:@"images"]];
+			}
 			
 			if ([coder decodeObjectForKey:@"last_comment_at"]) {
 				self.last_comment_at = [coder decodeObjectForKey:@"last_comment_at"];
@@ -145,6 +160,10 @@
 			
 			if ([coder decodeObjectForKey:@"last_read"]) {
 				self.last_read = [coder decodeObjectForKey:@"last_read"];
+			}
+			
+			if ([coder decodeObjectForKey:@"location"]) {
+				self.location = [coder decodeObjectForKey:@"location"];
 			}
 		}
 		
@@ -157,16 +176,18 @@
 		[coder encodeObject:self.time forKey:@"time"];
 		[coder encodeObject:self.uid forKey:@"uid"];
 		
+		//TODO: maybe use a loop and the kvc methods instead of all these ifs
 		if (self.has_comments) {
 			[coder encodeBool:self.has_comments forKey:@"has_comments"];
 		}
 		
+		if ([self.images count] > 0) {
+			[coder encodeObject:self.images forKey:@"images"];
+		}
 		
 		if (self.has_liked) {
 			[coder encodeBool:self.has_liked forKey:@"has_liked"];
 		}
-		
-		[coder encodeObject:self.images forKey:@"images"];
 		
 		if (self.last_comment_at) {
 			[coder encodeObject:self.last_comment_at forKey:@"last_comment_at"];
@@ -175,7 +196,47 @@
 		if (self.last_read) {
 			[coder encodeObject:self.last_read forKey:@"last_read"];
 		}
+		
+		if (self.location) {
+			[coder encodeObject:self.last_read forKey:@"location"];
+		}
 	}
+
+- (NSDictionary *)toDict {
+	NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
+	
+	[dict setObject:self.message forKey:@"message"];
+	[dict setObject:self.status_id forKey:@"status_id"];
+	[dict setObject:self.time forKey:@"time"];
+	[dict setObject:self.uid forKey:@"uid"];
+	
+	//TODO: maybe use a loop and the kvc methods instead of all these ifs
+	if (self.has_comments) {
+		[dict setObject:[NSNumber numberWithBool:self.has_comments] forKey:@"has_comments"];
+	}
+	
+	if ([self.images count] > 0) {
+		[dict setObject:self.images forKey:@"images"];
+	}
+	
+	if (self.has_liked) {
+		[dict setObject:[NSNumber numberWithBool:self.has_liked] forKey:@"has_liked"];
+	}
+	
+	if (self.last_comment_at) {
+		[dict setObject:self.last_comment_at forKey:@"last_comment_at"];
+	}
+	
+	if (self.last_read) {
+		[dict setObject:self.last_read forKey:@"last_read"];
+	}
+	
+	if (self.location) {
+		[dict setObject:self.location forKey:@"location"];
+	}
+	
+	return dict;
+}
 
 //Logging helper
 	- (NSString *)description {

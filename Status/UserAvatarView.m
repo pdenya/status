@@ -90,12 +90,13 @@
 							   
 							   if (self.should_resize && image) {
 								   //Multiply the original image size by the given scale, and you'll get your actual displayed image size.
-								   CGFloat sx = [self.avatarView w] / image.size.width;
-								   CGFloat sy = [self.avatarView h] / image.size.height;
-								   CGFloat s = fminf(sx, sy);
-								   [self resizeTo:(s * image.size.height)];
+								   [self autosize];
 							   }
 							}];
+	
+	if (self.should_resize) {
+		[self autosize];
+	}
 	
 	if (self.headerLabel) [self.headerLabel setText:[new_user full_name]];
 }
@@ -104,11 +105,20 @@
 	[self setPost:new_post index:0];
 }
 
+- (void) autosize {
+	if (!self.avatarView.image) return;
+	
+	CGFloat sx = [self.avatarView w] / self.avatarView.image.size.width;
+	CGFloat sy = [[ViewController instance] contentFrame].size.height / self.avatarView.image.size.height;
+	CGFloat s = fminf(sx, sy);
+	[self resizeTo:(s * self.avatarView.image.size.height)];
+}
+
 - (void) setPost:(Post *)new_post index:(int)index {
 	if ([new_post hasImages]) {
-		NSLog(@"Setting Image to %@", [new_post image:0 size:@"o"]);
-		[self.avatarView setImageWithURL:[NSURL URLWithString:[new_post image:index size:@"o"]]
-						placeholderImage:[[SDImageCache sharedImageCache] imageFromMemoryCacheForKey:[new_post image:index size:@"s"]]
+		NSLog(@"Setting Image to %@", [new_post image:0 size:@"n"]);
+		[self.avatarView setImageWithURL:[NSURL URLWithString:[new_post image:index size:@"n"]]
+						placeholderImage:[[SDImageCache sharedImageCache] imageFromMemoryCacheForKey:[new_post image:index size:@"n"]]
 							   completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
 								   if (!image) {
 									   image = self.avatarView.image;
@@ -116,10 +126,7 @@
 								   
 								   if (self.should_resize && image) {
 									   //Multiply the original image size by the given scale, and you'll get your actual displayed image size.
-									   CGFloat sx = [self.avatarView w] / image.size.width;
-									   CGFloat sy = [self.avatarView h] / image.size.height;
-									   CGFloat s = fminf(sx, sy);
-									   [self resizeTo:(s * image.size.height)];
+									   [self autosize];
 								   }
 							   }];
 	}

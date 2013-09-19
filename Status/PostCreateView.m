@@ -26,6 +26,11 @@
 		NSLog(@"self h %f", [self h]);
 		
 		[self.messageTextField seth:[self h] - (216 + 65)];
+		
+		if (!SYSTEM_VERSION_LESS_THAN(@"7.0")) {
+			[self.messageTextField seth:[self.messageTextField h] - 8];
+		}
+		
 		[self.messageTextField setw:[self w] - (padding * 2)];
 		[self.messageTextField sety:SYSTEM_VERSION_LESS_THAN(@"7.0") ? padding : 20];
 		[self.messageTextField setx:padding];
@@ -78,7 +83,7 @@
 	[close_btn sizeToFit];
 	[close_btn setx:padding];
 	[close_btn setw:[close_btn w] + 10];
-	[close_btn sety:[postButton y] - 14];
+	[close_btn sety:[postButton y] - (SYSTEM_VERSION_LESS_THAN(@"7.0") ? 14 : 7)];
 	
 	if (self.post) {
 		[self switchToComment:self.post];
@@ -108,16 +113,16 @@
 	
 	//todo: build post display view and add to the top
 	
-	UIView *responding_to = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [self w], 50)];
+	UIView *responding_to = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [self w], SYSTEM_VERSION_LESS_THAN(@"7.0") ? 50 : 60)];
 	responding_to.backgroundColor = [UIColor brandGreyColor];
 	[responding_to addFlexibleBottomBorder:[UIColor brandMediumGrey]];
 	[self addSubview:responding_to];
 	
 	UILabel *r_message = [UILabel label:self.post.message];
 	[r_message setw:[self w] - 20];
-	[r_message seth:[responding_to h] - 10];
+	[r_message seth:[responding_to h] - (SYSTEM_VERSION_LESS_THAN(@"7.0") ? 10 : 20)];
 	[r_message setx:10];
-	[r_message sety:5];
+	[r_message sety:SYSTEM_VERSION_LESS_THAN(@"7.0") ? 5 : 15];
 	r_message.backgroundColor = responding_to.backgroundColor;
 	[responding_to addSubview:r_message];
 	

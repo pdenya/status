@@ -12,8 +12,9 @@
 
 @property (nonatomic, retain) NSString *message;
 @property (nonatomic, retain) NSString *status_id;
-@property (nonatomic, retain) NSString *time;
+@property (nonatomic, retain) NSDecimalNumber *time;
 @property (nonatomic, retain) NSString *uid;
+@property (nonatomic, retain) NSString *location;
 @property (nonatomic, retain) NSMutableArray *images;
 @property (nonatomic, retain) NSDate *last_read;
 @property (nonatomic, retain) NSDate *last_comment_at;
@@ -36,5 +37,7 @@
 
 - (void)unlike;
 - (void)like;
+
+- (NSDictionary *)toDict;
 
 @end

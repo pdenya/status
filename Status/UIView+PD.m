@@ -52,13 +52,14 @@
 	return s;
 }
 
-
 //styling
 - (void) addBottomBorder:(UIColor *)borderColor {
-	CALayer *border = [CALayer layer];
+	UIView *border = [[UIView alloc] init];
 	border.frame = CGRectMake(0, [self h] - (1/[[UIScreen mainScreen] scale]), [self w], 1/[[UIScreen mainScreen] scale]);
-	border.backgroundColor = borderColor.CGColor;
-	[self.layer addSublayer:border];
+	border.backgroundColor = borderColor;
+	border.tag = 102;
+	[self addSubview:border];
+	[border release];
 }
 
 - (void) addFlexibleBottomBorder:(UIColor *)borderColor {
@@ -224,19 +225,60 @@
 }
 
 - (void) addAndGrowSubview:(UIView *)view {
-	view.transform = CGAffineTransformMakeScale(0.95, 0.95);
-	view.alpha = 0.4f;
-	[self addSubview:view];
-	
-	[UIView animateWithDuration:0.1f
-						  delay:0.0f
-						options:UIViewAnimationOptionCurveEaseOut
-					 animations:^{
-						 view.transform = CGAffineTransformIdentity;
-						 view.alpha = 1.0f;
-					 }
-					 completion:^(BOOL finished){ }];
-	
+	void (^animations)() = ^ {
+		view.transform = CGAffineTransformIdentity;
+		view.alpha = 1.0f;
+	};
+ 	
+	BOOL isios7 = !SYSTEM_VERSION_LESS_THAN(@"7.0");
+	if (isios7) {
+		view.transform = CGAffineTransformMakeScale(0.5, 0.5);
+		view.alpha = 0.4f;
+		[self addSubview:view];
+		
+		[UIView animateWithDuration:0.3f delay:0.0f usingSpringWithDamping:0.7f initialSpringVelocity:0.0f options:nil animations:animations completion:^(BOOL finished) {}];
+	}
+	else {
+		view.transform = CGAffineTransformMakeScale(0.95, 0.95);
+		view.alpha = 0.4f;
+		[self addSubview:view];
+		
+		[UIView animateWithDuration:0.1f
+							  delay:0.0f
+							options:UIViewAnimationOptionCurveEaseOut
+						 animations:animations
+						 completion:^(BOOL finished){ }];
+	}
+}
+
+- (void) addAndGrowSubview:(UIView *)view fromPoint:(CGPoint)point	{
+	void (^animations)() = ^ {
+		view.transform = CGAffineTransformIdentity;
+		view.alpha = 1.0f;
+		view.frame = [[UIScreen mainScreen] bounds];
+	};
+ 	
+	BOOL isios7 = !SYSTEM_VERSION_LESS_THAN(@"7.0");
+	if (isios7) {
+		view.transform = CGAffineTransformMakeScale(0.05, 0.05);
+		view.alpha = 0.1f;
+		view.center = point;
+		
+		[self addSubview:view];
+		
+		[UIView animateWithDuration:0.3f delay:0.0f usingSpringWithDamping:0.7f initialSpringVelocity:0.0f options:nil animations:animations completion:^(BOOL finished) {}];
+	}
+	else {
+		view.transform = CGAffineTransformMakeScale(0.95, 0.95);
+		view.alpha = 0.4f;
+		[self addSubview:view];
+		
+		[UIView animateWithDuration:0.1f
+							  delay:0.0f
+							options:UIViewAnimationOptionCurveEaseOut
+						 animations:animations
+						 completion:^(BOOL finished){ }];
+	}
 }
 
 - (void) shrinkAndRemove {

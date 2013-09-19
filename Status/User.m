@@ -21,7 +21,7 @@ const int max_failed = 30;
 	user.last_name = [user_data valueForKey:@"last_name"];
 	user.pic_big = [user_data valueForKey:@"pic_big"];
 	user.pic_square = [user_data valueForKey:@"pic_square"];
-	user.uid = [user_data objectForKey:@"uid"];
+	user.uid = [[user_data valueForKey:@"uid"] isKindOfClass:[NSString class]] ? [user_data valueForKey:@"uid"] : [[user_data valueForKey:@"uid"] stringValue];
 	
 	return user;
 }
@@ -68,7 +68,18 @@ const int max_failed = 30;
 		[coder encodeObject:self.uid forKey:@"uid"];
 	}
 
-#pragma mark - Properties
+#pragma mark - Real Properties
+/*
+- (NSString *)uid {
+	//TODO: remove this
+	if (uid && [uid isKindOfClass:[NSDecimalNumber class]]) {
+		uid = [(NSDecimalNumber *)uid stringValue];
+	}
+	
+	return uid;
+}
+*/
+#pragma mark - Fake Properties
 
 - (NSString *)picSquareUrl {
 	return [NSString stringWithFormat:@"http://graph.facebook.com/%@/picture?width=150&height=150", self.uid];
@@ -295,5 +306,18 @@ const int max_failed = 30;
 	});
 }
 
+- (NSDictionary *)toDict {
+	if ([self.uid isKindOfClass:[NSDecimalNumber class]]) {
+		self.uid = [(NSDecimalNumber *)self.uid stringValue];
+	}
+	
+	return @{
+		 @"first_name": self.first_name,
+		 @"last_name": self.last_name,
+		 @"pic_big": self.pic_big,
+		 @"pic_square": self.pic_square,
+		 @"uid": self.uid
+	 };
+}
 
 @end

@@ -45,6 +45,7 @@
 + (ViewController *)instance;
 - (id)init;
 - (void) openModal:(UIView *)view;
+- (void) openModal:(UIView *)view fromPoint:(CGPoint)point;
 - (void) closeModal:(id)sender;
 - (UIView *)headerContainer;
 - (CGRect) contentFrame;

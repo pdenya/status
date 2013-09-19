@@ -15,10 +15,11 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-		self.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+		//self.autoresizingMask = UIViewAutoresizingFlexibleHeight;
 		
         // Initialization code
-		self.backgroundColor = [UIColor brandGreyColor];
+		//self.backgroundColor = [UIColor brandGreyColor];
+		self.backgroundColor = [UIColor colorWithHex:0xFAFAFA]; //should match cell bg color
 		self.autoresizesSubviews = YES;
 
 		self.filterbtn = [self revealedButton:@{
@@ -65,7 +66,7 @@
 			btn;
 		});
 		
-		[self addFlexibleBottomBorder:[UIColor colorWithHex:0xc7c6c6]];
+		[self addFlexibleBottomBorder:[UIColor colorWithHex:0xa7a6a6]]; //[UIColor colorWithHex:0xc7c6c6]];
     }
     return self;
 }
@@ -185,7 +186,6 @@
 	lbl.backgroundColor = btn.backgroundColor;
 	[btn addSubview:lbl];
 	[lbl centerx];
-	NSLog(@"label y %f", [iconview bottomEdge] + 1);
 	[lbl sety:[iconview bottomEdge] + 1];
 	lbl.tag = 63;
 	lbl.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;

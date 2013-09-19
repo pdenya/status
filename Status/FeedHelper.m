@@ -96,11 +96,41 @@
 	[fb getStream:completed options:@{ @"max_time": @(max_time) }];
 }
 
-- (void) load {
+- (void) loadOld {
     NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
 	NSData *feedData = [NSData dataWithContentsOfFile:[NSString stringWithFormat:@"%@/feed",docDir]];
 	self.feed = [NSMutableArray arrayWithArray:[NSKeyedUnarchiver unarchiveObjectWithData:feedData]];
 	NSLog(@"Loaded Feed Data: %@", [self.feed description]);
+	
+	[self.feed enumerateObjectsUsingBlock:^(Post *post, NSUInteger idx, BOOL *stop) {
+		if (![post.uid isKindOfClass:[NSString class]]) {
+			post.uid = [(NSDecimalNumber *)post.uid stringValue];
+		}
+	}];
+}
+
+- (void) load {
+	NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+	NSData *userdata = [NSData dataWithContentsOfFile:[NSString stringWithFormat:@"%@/feed.plist",docDir]];
+	if(userdata == nil) {
+		//TODO: remove this backwards compatability which won't be necessary in production
+		[self loadOld];
+		return;
+	}
+	
+	NSString *error = nil;
+	NSArray *feeddicts= [NSPropertyListSerialization propertyListFromData:userdata mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:&error];
+	NSLog(@"userdicts %@", [feeddicts description]);
+	if(error != nil) return;
+	
+	NSMutableArray *loaded_posts = self.feed;
+	
+	[feeddicts enumerateObjectsUsingBlock:^(NSDictionary *postdict, NSUInteger idx, BOOL *stop) {
+		Post *post = [Post postFromDictionary:postdict];
+		[loaded_posts addObject:post];
+	}];
+
+	NSLog(@"break");
 }
 
 - (void) _save {
@@ -109,10 +139,22 @@
 	
 	if (!is_saving) {
 		is_saving = YES;
-        NSArray *save_feed = [self.feed copy];
-		NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-		NSData *feedData = [NSKeyedArchiver archivedDataWithRootObject:save_feed];
-		[feedData writeToFile:[NSString stringWithFormat:@"%@/feed",docDir] atomically:YES];
+		
+		// PERFORM SAVE
+		NSMutableArray *feeddicts = [[NSMutableArray alloc] initWithCapacity:[self.feed count]];
+		[self.feed enumerateObjectsUsingBlock:^(Post *post, NSUInteger idx, BOOL *stop) {
+			[feeddicts addObject:[post toDict]];
+		}];
+		
+		NSError *err = nil;
+		NSData *data = [NSPropertyListSerialization dataWithPropertyList:feeddicts format:NSPropertyListBinaryFormat_v1_0 options:0 error:&err];
+		
+		if (err == nil) {
+			NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+			[data writeToFile:[NSString stringWithFormat:@"%@/feed.plist",docDir] atomically:YES];
+		}
+		// END PERFORM SAVE
+		
 		is_saving = NO;
 		
 		if (is_dirty) {

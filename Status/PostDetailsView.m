@@ -119,37 +119,56 @@
 	[postLabel setx:[avatarView rightEdge] + 10];
 	[topView addSubview:postLabel];
 	
-	[topView seth:MAX(110, [postLabel h] + 20)];
+	[topView seth:MAX(110, MAX([postLabel bottomEdge] + 20, [dateLabel bottomEdge]))];
 
 	
     if ([post hasImages] && [post.images count] > 1) {
         //multiple images, show thumbnails
-        
-        CGFloat thumby = [topView h];
+		
+        CGFloat thumby = 5;
         CGFloat padding = [avatarView x];
         CGFloat thumbx = padding;
-		CGFloat thumbw = 55;
-		int row_limit = 5;
+		CGFloat thumbw = 180;
+		CGFloat thumbh = 180;
+		
+		UIScrollView *scrollview = [[UIScrollView alloc] initWithFrame:CGRectMake(0, [topView bottomEdge], [self w], thumbh + (thumby * 2))];
+		scrollview.backgroundColor = [UIColor brandMediumGrey];
+		scrollview.showsHorizontalScrollIndicator = NO;
 		
 		for (int index = 0; index < [post.images count]; index++) {
 			ThumbView *imgthumb = ({
-				ThumbView *imgthumb = [[ThumbView alloc] initWithFrame:CGRectMake(thumbx, thumby, thumbw, thumbw)];
+				ThumbView *imgthumb = [[ThumbView alloc] initWithFrame:CGRectMake(thumbx, thumby, thumbw, thumbh)];
 				[imgthumb setPost:post index:index];
-				[imgthumb makeTappable];
-				[topView addSubview:imgthumb];
-				thumbx = [imgthumb rightEdge] + padding;
 				
-				if (index % row_limit == row_limit - 1) {
-					thumbx = padding;
-					thumby = [imgthumb bottomEdge] + padding;
-				}
+				imgthumb.userInteractionEnabled = YES;
+				
+				UITapGestureRecognizer *doubletapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(zoomImage:)];
+				doubletapgr.numberOfTouchesRequired = 1;
+				doubletapgr.numberOfTapsRequired = 1;
+				doubletapgr.cancelsTouchesInView = YES;
+				doubletapgr.delaysTouchesBegan = NO;
+				[imgthumb addGestureRecognizer:doubletapgr];
+				[doubletapgr release];
+				
+				[scrollview addSubview:imgthumb];
+				thumbx = [imgthumb rightEdge] + padding;
 				
 				imgthumb;
 			});
 			
-			[topView seth:[imgthumb bottomEdge] + padding];
+			
 			[imgthumb release];
 		}
+		
+		scrollview.contentSize = CGSizeMake(MAX([scrollview w], thumbx), [scrollview h]);
+		[scrollview scrollRectToVisible:CGRectMake(scrollview.contentSize.width - 10.0f, 0, 10.0f, [scrollview h]) animated:NO];
+		
+		[self performSelector:@selector(scrollToBeginning:) withObject:scrollview afterDelay:0.2f];
+		
+		[topView addSubview:scrollview];
+		[scrollview release];
+		
+		[topView seth:[scrollview bottomEdge]];
     }
 	else if ([post hasImages]) {
         //1 image, embed it here
@@ -157,7 +176,7 @@
 		//create hr
 		UIView *hr = [self hrWithText:@"Images"];
 		[topView addSubview:hr];
-		[hr sety:[topView h] - [hr h]];
+		[hr sety:[topView h]];
 		
 		//embed image view
 		UserAvatarView *avatarzoom = [[UserAvatarView alloc] initWithFrame:[[ViewController instance] contentFrame]];
@@ -189,7 +208,7 @@
 	
 	UIButton *upgradeBtn = [UIButton flatBlueButton:@"Add a comment" modifier:1.5f];
 	[bottomview addSubview:upgradeBtn];
-	[upgradeBtn addTarget:self action:@selector(addCommentClicked) forControlEvents:UIControlEventTouchUpInside];
+	[upgradeBtn addTarget:self action:@selector(addCommentClicked:) forControlEvents:UIControlEventTouchUpInside];
 	[upgradeBtn centerx];
 	[upgradeBtn centery];
 	
@@ -205,6 +224,20 @@
 	[self updateFavBtn];
 	[self getFBComments];
 	self.post.last_read = [NSDate date];
+}
+
+- (void) scrollToBeginning:(UIScrollView *)scrollview {
+	BOOL isios7 = !SYSTEM_VERSION_LESS_THAN(@"7.0");
+	if (isios7) {
+		[UIView animateWithDuration:1.3f delay:0.0f usingSpringWithDamping:0.7f initialSpringVelocity:0.0f options:nil animations:^{
+			[scrollview scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
+		} completion:^(BOOL finished) {}];
+	}
+	else {
+		[UIView animateWithDuration:1.0f animations:^{
+			[scrollview scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
+		}];
+	}
 }
 
 - (UIView *)hrWithText:(NSString *)hr_string {
@@ -243,13 +276,42 @@
 	[self.tableview setTableHeaderView:topView];
 }
 
+- (void) zoomImage:(UIGestureRecognizer *)gr {
+	ThumbView *imgthumb = (ThumbView *)gr.view;
+	UIScrollView *scrollview = [[UIScrollView alloc] init];
+	int x = 0;
+	
+	for (int i = 0; i < [self.post.images count]; i++) {
+		UserAvatarView *imgzoom = [[UserAvatarView alloc] init];
+		[imgzoom setPost:self.post index:i];
+		[imgzoom setx:x];
+		[imgzoom hideHeader];
+		x = [imgzoom rightEdge];
+		[scrollview addSubview:imgzoom];
+		[imgzoom release];
+	}
+	
+	scrollview.frame = [UIScreen mainScreen].bounds;
+	scrollview.pagingEnabled = YES;
+	scrollview.contentSize = CGSizeMake(x, [scrollview h]);
+	scrollview.contentOffset = CGPointMake([scrollview w] * imgthumb.index, 0);
+	scrollview.backgroundColor = [UIColor blackColor];
+	
+	UITapGestureRecognizer *tapgr = [[UITapGestureRecognizer alloc] initWithTarget:scrollview action:@selector(shrinkAndRemove)];
+	tapgr.numberOfTapsRequired = 1;
+	tapgr.numberOfTouchesRequired = 1;
+	[scrollview addGestureRecognizer:tapgr];
+	[tapgr release];
+	
+	[[ViewController instance] openModal:scrollview fromPoint:[gr locationOfTouch:0 inView:[ViewController instance].view]];
+	[scrollview release];
+}
 
-- (void)addCommentClicked {
+- (void)addCommentClicked:(UIButton *)btn {
 	//TODO fix this
 	if (!self.postcreate) {
 		self.postcreate = [[PostCreateView alloc] initWithFrame:[UIScreen mainScreen].bounds];
 		self.postcreate.postClicked = ^{
-			NSLog(@"post postclicked");
 			[self getFBComments];
 		};
 		
@@ -258,7 +320,8 @@
 	
 	self.postcreate.post = self.post;
 	
-	[[ViewController instance] openModal:self.postcreate];
+	//TODO: Translate btn.center into [viewcontroller instance].view
+	[[ViewController instance] openModal:self.postcreate fromPoint:btn.center];
 	[self.postcreate addedAsSubview:@{}];
 }
 
@@ -273,25 +336,24 @@
 	}];
 }
 
-- (void)zoomAvatar:(id)sender {
+- (void)zoomAvatar:(UITapGestureRecognizer *)gr {
 	NSLog(@"zoomAvatar");
 	
-	UITapGestureRecognizer *gr = (UITapGestureRecognizer *)sender;
 	UITableViewCell *cell = (UITableViewCell *)[gr.view parents:[UITableViewCell class]];
 	NSIndexPath *index_path = [self.tableview indexPathForCell:cell];
 	
 	NSLog(@"index_path %i", [index_path row]);
 	
-	User *comment_user = (User *)[self.user_data objectForKey:[[self.comments objectAtIndex:index_path.row] valueForKey:@"fromid"]];
+	User *comment_user = (User *)[self.user_data objectForKey:[[[self.comments objectAtIndex:index_path.row] valueForKey:@"fromid"] stringValue]];
 	
 	UserProfileView *profileview = [[UserProfileView alloc] initWithUser:comment_user];
-	[[ViewController instance] openModal:profileview];
+	[[ViewController instance] openModal:profileview fromPoint:[gr locationOfTouch:0 inView:[ViewController instance].view]];
 	[profileview release];
 }
 
-- (void)zoomUserAvatar:(id)sender {
+- (void)zoomUserAvatar:(UITapGestureRecognizer *)gr {
 	UserProfileView *profileview = [[UserProfileView alloc] initWithUser:self.user];
-	[[ViewController instance] openModal:profileview];
+	[[ViewController instance] openModal:profileview fromPoint:[gr locationOfTouch:0 inView:[ViewController instance].view]];
 	[profileview release];
 }
 
@@ -400,7 +462,7 @@
 		avatarView = (ThumbView *)[cell viewWithTag:96];
 	}
 	
-	User *comment_user = (User *)[self.user_data objectForKey:[[self.comments objectAtIndex:indexPath.row] valueForKey:@"fromid"]];
+	User *comment_user = (User *)[self.user_data objectForKey:[[[self.comments objectAtIndex:indexPath.row] valueForKey:@"fromid"] stringValue]];
 	
 	messageLabel.text = [[self.comments objectAtIndex:indexPath.row] valueForKey:@"text"];
 	[messageLabel sizeToFit];

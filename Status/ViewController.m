@@ -39,6 +39,7 @@ const int FAILED_THRESHOLD = 30;
 	
 	if (self) {
 		self.view.frame = [UIScreen mainScreen].bounds;
+		self.view.backgroundColor = [UIColor brandGreyColor];
 		self.is_done_loading = NO;
 		
 		//Auto Pro
@@ -250,12 +251,12 @@ const int FAILED_THRESHOLD = 30;
 	[self openModal:learnmore];
 }
 
-- (void) showNewPost {
+- (void) showNewPost:(UIButton *)btn {
 	if (!self.postcreate) {
 		self.postcreate = [[PostCreateView alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	}
 	
-	[self openModal:self.postcreate];
+	[self openModal:self.postcreate fromPoint:btn.center];
 	[self.postcreate addedAsSubview:@{}];
 	//[self.postcreate release];
 }
@@ -338,7 +339,7 @@ const int FAILED_THRESHOLD = 30;
 	[newPostButton setImageEdgeInsets:insets];
 	[header_view addSubview:newPostButton];
 	newPostButton.frame = CGRectMake([header_view w] - (btn_height + btn_offset), btn_y + (1.0f/[[UIScreen mainScreen] scale]), btn_height, btn_height);
-	[newPostButton addTarget:self action:@selector(showNewPost) forControlEvents:UIControlEventTouchUpInside];
+	[newPostButton addTarget:self action:@selector(showNewPost:) forControlEvents:UIControlEventTouchUpInside];
 	newPostButton.tag = 74;
 	
 	return header_view;
@@ -357,7 +358,7 @@ const int FAILED_THRESHOLD = 30;
 		
 		
 		[[FeedHelper instance] refresh];
-		[self performSelector:@selector(streamRefreshInterval) withObject:nil afterDelay:30.0f];
+		[self performSelector:@selector(streamRefreshInterval) withObject:nil afterDelay:60.0f];
 	}
 	else {
 		//every second until we're done loading
@@ -406,6 +407,12 @@ const int FAILED_THRESHOLD = 30;
 - (void) openModal:(UIView *)view {
 	view.tag = 50;
 	[self.view addAndGrowSubview:view];
+	[self.view bringSubviewToFront:view];
+}
+
+- (void) openModal:(UIView *)view fromPoint:(CGPoint)point {
+	view.tag = 50;
+	[self.view addAndGrowSubview:view fromPoint:point];
 	[self.view bringSubviewToFront:view];
 }
 

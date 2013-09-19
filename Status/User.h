@@ -41,4 +41,5 @@
 - (void) favorite;
 - (void) unfavorite;
 - (void) filter:(NSString *)filter_type;
+- (NSDictionary *)toDict;
 @end
