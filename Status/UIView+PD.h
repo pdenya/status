@@ -55,7 +55,4 @@ typedef void (^PDObjectBlock)(id);
 - (void) addAndGrowSubview:(UIView *)view;
 - (void) addAndGrowSubview:(UIView *)view fromPoint:(CGPoint)point;
 
-//app specific
-+ (UIView *) starView:(CGFloat)height;
-
 @end

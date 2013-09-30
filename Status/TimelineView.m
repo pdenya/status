@@ -12,7 +12,6 @@
 #import "UserAvatarView.h"
 #import "ThumbView.h"
 #import "ViewController.h"
-#import <QuartzCore/QuartzCore.h>
 #import "UpgradeHeader.h"
 #import "UserProfileView.h"
 #import "CellScrollView.h"
@@ -27,7 +26,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code
-		self.tableview = [[UITableView alloc] initWithFrame:self.bounds style:UITableViewStylePlain];
+		self.tableview = [[[UITableView alloc] initWithFrame:self.bounds style:UITableViewStylePlain] autorelease];
 		self.tableview.delegate = self;
 		self.tableview.dataSource = self;
 		self.tableview.separatorStyle = UITableViewCellSeparatorStyleNone;
@@ -35,7 +34,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		self.tableview.backgroundColor = [UIColor whiteColor];
 		self.max_free_rows = 0;
 		self.removeWhenFiltered = NO;
-		[self.tableview setTableFooterView:[UIView new]];
+		[self.tableview setTableFooterView:[[UIView new] autorelease]];
 		[self addSubview:self.tableview];
         
 		
@@ -80,7 +79,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	
 	header.backgroundColor = [UIColor brandGreyColor];
 	
-	UILabel *title = [[UILabel alloc] init];
+	UILabel *title = [[[UILabel alloc] init] autorelease];
 	title.backgroundColor = [UIColor clearColor];
 	title.text = [options objectForKey:@"title"];
 	title.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:13.0f];
@@ -89,7 +88,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	[title sety:7];
 	[header addSubview:title];
 	
-	UILabel *message = [[UILabel alloc] init];
+	UILabel *message = [[[UILabel alloc] init] autorelease];
 	message.backgroundColor = [UIColor clearColor];
 	message.text = [PDUtils isPro] && [options objectForKey:@"message_pro"] ? [options objectForKey:@"message_pro"] : [options objectForKey:@"message"];
 	message.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:12.0f];
@@ -101,11 +100,11 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	[header addSubview:message];
 	
 	// left blue box
-	UIView *gradient_view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [message x] - 10, [message bottomEdge] + 10)];
+	UIView *gradient_view = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, [message x] - 10, [message bottomEdge] + 10)] autorelease];
 	gradient_view.backgroundColor = [UIColor brandBlueColor];
 	[header addSubview:gradient_view];
 	
-	UIImageView *iconview = [[UIImageView alloc] initWithImage:[UIImage imageNamed:[options objectForKey:@"icon"]]];
+	UIImageView *iconview = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:[options objectForKey:@"icon"]]] autorelease];
 	int icon_padding = 15;
 	iconview.contentMode = UIViewContentModeScaleAspectFit;
 	iconview.frame = CGRectMake(icon_padding, 7, [gradient_view w] - (icon_padding * 2), [gradient_view h] - (icon_padding * 2));
@@ -155,6 +154,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		[orlabel sety:[upgradeBtn y] + ([upgradeBtn h] / 2) - ([orlabel h] / 2)];
 		
 		[learnmoreBtn setx:[orlabel x] - [learnmoreBtn w] - 2];
+		[orlabel release];
 		
 		[header seth:[upgradeBtn bottomEdge] + 14];
 	}
@@ -169,6 +169,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	
 	
 	[self.tableview setTableHeaderView:header];
+
 	[header release];
 }
 
@@ -212,12 +213,15 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	[tutorial seth:[steptwo bottomEdge] + 20];
 	
 	self.tutorial = tutorial;
+	
+	[tutorial release];
+	[example release];
 }
 
 - (void) beginRefreshing {
 	if (!self.refreshingview) {
 		self.refreshingview = ({
-			UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [self w], 30.0f)];
+			UIView *view = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, [self w], 30.0f)] autorelease];
 			view.backgroundColor = [UIColor colorWithHex:0xFCFCFC];
 			[view addBottomBorder:self.tableview.separatorColor];
 			
@@ -352,6 +356,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	
 	[[ViewController instance] openModal:details fromPoint:touch_point];
 	[details addedAsSubview];
+	[details release];
 }
 
 - (void)promoLearnMore:(id)sender {
@@ -393,7 +398,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		[self.tableview setTableFooterView:self.tutorial];
 	}
 	else if (count > 0 && self.tutorial && [self.tableview tableFooterView] == self.tutorial) {
-		[self.tableview setTableFooterView:[UIView new]];
+		[self.tableview setTableFooterView:[[UIView new] autorelease]];
 	}
 	
 	return count;
@@ -401,7 +406,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 
 - (UITableViewCell *)upgradeCell {
 	static NSString *UpgradeCellIdentifier = @"UpgradeCell";
-	UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:UpgradeCellIdentifier];
+	UITableViewCell *cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:UpgradeCellIdentifier] autorelease];
 	
 	cell.textLabel.hidden = YES;
 	cell.contentView.backgroundColor = [UIColor brandGreyColor];
@@ -439,8 +444,6 @@ const int NUM_LINES_BEFORE_CLIP = 5;
     UITableViewCell *cell = [self.tableview dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier] autorelease];
-		//cell.delegate = self;
-		//cell.direction = ZKRevealingTableViewCellDirectionBoth;
 		
 		scrollview = [[CellScrollView alloc] initWithFrame:cell.bounds];
 		[cell.contentView addSubview:scrollview];
@@ -449,7 +452,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		scrollview.showsHorizontalScrollIndicator = NO;
 		scrollview.showsVerticalScrollIndicator = NO;
 		
-		contentview = [[UIView alloc] initWithFrame:cell.bounds];
+		contentview = [[[UIView alloc] initWithFrame:cell.bounds] autorelease];
 		[scrollview addSubview:contentview];
 		contentview.tag = 56;
 		
@@ -460,12 +463,12 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		
 		[contentview addBottomBorder:[UIColor colorWithHex:0xa7a6a6]];
 		
-		cell.selectedBackgroundView = [[UIView alloc] init];
+		cell.selectedBackgroundView = [[[UIView alloc] init] autorelease];
 		[contentview setBackgroundColor:[UIColor colorWithHex:0xFAFAFA]];
 		
 		// right border
 		//NOTE: these are not visible when white, just hiding them in case it's convenient to add them back soon
-		rightBorder = [[UIView alloc] init];
+		rightBorder = [[[UIView alloc] init] autorelease];
 		rightBorder.frame = CGRectMake([cell.contentView w], 0.0f, 0.5f, [cell h]);
 		rightBorder.backgroundColor = contentview.backgroundColor; //grey - DDDDDD
 		[contentview addSubview:rightBorder];
@@ -473,7 +476,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		rightBorder.hidden = YES;
 		
 		// left border
-		leftBorder = [[UIView alloc] init];
+		leftBorder = [[[UIView alloc] init] autorelease];
 		leftBorder.frame = CGRectMake(0.0f, 0.0f, 0.5f, [cell h]);
 		leftBorder.backgroundColor = contentview.backgroundColor; //grey - DDDDDD
 		[contentview addSubview:leftBorder];
@@ -481,7 +484,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		leftBorder.hidden = YES;
 		
 		// Avatar View
-		avatarView = [[ThumbView alloc] initWithFrame:CGRectMake(10, 10, 50, 50)];
+		avatarView = [[[ThumbView alloc] initWithFrame:CGRectMake(10, 10, 50, 50)] autorelease];
 		avatarView.tag = 96;
 		[contentview addSubview:avatarView];
 		
@@ -514,7 +517,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		countdown_label.tag = 95;
 		
 		[contentview addSubview:filter_countdown];
-		
+		[filter_countdown release];
 		
 		// Main Post
 		messageLabel = [[[UILabel alloc] init] autorelease];
@@ -562,6 +565,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		commentsNotifierView.tag = 97;
 		[contentview addSubview:commentsNotifierView];
 		[contentview bringSubviewToFront:commentsNotifierView];
+		[commentsNotifierView release];
 		
 		// Images icon
 		imageNotifierView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_has_images.png"]];
@@ -570,6 +574,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		imageNotifierView.tag = 93;
 		[contentview addSubview:imageNotifierView];
 		[contentview bringSubviewToFront:imageNotifierView];
+		[imageNotifierView release];
 
 		UITapGestureRecognizer *tapgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didSelectScrollview:)];
 		tapgr.numberOfTapsRequired = 1;
@@ -586,7 +591,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		[tapgr release];
 		[doubletapgr release];
 		
-		revealedview = [[RevealedView alloc] initWithFrame:CGRectMake(0, 0, [self w], 100)];
+		revealedview = [[[RevealedView alloc] initWithFrame:CGRectMake(0, 0, [self w], 100)] autorelease];
 		revealedview.tag = 50;
 		
 		scrollview.contentSize = CGSizeMake([self w] + 100 + 201, [cell h]);
@@ -614,12 +619,17 @@ const int NUM_LINES_BEFORE_CLIP = 5;
     Post *post = [self.feed objectAtIndex:[indexPath row]];
 	User *user = [self.user_data objectForKey:post.uid];
 	
+	
+	NSData *strdata = [post.message dataUsingEncoding:NSNonLossyASCIIStringEncoding];
+	NSLog(@"%@", [[[NSString alloc] initWithData:strdata encoding:NSUTF8StringEncoding] autorelease]);
+	
 	if (![self.user_data objectForKey:post.uid]) {
 		// FOR DEBUGGING
 		//[self.user_data enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) { NSLog(@"%@ != %@", ((User *)obj).uid, post.uid); }];
 		
 		[[FBHelper instance] refreshUser:post.uid completed:^(BOOL success) {
-			if (success) {
+			NSLog(@"refresh response");
+			if (success && [self.user_data objectForKey:post.uid]) {
 				[self.tableview reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
 			}
 		}];
@@ -802,6 +812,10 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	[self.tableview deleteRowsAtIndexPaths:index_paths_to_remove withRowAnimation:UITableViewRowAnimationTop];
 	[tableview endUpdates];
 	
+	[index_paths_to_remove removeAllObjects];
+	[index_paths_to_remove release];
+	[indexes_to_remove removeAllIndexes];
+	[indexes_to_remove release];
 }
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollview {
@@ -895,7 +909,7 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 }
 
 
-#pragma mark - ZKRevealingTableViewCellDelegate
+#pragma mark - TableViewCellDelegate
 
 
 - (void)cellDidSnapBack:(UITableViewCell *)cell {

@@ -190,6 +190,9 @@
 	lbl.tag = 63;
 	lbl.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
 	
+	[iconview release];
+	[lbl release];
+	
 	return btn;
 }
 

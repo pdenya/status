@@ -61,6 +61,8 @@
 	else {
 		[close_btn sety:[close_btn y] + [self header_adjust] / 4];
 	}
+	
+	[close_btn release];
 }
 
 - (void)close:(id)sender {

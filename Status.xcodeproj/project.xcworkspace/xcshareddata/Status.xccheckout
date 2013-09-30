@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>C00439D6-C20F-4628-9723-CB37451C7D85</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Status</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>995C5690-379E-4B43-A554-86E0EB813918</key>
+		<string>https://bitbucket.org/pdenya/status.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Status.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>995C5690-379E-4B43-A554-86E0EB813918</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://bitbucket.org/pdenya/status.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>995C5690-379E-4B43-A554-86E0EB813918</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>995C5690-379E-4B43-A554-86E0EB813918</string>
+			<key>IDESourceControlWCCName</key>
+			<string>Status</string>
+		</dict>
+	</array>
+</dict>
+</plist>

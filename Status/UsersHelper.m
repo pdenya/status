@@ -24,7 +24,7 @@
 - (UsersHelper *)init {
     
     if (self = [super init]) {
-        self.users = [[NSMutableDictionary alloc] init];
+        self.users = [[[NSMutableDictionary alloc] init] autorelease];
     }
     
     return self;
@@ -85,6 +85,9 @@
 	
 	NSError *err = nil;
 	NSData *data = [NSPropertyListSerialization dataWithPropertyList:userdicts format:NSPropertyListBinaryFormat_v1_0 options:0 error:&err];
+	
+	[userdicts removeAllObjects];
+	[userdicts release];
 	
 	if (err != nil) {
 		return;

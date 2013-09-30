@@ -28,18 +28,21 @@
 		UIView *unreadsection = [self getSection:@{
 		   @"title": @"Unlimited Unread Messages",
 		   @"content":	@"A list of all the posts that have comments you haven’t read yet.  As you tap "
-						@"through to read the comments the post is removed from the stream until someone else responds."
+						@"through to read the comments the post is removed from the stream until someone else responds.",
+		   @"img": @"icon_unread_large"
 	   }];
 		
 		[unreadsection sety:[header_view bottomEdge] + padding];
 		[self addSubview:unreadsection];
+		
 		
 		UIView *filtersection = [self getSection:@{
 		   @"title": @"Unlimited Filters",
 		   @"content":	@"Hide posts from friends for different intervals: a day (ideal for people posting about sports games you don’t follow), a week or forever. "
 						@"Your friends are only hidden within this app, your Facebook timeline will not be affected."
 						@"\n\n"
-						@"Browse the full list of people you’ve blocked along with their most recent posts (to help you judge whether or not they’re worth unblocking)."
+						@"Browse the full list of people you’ve blocked along with their most recent posts (to help you judge whether or not they’re worth unblocking).",
+		   @"img": @"icon_filter_large"
 	   }];
 		
 		
@@ -48,7 +51,8 @@
 		
 		UIView *favoritesection = [self getSection:@{
 		   @"title": @"Unlimited Favorites",
-		   @"content": @"Mark as many people as your favorites as you want and you’ll see the last status each of them posted in your favorites timeline."
+		   @"content": @"Mark as many people as your favorites as you want and you’ll see the last status each of them posted in your favorites timeline.",
+		   @"img": @"icon_favorite_large"
 	   }];
 		
 		
@@ -69,6 +73,8 @@
 		[upgradeBtn centery];
 		[upgradeBtn addTarget:self action:@selector(upgradeClicked:) forControlEvents:UIControlEventTouchUpInside];
 		
+		[header_view release];
+		[bottomview release];
     }
     return self;
 }
@@ -78,7 +84,13 @@
 }
 
 - (UIView *)getSection:(NSDictionary *)options {
-	UIView *section = [[UIView alloc] init];
+	UIView *section = [[[UIView alloc] init] autorelease];
+	
+	UIImageView *img = [[UIImageView alloc] initWithImage:[UIImage imageNamed:[options objectForKey:@"img"]]] ;
+	[img setx:13];
+	[img sety:2];
+	[section addSubview:img];
+	[img release];
 	
 	UILabel *titleLabel = [UILabel boldLabel:[options objectForKey:@"title"]];
 	[titleLabel setx:76];

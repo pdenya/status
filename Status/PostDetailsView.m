@@ -23,30 +23,36 @@
 
 	if (self) {
 		self.backgroundColor = [UIColor brandGreyColor];
+		NSMutableArray *comments_arr = [[NSMutableArray alloc] init];
+		self.comments = comments_arr;
+		[comments_arr release];
+		
+		NSMutableDictionary *user_data_dict = [[NSMutableDictionary alloc] init];
+		self.user_data = user_data_dict;
+		[user_data_dict release];
 	}
 	
 	return self;
 }
 
 - (void) dealloc {
-	[self.postcreate release];
-	[self.tableview release];
+	if (_postcreate) {
+		[_postcreate release];
+	}
+	
+	[tableview release];
 	
 	[self.comments removeAllObjects];
-	[self.comments release];
+	[comments release];
 	
 	[self.user_data removeAllObjects];
-	[self.user_data release];
+	[user_data release];
 	
 	[super dealloc];
 }
 
 - (void)addedAsSubview {
 	if (!self.post) NSLog(@"ERROR: Post not set in addedAsSubview");
-		
-	self.comments = [[NSMutableArray alloc] init];
-	self.user_data = [[NSMutableDictionary alloc] init];
-	
 	
 	HeaderView *header_view = [[HeaderView alloc] init];
 	[header_view addCloseButton];
@@ -68,6 +74,7 @@
 	//add header view
 	[self addSubview:header_view];
 	[self bringSubviewToFront:header_view];
+	[header_view release];
 	
 	//comments table header view which contains the post and stuff
 	UIView *topView = [[UIView alloc] initWithFrame:self.bounds];
@@ -120,7 +127,6 @@
 	[topView addSubview:postLabel];
 	
 	[topView seth:MAX(110, MAX([postLabel bottomEdge] + 20, [dateLabel bottomEdge]))];
-
 	
     if ([post hasImages] && [post.images count] > 1) {
         //multiple images, show thumbnails
@@ -185,10 +191,11 @@
 		[avatarzoom setPost:self.post];
 		[avatarzoom sety:[hr bottomEdge]];
 		[topView addSubview:avatarzoom];
-		[avatarzoom release];
 		
 		//adjust topview height
 		[topView seth:[topView h] + [hr h] + [avatarzoom h]];
+		
+		[avatarzoom release];
 	}
 	
 	//post/comment separator
@@ -196,8 +203,7 @@
     [topView seth:[topView h] + [hr h]];
     [hr sety:[topView h] - [hr h]];
 	hr.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
-	[topView addSubview:hr];
-	
+	[topView addSubview:hr];	
     
 	
 	// footer
@@ -213,17 +219,25 @@
 	[upgradeBtn centery];
 	
 	//comments list
-	self.tableview = [[UITableView alloc] initWithFrame:[[ViewController instance] contentFrame]];
-	self.tableview.delegate = self;
-	self.tableview.dataSource = self;
-	self.tableview.tableHeaderView = topView;
-	self.tableview.backgroundColor = [UIColor brandGreyColor];
-	[self.tableview setTableFooterView:bottomview];
-	[self addSubview:self.tableview];
+	UITableView *tblview = [[UITableView alloc] initWithFrame:[[ViewController instance] contentFrame]];
+	tblview.delegate = self;
+	tblview.dataSource = self;
+	tblview.tableHeaderView = topView;
+	tblview.backgroundColor = [UIColor brandGreyColor];
+	[tblview setTableFooterView:bottomview];
+	[self addSubview:tblview];
+	self.tableview = tblview;
+	[tblview release];
 		
 	[self updateFavBtn];
 	[self getFBComments];
 	self.post.last_read = [NSDate date];
+	
+	[bottomview release];
+	[avatarView release];
+	[postLabel release];
+	[dateLabel release];
+	[topView release];
 }
 
 - (void) scrollToBeginning:(UIScrollView *)scrollview {
@@ -241,7 +255,7 @@
 }
 
 - (UIView *)hrWithText:(NSString *)hr_string {
-	UIView *hr = [[UIView alloc] init];
+	UIView *hr = [[[UIView alloc] init] autorelease];
 	[hr setw:[UIScreen mainScreen].bounds.size.width];
 	[hr setx:0];
 	hr.backgroundColor = [UIColor colorWithHex:0xf1f0f0];
@@ -256,6 +270,7 @@
 	[hr seth:[hr_comments h] + 4];
 	[hr_comments centerx];
 	[hr_comments centery];
+	[hr_comments release];
 	
 	CALayer *topBorder = [CALayer layer];
 	topBorder.frame = CGRectMake(0.0f, 0, [hr w], 0.5f);
@@ -310,12 +325,15 @@
 - (void)addCommentClicked:(UIButton *)btn {
 	//TODO fix this
 	if (!self.postcreate) {
-		self.postcreate = [[PostCreateView alloc] initWithFrame:[UIScreen mainScreen].bounds];
-		self.postcreate.postClicked = ^{
+		PostCreateView *postcreate = [[PostCreateView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+		postcreate.postClicked = ^{
 			[self getFBComments];
 		};
 		
-		self.postcreate.messageTextField.text = @"";
+		postcreate.messageTextField.text = @"";
+		
+		self.postcreate = postcreate;
+		[postcreate release];
 	}
 	
 	self.postcreate.post = self.post;
@@ -403,7 +421,7 @@
 		//hide defaults
 		cell.textLabel.hidden = YES;
 		cell.detailTextLabel.hidden = YES;
-		cell.selectedBackgroundView = [[UIView alloc] init];
+		cell.selectedBackgroundView = [[[UIView alloc] init] autorelease];
 		cell.contentView.backgroundColor = [UIColor whiteColor];
 		
 		messageLabel = [[[UILabel alloc] init] autorelease];
@@ -443,7 +461,7 @@
 		[nameLabel seth:20];
 		nameLabel.tag = 92;
 		
-		avatarView = [[ThumbView alloc] initWithFrame:CGRectMake(5, 8, 60, 60)];
+		avatarView = [[[ThumbView alloc] initWithFrame:CGRectMake(5, 8, 60, 60)] autorelease];
 		avatarView.tag = 96;
 		[cell.contentView addSubview:avatarView];
 				

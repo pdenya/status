@@ -63,7 +63,7 @@
 }
 
 - (void) addFlexibleBottomBorder:(UIColor *)borderColor {
-	UIView *border = [[UIView alloc] init];
+	UIView *border = [[[UIView alloc] init] autorelease];
 	border.tag = 101;
 	border.frame = CGRectMake(0, [self h] - (1/[[UIScreen mainScreen] scale]), [self w], 1/[[UIScreen mainScreen] scale]);
 	border.backgroundColor = borderColor;
@@ -193,7 +193,7 @@
 }
 
 + (UIView *) horizontalRule {
-	UIView *hr = [[UIView alloc] init];
+	UIView *hr = [[[UIView alloc] init] autorelease];
 	[hr setw:200];
 	[hr seth:(1/[[UIScreen mainScreen] scale])];
 	hr.backgroundColor = [UIColor colorWithHex:0x317ca7];
@@ -285,14 +285,5 @@
 	[self shrinkAndRemove:0.0f];
 }
 
-+ (UIView *) starView:(CGFloat)height {
-	UIView *v = [[UIView alloc] init];
-	[v seth:height];
-	[v setw:height];
-	
-	
-	
-	return v;
-}
 
 @end

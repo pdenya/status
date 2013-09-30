@@ -23,10 +23,17 @@
 - (FavoritesHelper *)init {
     
     if (self = [super init]) {
-        self.favorites = [[NSMutableDictionary alloc] init];
+		NSMutableDictionary *favs = [[NSMutableDictionary alloc] init];
+        self.favorites = favs;
+		[favs release];
     }
     
     return self;
+}
+
+- (void) dealloc {
+	[_favorites release];
+	[super dealloc];
 }
 
 + (BOOL)isFavorited:(User *)user {

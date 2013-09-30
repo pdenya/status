@@ -24,7 +24,7 @@
 	if ([post_data valueForKey:@"images"]) {
 		post.images = [NSMutableArray arrayWithArray:[post_data valueForKey:@"images"]];
 	} else {
-		post.images = [[NSMutableArray alloc] init];
+		post.images = [[[NSMutableArray alloc] init] autorelease];
 	}
 	
 	if ([post_data valueForKey:@"location"]) {
@@ -43,7 +43,13 @@
 }
 
 + (UIFont *)getPostFont {
-	return [UIFont fontWithName:@"HelveticaNeue-Light" size:15.0f];
+	static UIFont *font;
+	
+	if (!font) {
+		font = [UIFont fontWithName:@"HelveticaNeue-Light" size:15.0f];
+	}
+	
+	return font;
 }
 
 - (BOOL)hasImages {
@@ -203,7 +209,7 @@
 	}
 
 - (NSDictionary *)toDict {
-	NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
+	NSMutableDictionary *dict = [[[NSMutableDictionary alloc] init] autorelease];
 	
 	[dict setObject:self.message forKey:@"message"];
 	[dict setObject:self.status_id forKey:@"status_id"];

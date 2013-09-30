@@ -27,7 +27,7 @@
 }
 
 + (UILabel *)boldLabel:(NSString *)text size:(CGFloat)size {
-	UILabel *title = [[UILabel alloc] init];
+	UILabel *title = [[[UILabel alloc] init] autorelease];
 	title.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:size];
 	title.textColor = [UIColor colorWithHex:0x444444];
 	title.text = text;
@@ -44,7 +44,7 @@
 }
 
 + (UILabel *)label:(NSString *)text size:(CGFloat)size {
-	UILabel *title = [[UILabel alloc] init];
+	UILabel *title = [[[UILabel alloc] init] autorelease];
 	title.font = [UIFont fontWithName:@"HelveticaNeue" size:size];
 	title.textColor = [UIColor colorWithHex:0x444444];
 	title.text = text;
@@ -59,7 +59,7 @@
 }
 
 + (UILabel *)italicLabel:(NSString *)text size:(CGFloat)size {
-	UILabel *title = [[UILabel alloc] init];
+	UILabel *title = [[[UILabel alloc] init] autorelease];
 	title.font = [UIFont fontWithName:@"HelveticaNeue-Italic" size:size];
 	title.textColor = [UIColor colorWithHex:0x444444];
 	title.text = text;

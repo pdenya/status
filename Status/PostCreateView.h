@@ -21,8 +21,10 @@ typedef void (^PCBlock)(void);
 @property (assign) Post *post;
 @property (readwrite, copy) PCBlock postClicked;
 @property (readwrite, copy) PCBlock focused;
+@property (nonatomic, retain) UIImage *img;
 
 - (void)addedAsSubview:(NSDictionary *)options;
 - (void)switchToComment:(Post *)p;
+- (void)focus;
 
 @end

@@ -10,7 +10,6 @@
 @class ThumbView;
 @interface UITableViewCell (PD)
 
-- (void) configureForTimeline;
 - (UILabel *) messageLabel;
 - (UILabel *) dateLabel;
 - (UILabel *) nameLabel;

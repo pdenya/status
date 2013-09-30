@@ -23,7 +23,7 @@
 
 		self.backgroundColor = [UIColor colorWithHex:0xa2caf1];
 		
-		self.imgview = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"comment.png"]];
+		self.imgview = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"comment.png"]] autorelease];
 		self.imgview.frame = self.bounds;
 		self.imgview.contentMode = UIViewContentModeScaleAspectFill;
 		

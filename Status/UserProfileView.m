@@ -26,7 +26,7 @@
 	
 	if (self) {
 		self.user = user;
-		self.feed = [[NSMutableArray alloc] init];
+		self.feed = [[[NSMutableArray alloc] init] autorelease];
 		
 		HeaderView *header_view = [[HeaderView alloc] init];
 		[header_view addCloseButton];
@@ -51,7 +51,7 @@
             [topview seth:[avatarzoom h]];
             [topview addSubview:avatarzoom];
             
-            self.timeline = [[TimelineView alloc] initWithFrame:[[ViewController instance] contentFrame]];
+            self.timeline = [[[TimelineView alloc] initWithFrame:[[ViewController instance] contentFrame]] autorelease];
             [self.timeline.tableview setTableHeaderView:topview];
             self.timeline.feed = self.feed;
             [self.timeline.tableview reloadData];
@@ -61,6 +61,8 @@
             [self addSubview:avatarzoom];
         }
         
+		[header_view release];
+		[topview release];
 		[avatarzoom release];
 	}
 	
@@ -69,8 +71,8 @@
 
 - (void) dealloc {
 	[self.feed removeAllObjects];
-	[self.feed release];
-	[self.timeline release];
+	[_feed release];
+	[_timeline release];
 	
 	[super dealloc];
 }

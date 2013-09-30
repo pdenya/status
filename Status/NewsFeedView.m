@@ -19,12 +19,12 @@
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code
-		self.feed = [[NSMutableArray alloc] init];
+		self.feed = [[[NSMutableArray alloc] init] autorelease];
 		self.backgroundColor = [UIColor whiteColor];
 		
 		[self refreshFeed];
 		
-		self.timeline = [[TimelineView alloc] initWithFrame:self.bounds];
+		self.timeline = [[[TimelineView alloc] initWithFrame:self.bounds] autorelease];
 		self.timeline.feed = self.feed;
 		self.timeline.removeWhenFiltered = YES;
 		[self.timeline.tableview reloadData];

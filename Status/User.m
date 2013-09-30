@@ -37,10 +37,40 @@ const int max_failed = 30;
 	self = [super init];
 	
 	if (self) {
-		self.callbacks = [[NSMutableArray alloc] init];
+		self.callbacks = [[[NSMutableArray alloc] init] autorelease];
 	}
 	
 	return self;
+}
+
+- (void) dealloc {
+	[callbacks release];
+	
+	if (last_name) {
+		[last_name release];
+	}
+	
+	if (pic_square) {
+		[pic_square release];
+	}
+	
+	if (pic_big) {
+		[pic_big release];
+	}
+	
+	if (uid) {
+		[uid release];
+	}
+	
+	if (image_square) {
+		[image_square release];
+	}
+	
+	if (image_big) {
+		[image_big release];
+	}
+	
+	[super dealloc];
 }
 
 + (int)reachedFailureThreshold {

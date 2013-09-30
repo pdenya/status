@@ -23,6 +23,7 @@ typedef void (^FBBoolBlock)(BOOL success);
 - (void)openSession:(FBVoidBlock)opened_callback allowLoginUI:(BOOL)allowLoginUI onFail:(FBVoidBlock)failed_callback;
 - (void) getStream:(FBDictionaryBlock)completed options:(NSDictionary *)options;
 - (void) postStatus:(NSString *)message completed:(FBArrayBlock)completed;
+- (void)postStatus:(NSString *)message withImage:(UIImage *)img completed:(FBArrayBlock)completed;
 - (void) getComments:(NSString *)post_id completed:(FBDictionaryBlock)completed;
 - (void) postComment:(NSString *)message onStatus:(NSString *)status_id completed:(FBArrayBlock)completed;
 - (BOOL) hasSession;

@@ -38,7 +38,7 @@
 - (FilterHelper *)init {
     
     if (self = [super init]) {
-        self.filter = [[NSMutableDictionary alloc] init];
+        self.filter = [[[NSMutableDictionary alloc] init] autorelease];
     }
     
     return self;
@@ -52,7 +52,7 @@
 		self.filter = [NSMutableDictionary dictionaryWithDictionary:tmp];
 	}
 	else {
-		self.filter = [[NSMutableDictionary alloc] init];
+		self.filter = [[[NSMutableDictionary alloc] init] autorelease];
 		[self save];
 	}
 

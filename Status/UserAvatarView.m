@@ -22,16 +22,16 @@
 - (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-		self.urls = [[NSMutableArray alloc] init];
-		self.photos = [[NSMutableArray alloc] init];
+		self.urls = [[[NSMutableArray alloc] init] autorelease];
+		self.photos = [[[NSMutableArray alloc] init] autorelease];
 		self.backgroundColor = [UIColor blackColor];
 		self.should_resize = NO;
 		
-		self.headerView = [[HeaderView alloc] init];
+		self.headerView = [[[HeaderView alloc] init] autorelease];
 		[self.headerView addCloseButton];
 		[self addSubview:self.headerView];
 		
-		self.avatarView = [[UIImageView alloc] initWithFrame:self.bounds];
+		self.avatarView = [[[UIImageView alloc] initWithFrame:self.bounds] autorelease];
 		[self.avatarView sety:[self.headerView bottomEdge]];
 		[self.avatarView seth:[self h] - [self.avatarView y]];
 		self.avatarView.contentMode = UIViewContentModeScaleAspectFit;

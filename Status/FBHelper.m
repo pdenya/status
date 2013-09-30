@@ -66,7 +66,9 @@
 		
 		if (error) {
 			NSLog(@"error %@", [error description]);
-			session = [[FBSession alloc] initWithPermissions:permissions];
+			
+			//not sure what to do with this..
+			session = [[[FBSession alloc] initWithPermissions:permissions] autorelease];
 		}
 	};
 	
@@ -77,7 +79,8 @@
 		NSLog(@"Trying with Login UI");
 		is_opening = [FBSession openActiveSessionWithReadPermissions:read_permissions allowLoginUI:allowLoginUI completionHandler:completionHandler];
 	}
-	else if (!is_opening) {
+	
+	if (!is_opening) {
 		failed_callback();
 	}
 	
@@ -186,6 +189,9 @@
 		}
 		
 		comment_condition = [NSString stringWithFormat:@"OR object_id IN (\"%@\")", [status_ids componentsJoinedByString:@"\",\""]];
+		
+		[status_ids removeAllObjects];
+		[status_ids release];
 	}
 	
 	query = [NSString stringWithFormat:query, latest_stream_time, comment_condition];
@@ -266,7 +272,7 @@
 							 post = [[Post alloc] init];
 							 post.status_id = status_id;
 							 post.time = [stream_result objectForKey:@"created_time"];
-							 post.uid = [stream_result objectForKey:@"actor_id"];
+							 post.uid = [[stream_result objectForKey:@"actor_id"] isKindOfClass:[NSString class]] ? [stream_result objectForKey:@"actor_id"] : [[stream_result objectForKey:@"actor_id"] stringValue];
 							 post.has_comments = NO;
 							 post.has_liked = NO;
 							 post.images = [[NSMutableArray alloc] init];
@@ -304,7 +310,7 @@
 							 post.location = [stream_result valueForKeyPath:@"attachment.name"];
 						 }
 						 //check for link
-						 else if (media && [[[media objectAtIndex:0] objectForKey:@"type"] isEqualToString:@"link"]) {
+						 else if (media && [media count] > 0 && [[[media objectAtIndex:0] objectForKey:@"type"] isEqualToString:@"link"]) {
 							 //fuckin facebook, are you kidding me? I specifically told you not to get these.
 							 is_facebook_being_an_asshole = YES;
 						 }
@@ -410,6 +416,11 @@
 				@"users": user_data
 			 };
 			 
+			 [statuses release];
+			 [user_data release];
+			 [comment_map release];
+			 [images_map release];
+			 
 			 NSLog(@"Stream Results: %@", [response_container description]);
 			 
 			 NSUserDefaults *userdefaults = [NSUserDefaults standardUserDefaults];
@@ -425,7 +436,7 @@
 }
 
 - (void) reauthorizeWithWritePermissions:(FBVoidBlock)completed {
-	if (![[NSUserDefaults standardUserDefaults] objectForKey:@"fb_publish_authorized"]) {
+	if (![[NSUserDefaults standardUserDefaults] objectForKey:@"fb_publish_authorized"] && [FBSession.activeSession.permissions indexOfObject:@"publish_stream"] == NSNotFound) {
 		[[FBSession activeSession] reauthorizeWithPublishPermissions:@[@"publish_stream"] defaultAudience:FBSessionDefaultAudienceFriends completionHandler:^(FBSession *session, NSError *error) {
 			if (!error) {
 				completed();
@@ -505,6 +516,28 @@
 	[self reauthorizeWithWritePermissions:success];
 }
 
+- (void)postStatus:(NSString *)message withImage:(UIImage *)img completed:(FBArrayBlock)completed {
+	NSLog(@"Posting Status to Facebook: %@", message);
+	
+	FBVoidBlock success = ^{
+		[FBRequestConnection startWithGraphPath:@"/me/photos" parameters:@{ @"message": message, @"picture": UIImagePNGRepresentation(img) } HTTPMethod:@"POST" completionHandler:
+		 ^(FBRequestConnection *connection, id result, NSError *error) {
+			 if (error) {
+				 NSLog(@"Error: %@", [error localizedDescription]);
+				 NSLog(@"Error: %@", [error description]);
+				 NSLog(@"Error: %@", [[error userInfo] description]);
+			 } else {
+				 NSLog(@"Result: %@", [result description]);
+				 completed(nil);
+			 }
+			 
+		 }
+		 ];
+	};
+	
+	[self reauthorizeWithWritePermissions:success];
+}
+
 - (void)postComment:(NSString *)message onStatus:(NSString *)status_id completed:(FBArrayBlock)completed {
 	FBVoidBlock success = ^{
 		[FBRequestConnection startWithGraphPath:[NSString stringWithFormat:@"/%@/comments", status_id] parameters:@{ @"message": message } HTTPMethod:@"POST" completionHandler:
@@ -578,6 +611,9 @@
 					@"comments": formatted_results,
 					@"users": user_data
 				};
+				
+				[formatted_results release];
+				[user_data release];
 				
 				NSLog(@"Stream Results: %@", [response_container description]);
 				

@@ -52,5 +52,6 @@
 - (void) showLearnMoreView;
 - (void)refreshFeeds:(NSArray *)added_row_indexes;
 - (void) upgraded;
+- (void) loadPostCreate;
 
 @end

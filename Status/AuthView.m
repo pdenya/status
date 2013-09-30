@@ -88,6 +88,8 @@
 			[view seth:MAX([focus_description bottomEdge], [imgview bottomEdge])];
 			[view sety:[bluebg bottomEdge] + section_padding];
 			
+			[imgview release];
+			
 			view;
 		});
 		
@@ -120,6 +122,8 @@
 			
 			[view seth:MAX([track_description bottomEdge], [imgview bottomEdge])];
 			[view sety:[focusview bottomEdge] + section_padding];
+			
+			[imgview release];
 			
 			view;
 		});
@@ -156,7 +160,7 @@
 		
 		
 		//this is visually above bottom view but it's easier to have the height while initing it and h is dependent on bottomView sort of
-		self.tourview = ({
+		UIScrollView *scrollview = ({
 			UIScrollView *scrollview = [[UIScrollView alloc] initWithFrame:CGRectMake(0, [trackview bottomEdge] + section_padding, [self w], 100)];
 			[scrollview seth:[bottomView y] - [scrollview y]];
 
@@ -236,13 +240,23 @@
 			scrollview;
 		});
 		
-		[self addSubview:self.tourview];
+		[self addSubview:scrollview];
+		self.tourview = scrollview;
+		[scrollview release];
 		[self performSelector:@selector(scrollToBeginning) withObject:nil afterDelay:0.5f];
 		
+		[focusview release];
+		[trackview release];
+		[bluebg release];
 		[bottomView release];
     }
 	
     return self;
+}
+
+- (void) dealloc {
+	[_tourview release];
+	[super dealloc];
 }
 
 - (void) scrollToBeginning {
@@ -265,7 +279,7 @@
 	
 	switch(imgview.tag) {
 		case 40:
-			[imgview setx:[imgview x] + 40.0f]; return;
+			[imgview setx:[imgview x] + 40.0f];
 			[zoomedview setImage:[UIImage imageNamed:@"screenshot_timeline.png"]];
 			break;
 		case 41:

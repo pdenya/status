@@ -23,11 +23,11 @@
 		self.filter = [FilterHelper instance].filter;
 		self.keys = [NSMutableArray arrayWithArray:[self.filter allKeys]];
 		self.user_data = [UsersHelper instance].users;
-		self.feed = [NSMutableArray new];
+		self.feed = [[NSMutableArray new] autorelease];
 		
 		[self refreshFeed];
 		
-		self.timeline = [[TimelineView alloc] initWithFrame:self.bounds];
+		self.timeline = [[[TimelineView alloc] initWithFrame:self.bounds] autorelease];
 		self.timeline.feed = self.feed;
 		self.timeline.max_free_rows = 5;
 		

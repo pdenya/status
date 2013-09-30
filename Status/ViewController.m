@@ -43,31 +43,72 @@ const int FAILED_THRESHOLD = 30;
 		self.is_done_loading = NO;
 		
 		//Auto Pro
-		[PDUtils markAsPro];
+		//[PDUtils markAsPro];
 	}
 
 	return self;
 }
 
+- (void) dealloc {
+	
+	if (self.newsfeed) {
+		[newsfeed release];
+	}
+	if (self.favoritesview) {
+		[favoritesview release];
+	}
+	if (self.filteredview) {
+		[filteredview release];
+	}
+	if (self.unreadview) {
+		[unreadview release];
+	}
+	if (self.feed) {
+		[feed release];
+	}
+	if (self.user_data) {
+		[user_data release];
+	}
+	if (self.filter) {
+		[filter release];
+	}
+	if (self.favorites) {
+		[favorites release];
+	}
+	if (self.headerView) {
+		[headerView release];
+	}
+	if (self.postcreate) {
+		[_postcreate release];
+	}
+	
+	[super dealloc];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
 	[AppHelper instance].vc = self;
-}
-
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-}
 	
--(void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-
+	
 	self.total_failed = 0;
 	
 	//[[FBHelper instance] logout];
 	[self performSelectorInBackground:@selector(loadFeeds) withObject:nil];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+	[super viewDidAppear:animated];
 	
-	NSLog(@"viewWillAppear");
+	if (self.postcreate && self.postcreate.superview) {
+		[self.postcreate focus];
+	}
+	else {
+		[self performSelectorInBackground:@selector(loadPostCreate) withObject:nil];
+	}
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
 }
 
 - (void) loadFeeds {
@@ -174,7 +215,7 @@ const int FAILED_THRESHOLD = 30;
 	}
 	
 	if (!self.newsfeed) {
-		self.newsfeed = [[NewsFeedView alloc] initWithFrame:[self contentFrame]];
+		self.newsfeed = [[[NewsFeedView alloc] initWithFrame:[self contentFrame]] autorelease];
 	}
 	else {
 		[self.newsfeed refreshFeed];
@@ -194,7 +235,7 @@ const int FAILED_THRESHOLD = 30;
 
 - (void) showFavorites {
 	if (!self.favoritesview) {
-		self.favoritesview = [[FavoritesView alloc] initWithFrame:[self contentFrame]];
+		self.favoritesview = [[[FavoritesView alloc] initWithFrame:[self contentFrame]] autorelease];
 	}
 	else {
 		[self.favoritesview refreshFeed];
@@ -212,7 +253,7 @@ const int FAILED_THRESHOLD = 30;
 
 - (void) showFilter {
 	if (!self.filteredview) {
-		self.filteredview = [[FilteredUsersView alloc] initWithFrame:[self contentFrame]];
+		self.filteredview = [[[FilteredUsersView alloc] initWithFrame:[self contentFrame]] autorelease];
 	}
 	else {
 		[self.filteredview refreshFeed];
@@ -230,7 +271,7 @@ const int FAILED_THRESHOLD = 30;
 
 - (void) showUnread {
 	if (!self.unreadview) {
-		self.unreadview = [[UnreadPostsView alloc] initWithFrame:[self contentFrame]];
+		self.unreadview = [[[UnreadPostsView alloc] initWithFrame:[self contentFrame]] autorelease];
 	}
 	else {
 		[self.unreadview refreshFeed];
@@ -249,16 +290,23 @@ const int FAILED_THRESHOLD = 30;
 - (void) showLearnMoreView {
 	LearnMoreView *learnmore = [[LearnMoreView alloc] initWithFrame:self.view.bounds];
 	[self openModal:learnmore];
+	[learnmore release];
 }
 
 - (void) showNewPost:(UIButton *)btn {
 	if (!self.postcreate) {
-		self.postcreate = [[PostCreateView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+		self.postcreate = [[[PostCreateView alloc] initWithFrame:[UIScreen mainScreen].bounds] autorelease];
 	}
 	
 	[self openModal:self.postcreate fromPoint:btn.center];
 	[self.postcreate addedAsSubview:@{}];
 	//[self.postcreate release];
+}
+
+- (void) loadPostCreate {
+	if (!self.postcreate) {
+		self.postcreate = [[[PostCreateView alloc] initWithFrame:[UIScreen mainScreen].bounds] autorelease];
+	}
 }
 
 - (void) upgraded {
@@ -284,7 +332,7 @@ const int FAILED_THRESHOLD = 30;
 
 - (UIView *)headerContainer {
 	//TODO update this to use HeaderView class
-	UIView *header_view = [[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+	UIView *header_view = [[[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds] autorelease];
 	[header_view seth:SYSTEM_VERSION_LESS_THAN(@"7.0") ? 35 : 50];
 	header_view.backgroundColor = [UIColor colorWithHex:0xf1f0f0];
 	
@@ -390,6 +438,9 @@ const int FAILED_THRESHOLD = 30;
 	}
 	
 	[self.filter removeObjectsForKeys:to_remove];
+
+	[to_remove removeAllObjects];
+	[to_remove release];
 }
 
 - (void)refreshFeeds:(NSArray *)added_row_indexes {
@@ -420,7 +471,10 @@ const int FAILED_THRESHOLD = 30;
 	//sender or viewWithTag:50
 	NSLog(@"sender tag %i", ((UIView *)sender).tag);
 	UIView *view = [sender isKindOfClass:[UIView class]] && ((UIView *)sender).tag == 50 ? (UIView *)sender : [self.view viewWithTag:50];
-	[view shrinkAndRemove];
+	
+	if (view) {
+		[view shrinkAndRemove];
+	}
 	
 	if (self.favoritesview && self.favoritesview.superview) {
 		[self.favoritesview refreshFeed];

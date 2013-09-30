@@ -24,7 +24,7 @@
 - (FeedHelper *)init {
     
     if (self = [super init]) {
-        self.feed = [[NSMutableArray alloc] init];
+        self.feed = [[[NSMutableArray alloc] init] autorelease];
     }
     
     return self;
@@ -63,6 +63,9 @@
 		else {
 			[[ViewController instance] refreshFeeds:nil];
 		}
+		
+		[added_rows removeAllObjects];
+		[added_rows release];
 	};
 	
 	/*
@@ -119,7 +122,7 @@
 	}
 	
 	NSString *error = nil;
-	NSArray *feeddicts= [NSPropertyListSerialization propertyListFromData:userdata mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:&error];
+	NSArray *feeddicts = [NSPropertyListSerialization propertyListFromData:userdata mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:&error];
 	NSLog(@"userdicts %@", [feeddicts description]);
 	if(error != nil) return;
 	
@@ -130,6 +133,8 @@
 		[loaded_posts addObject:post];
 	}];
 
+	feeddicts = nil;
+	
 	NSLog(@"break");
 }
 
@@ -153,6 +158,9 @@
 			NSString *docDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
 			[data writeToFile:[NSString stringWithFormat:@"%@/feed.plist",docDir] atomically:YES];
 		}
+		
+		[feeddicts removeAllObjects];
+		[feeddicts release];
 		// END PERFORM SAVE
 		
 		is_saving = NO;
