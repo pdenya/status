@@ -494,7 +494,7 @@
 	[self reauthorizeWithWritePermissions:success];
 }
 
-- (void)postStatus:(NSString *)message completed:(FBArrayBlock)completed {
+- (void)postStatus:(NSString *)message completed:(FBBoolBlock)completed {
 	NSLog(@"Posting Status to Facebook: %@", message);
 	
 	FBVoidBlock success = ^{
@@ -504,9 +504,10 @@
 					NSLog(@"Error: %@", [error localizedDescription]);
 					NSLog(@"Error: %@", [error description]);
 					NSLog(@"Error: %@", [[error userInfo] description]);
+					completed(NO);
 				} else {
 					NSLog(@"Result: %@", [result description]);
-					completed(nil);
+					completed(YES);
 				}
 
 			}
@@ -516,7 +517,7 @@
 	[self reauthorizeWithWritePermissions:success];
 }
 
-- (void)postStatus:(NSString *)message withImage:(UIImage *)img completed:(FBArrayBlock)completed {
+- (void)postStatus:(NSString *)message withImage:(UIImage *)img completed:(FBBoolBlock)completed {
 	NSLog(@"Posting Status to Facebook: %@", message);
 	
 	FBVoidBlock success = ^{
@@ -526,9 +527,10 @@
 				 NSLog(@"Error: %@", [error localizedDescription]);
 				 NSLog(@"Error: %@", [error description]);
 				 NSLog(@"Error: %@", [[error userInfo] description]);
+				 completed(NO);
 			 } else {
 				 NSLog(@"Result: %@", [result description]);
-				 completed(nil);
+				 completed(YES);
 			 }
 			 
 		 }
@@ -538,7 +540,7 @@
 	[self reauthorizeWithWritePermissions:success];
 }
 
-- (void)postComment:(NSString *)message onStatus:(NSString *)status_id completed:(FBArrayBlock)completed {
+- (void)postComment:(NSString *)message onStatus:(NSString *)status_id completed:(FBBoolBlock)completed {
 	FBVoidBlock success = ^{
 		[FBRequestConnection startWithGraphPath:[NSString stringWithFormat:@"/%@/comments", status_id] parameters:@{ @"message": message } HTTPMethod:@"POST" completionHandler:
 			^(FBRequestConnection *connection, id result, NSError *error) {
@@ -546,11 +548,11 @@
 					NSLog(@"Error: %@", [error localizedDescription]);
 					NSLog(@"Error: %@", [error description]);
 					NSLog(@"Error: %@", [[error userInfo] description]);
-					completed(nil);
+					completed(NO);
 				} else {
 					NSLog(@"Result: %@", [result description]);
 					// Get the friend data to display
-					completed(nil);
+					completed(YES);
 					
 				}
 			}

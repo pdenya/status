@@ -71,7 +71,18 @@
 		[bottomview addSubview:upgradeBtn];
 		[upgradeBtn centerx];
 		[upgradeBtn centery];
+		[upgradeBtn sety:[upgradeBtn y] - 5];
 		[upgradeBtn addTarget:self action:@selector(upgradeClicked:) forControlEvents:UIControlEventTouchUpInside];
+		
+		UIButton *learnmoreBtn = [UIButton flatBlueButton:@"Restore previous purchase"];
+		[learnmoreBtn setTitleColor:[UIColor colorWithHex:0x3e9ed5] forState:UIControlStateNormal];
+		[bottomview sizeToFit];
+		[bottomview addSubview:learnmoreBtn];
+		[learnmoreBtn sety:[upgradeBtn bottomEdge]];
+		[learnmoreBtn centerx];
+		[learnmoreBtn.titleLabel underline];
+		learnmoreBtn.backgroundColor = [UIColor clearColor];
+		[learnmoreBtn addTarget:self action:@selector(restoreClicked:) forControlEvents:UIControlEventTouchUpInside];
 		
 		[header_view release];
 		[bottomview release];
@@ -81,6 +92,10 @@
 
 - (void)upgradeClicked:(id)sender {
 	[PDUtils upgradeToPro];
+}
+
+- (void)restoreClicked:(id)sender {
+	[PDUtils restorePro];
 }
 
 - (UIView *)getSection:(NSDictionary *)options {

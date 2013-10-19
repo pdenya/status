@@ -108,6 +108,12 @@
 		[self switchToComment:self.post];
 	}
 	
+	UIView *keyboardbg = [UIView new];
+	keyboardbg.backgroundColor = [UIColor brandGreyColor];
+	keyboardbg.frame = CGRectMake(0, [self h] - 216, [self w], 216);
+	[self addSubview:keyboardbg];
+	[keyboardbg release];
+	
 	[UIView animateWithDuration:0.2f animations:^{
 		postButton.alpha = 1;
 		postButton.hidden = NO;
@@ -153,17 +159,68 @@
 	[imgview removeFromSuperview];
 }
 
+- (void)showLoader {
+	UIView *overlay = [UIView new];
+	overlay.backgroundColor = [UIColor blackColor];
+	overlay.frame = [self frame];
+	overlay.alpha = 0.6;
+	overlay.tag = 62;
+	[self addSubview:overlay];
+	[overlay release];
+	
+	UIActivityIndicatorView *activityIndicator = [[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 25, 25)];
+	[activityIndicator setActivityIndicatorViewStyle:UIActivityIndicatorViewStyleWhiteLarge];
+	[activityIndicator startAnimating];
+	
+	[self addSubview:activityIndicator];
+	[activityIndicator centerx];
+	[activityIndicator centery];
+	activityIndicator.tag = 63;
+	[activityIndicator release];
+}
+
+- (void)removeLoader {
+	UIView *overlay = [self viewWithTag:62];
+	if (overlay) {
+		[overlay removeFromSuperview];
+	}
+	
+	UIActivityIndicatorView *activity_indicator = (UIActivityIndicatorView *)[self viewWithTag:63];
+	if (activity_indicator) {
+		[activity_indicator removeFromSuperview];
+	}
+}
+
+- (void) alert:(NSString *)title message:(NSString *)message {
+	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
+													message:message
+												   delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+	[alert show];
+	[alert release];
+
+}
+
 - (void)postCommentClicked:(id)sender {
 	FBHelper *fb = [FBHelper instance];
 	
+	[self.messageTextField resignFirstResponder];
+	[self showLoader];
+	
 	[fb postComment:self.messageTextField.text onStatus:[self.post combined_id] completed:
-	 ^(NSArray *response) {
-		 if ([self postClicked]) {
-			 [self postClicked]();
+	 ^(BOOL response) {
+		 [self removeLoader];
+		 if (response) {
+			 if ([self postClicked]) {
+				 [self postClicked]();
+			 }
+			 
+			 //todo: make this happen immediately rather than waiting for this response
+			 [self clear];
+			 [[ViewController instance] closeModal:self];
 		 }
-		 
-	  	 //todo: make this happen immediately rather than waiting for this response
-		 [[ViewController instance] closeModal:self];
+		 else {
+			 [self alert:@"Comment Error" message:@"Couldn't connect to Facebook."];
+		 }
 	 }];
 }
 
@@ -173,26 +230,164 @@
 	if ([PDUtils processCommand:self.messageTextField]) {
 		return;
 	}
+
+	[self.messageTextField resignFirstResponder];
+	[self showLoader];
+	
+	
 	
 	FBHelper *fb = [FBHelper instance];
 	
-	void (^completed)(NSArray *response) = ^(NSArray *response) {
-		if ([self postClicked]) {
-			[self postClicked]();
-		}
+	void (^completed)(BOOL response) = ^(BOOL response) {
+		[self removeLoader];
 		
-		//todo: make this happen immediately rather than waiting for this response
-		[[ViewController instance] closeModal:self];
+		if (response) {
+			// call the result handler block on the main queue (i.e. main thread)
+			dispatch_async( dispatch_get_main_queue(), ^{
+				//todo: make this happen immediately rather than waiting for this response
+				if ([self postClicked]) {
+					[self postClicked]();
+				}
+				
+				// running synchronously on the main thread now -- call the handler
+				[self clear];
+				[[ViewController instance] closeModal:self];
+			});
+			
+		}
+		else {
+			[self alert:@"Post Error" message:@"Couldn't connect to Facebook."];
+		}
 	};
 	
 	if (self.img != nil) {
-		[fb postStatus:self.messageTextField.text withImage:self.img completed:completed];
+		UIImage *img = self.img;
+		
+		//resize the image a little bit to make it smaller/easier to send
+		//img = [img rotateAndScaleFromCameraWithMaxSize:1500];
+		img = scaleAndRotateImage(img);
+		
+		[fb postStatus:self.messageTextField.text withImage:img completed:completed];
 	}
 	else {
 		[fb postStatus:self.messageTextField.text completed:completed];
 	}
 	
 }
+
+- (void) clear {
+	self.messageTextField.text = @"";
+	[self setAttachedImage:nil];
+}
+
+UIImage *scaleAndRotateImage(UIImage *image)
+{
+	int kMaxResolution = 1280; // Or whatever
+	
+	CGImageRef imgRef = image.CGImage;
+	
+	CGFloat width = CGImageGetWidth(imgRef);
+	CGFloat height = CGImageGetHeight(imgRef);
+	
+	CGAffineTransform transform = CGAffineTransformIdentity;
+	CGRect bounds = CGRectMake(0, 0, width, height);
+	if (width > kMaxResolution || height > kMaxResolution) {
+		CGFloat ratio = width/height;
+		if (ratio > 1) {
+			bounds.size.width = kMaxResolution;
+			bounds.size.height = bounds.size.width / ratio;
+		}
+		else {
+			bounds.size.height = kMaxResolution;
+			bounds.size.width = bounds.size.height * ratio;
+		}
+	}
+	
+	CGFloat scaleRatio = bounds.size.width / width;
+	CGSize imageSize = CGSizeMake(CGImageGetWidth(imgRef), CGImageGetHeight(imgRef));
+	CGFloat boundHeight;
+	UIImageOrientation orient = image.imageOrientation;
+	switch(orient) {
+			
+		case UIImageOrientationUp: //EXIF = 1
+			transform = CGAffineTransformIdentity;
+			break;
+			
+		case UIImageOrientationUpMirrored: //EXIF = 2
+			transform = CGAffineTransformMakeTranslation(imageSize.width, 0.0);
+			transform = CGAffineTransformScale(transform, -1.0, 1.0);
+			break;
+			
+		case UIImageOrientationDown: //EXIF = 3
+			transform = CGAffineTransformMakeTranslation(imageSize.width, imageSize.height);
+			transform = CGAffineTransformRotate(transform, M_PI);
+			break;
+			
+		case UIImageOrientationDownMirrored: //EXIF = 4
+			transform = CGAffineTransformMakeTranslation(0.0, imageSize.height);
+			transform = CGAffineTransformScale(transform, 1.0, -1.0);
+			break;
+			
+		case UIImageOrientationLeftMirrored: //EXIF = 5
+			boundHeight = bounds.size.height;
+			bounds.size.height = bounds.size.width;
+			bounds.size.width = boundHeight;
+			transform = CGAffineTransformMakeTranslation(imageSize.height, imageSize.width);
+			transform = CGAffineTransformScale(transform, -1.0, 1.0);
+			transform = CGAffineTransformRotate(transform, 3.0 * M_PI / 2.0);
+			break;
+			
+		case UIImageOrientationLeft: //EXIF = 6
+			boundHeight = bounds.size.height;
+			bounds.size.height = bounds.size.width;
+			bounds.size.width = boundHeight;
+			transform = CGAffineTransformMakeTranslation(0.0, imageSize.width);
+			transform = CGAffineTransformRotate(transform, 3.0 * M_PI / 2.0);
+			break;
+			
+		case UIImageOrientationRightMirrored: //EXIF = 7
+			boundHeight = bounds.size.height;
+			bounds.size.height = bounds.size.width;
+			bounds.size.width = boundHeight;
+			transform = CGAffineTransformMakeScale(-1.0, 1.0);
+			transform = CGAffineTransformRotate(transform, M_PI / 2.0);
+			break;
+			
+		case UIImageOrientationRight: //EXIF = 8
+			boundHeight = bounds.size.height;
+			bounds.size.height = bounds.size.width;
+			bounds.size.width = boundHeight;
+			transform = CGAffineTransformMakeTranslation(imageSize.height, 0.0);
+			transform = CGAffineTransformRotate(transform, M_PI / 2.0);
+			break;
+			
+		default:
+			[NSException raise:NSInternalInconsistencyException format:@"Invalid image orientation"];
+			
+	}
+	
+	UIGraphicsBeginImageContext(bounds.size);
+	
+	CGContextRef context = UIGraphicsGetCurrentContext();
+	
+	if (orient == UIImageOrientationRight || orient == UIImageOrientationLeft) {
+		CGContextScaleCTM(context, -scaleRatio, scaleRatio);
+		CGContextTranslateCTM(context, -height, 0);
+	}
+	else {
+		CGContextScaleCTM(context, scaleRatio, -scaleRatio);
+		CGContextTranslateCTM(context, 0, -height);
+	}
+	
+	CGContextConcatCTM(context, transform);
+	
+	CGContextDrawImage(UIGraphicsGetCurrentContext(), CGRectMake(0, 0, width, height), imgRef);
+	UIImage *imageCopy = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();
+	
+	return imageCopy;
+}
+
 
 - (void)cancelClicked:(id)sender {
 	[[ViewController instance] closeModal:self];
@@ -241,7 +436,7 @@
 								  if (nil != result) {
 									  ALAssetRepresentation *repr = [result defaultRepresentation];
 									  // this is the most recent saved photo
-									  [self setAttachedImage:[UIImage imageWithCGImage:[repr fullScreenImage]]];
+									  [self setAttachedImage:[UIImage imageWithCGImage:[repr fullResolutionImage]]];
 									  // we only need the first (most recent) photo -- stop the enumeration
 									  *stop = YES;
 								  }

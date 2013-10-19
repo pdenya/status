@@ -20,6 +20,11 @@
 	[[IAPHelper instance] buyProduct];
 }
 
++ (void) restorePro {
+	[[IAPHelper instance] restoreCompletedTransactions];
+}
+
+
 + (void) markAsPro {
 	[[NSUserDefaults standardUserDefaults] setObject:@"pro" forKey:@"is_pro"];
 }

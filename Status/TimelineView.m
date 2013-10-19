@@ -42,18 +42,6 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 		self.user_data = [UsersHelper instance].users;
 		self.filter = [FilterHelper instance].filter;
 		self.isSnappingBack = NO;
-		
-		UIButton *postButton = [UIButton buttonWithType:UIButtonTypeCustom];
-		[postButton setImage:[UIImage imageNamed:@"visible.png"] forState:UIControlStateNormal];
-		[postButton addTarget:self action:@selector(showPostCreateView) forControlEvents:UIControlEventTouchUpInside];
-		
-		UIButton *filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-		[filterButton setImage:[UIImage imageNamed:@"filter.png"] forState:UIControlStateNormal];
-		[filterButton addTarget:self action:@selector(didClickFilterButton) forControlEvents:UIControlEventTouchUpInside];
-		
-		UIButton *favoritesButton = [UIButton buttonWithType:UIButtonTypeCustom];
-		[favoritesButton setImage:[UIImage imageNamed:@"favorites.png"] forState:UIControlStateNormal];
-		[favoritesButton addTarget:self action:@selector(didClickFavoritesButton) forControlEvents:UIControlEventTouchUpInside];
     }
     return self;
 }
@@ -326,20 +314,6 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 	[avatarzoom setPost:post];
 	[self addSubview:avatarzoom];
 	[avatarzoom release];
-}
-
-- (void)showPostCreateView {
-	PostCreateView *postcreateview = [[[PostCreateView alloc] initWithFrame:self.bounds] autorelease];
-	[self addSubview:postcreateview];
-	[self bringSubviewToFront:postcreateview];
-	[postcreateview addedAsSubview:@{ @"autofocus": [NSNumber numberWithBool:YES] }];
-	postcreateview.postClicked = ^{
-		FBHelper *fb = [FBHelper instance];
-		[fb postStatus:postcreateview.messageTextField.text completed:^(NSArray *response) {
-			//nothing
-			[postcreateview removeFromSuperview];
-		}];
-	};
 }
 
 - (void)viewComments:(id)sender {
@@ -795,6 +769,11 @@ const int NUM_LINES_BEFORE_CLIP = 5;
 }
 
 - (void)removeFromTimeline:(User *)user {
+	if (self.max_free_rows > 0) {
+		[self.tableview reloadData];
+		return;
+	}
+	
 	NSMutableIndexSet *indexes_to_remove = [[NSMutableIndexSet alloc] init];
 	NSMutableArray *index_paths_to_remove = [[NSMutableArray alloc] init];
 	

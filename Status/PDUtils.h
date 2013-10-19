@@ -18,4 +18,5 @@
 + (void) openURL:(NSURL *)inputURL;
 + (BOOL) parseAndOpenLink:(NSString *)message;
 + (void) markAsPro;
++ (void) restorePro;
 @end
