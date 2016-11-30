@@ -31,21 +31,6 @@
 	NSArray *permissions = @[ @"publish_stream" ];
 	NSArray *read_permissions = @[ @"read_stream" ];
 	
-	/*
-	 //  stackoverflow.com/questions/12810353/error-when-using-fbsession-openactivesessionwithpublishpermissions
-	 ACAccountStore* as = [[ACAccountStore new] autorelease];
-	 ACAccountType* at = [as accountTypeWithAccountTypeIdentifier: @"com.apple.facebook"];
-	 if ( at != nil ) {
-	 // iOS6+, call  [FBSession openActiveSessionWithReadPermissions: ...]
-	 
-	 } else  {
-	 // iOS5, call [FBSession openActiveSessionWithPublishPermissions: ...]
-	 }
-
-	 */
-	
-	
-	
 	void (^completionHandler)(FBSession *session, FBSessionState status, NSError *error) = ^(FBSession *session, FBSessionState status, NSError *error) {
 		NSLog(@"completion");
 		switch (status) {
@@ -83,35 +68,6 @@
 	if (!is_opening) {
 		failed_callback();
 	}
-	
-	/*
-	NSLog(@"calling open active session");
-    [FBSession openActiveSessionWithPublishPermissions:permissions
-									   defaultAudience:FBSessionDefaultAudienceFriends
-										  allowLoginUI:allowLoginUI
-									 completionHandler:
-	 ^(FBSession *session, FBSessionState state, NSError *error) {
-		 NSLog(@"completion");
-		 switch (state) {
-			 case FBSessionStateOpen:
-				 opened_callback();
-				 break;
-			 case FBSessionStateClosed:
-			 case FBSessionStateClosedLoginFailed:
-				 [FBSession.activeSession closeAndClearTokenInformation];
-				 failed_callback();
-				 break;
-			 default:
-				 NSLog(@"default");
-				 break;
-		 }
-		 
-		 if (error) {
-			 NSLog(@"error");
-			 session = [[FBSession alloc] initWithPermissions:permissions];
-		 }
-	 }];
-	 */
 }
 
 - (void)logout {
@@ -206,9 +162,6 @@
     [FBRequestConnection startWithGraphPath:@"/fql" parameters:queryParam HTTPMethod:@"GET" completionHandler:
 	 ^(FBRequestConnection *connection, id result, NSError *error) {
 		 if (error) {
-			 //NSLog(@"Error: %@", [error localizedDescription]);
-			 //NSLog(@"Error: %@", [error description]);
-			 //NSLog(@"Error: %@", [[error userInfo] description]);
 			 NSLog(@"Error getting stream");
 			 completed(nil);
 			 self.isGettingStream = NO;
